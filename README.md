@@ -19,8 +19,16 @@ Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build fro
 ## Setup
 
 1. In the `py_environment` file, three paths are marked that need to be changed.
+> "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
+
+>-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe----- Replace this entire block, from the dashes to the dashes.
+
 2. Place all `.ts` files flat into the **extensions** folder, and place the four folders flat into the **skills** folder.
+
 3. Make sure Python and its dependency packages are installed (see below).
+
+4. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
+
 
 ## Python environment
 
