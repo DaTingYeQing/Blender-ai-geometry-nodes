@@ -35,13 +35,14 @@ Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build fro
 ## Setup
 
 1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
+>Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
 
 2. In the `py_environment` file, three paths are marked that need to be changed.
 > "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
 
 >-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe----- Replace this entire block, from the dashes to the dashes.
 
-3. Place all `.ts` files flat into the **extensions** folder, and place the four folders flat into the **skills** folder.
+3. Please put the prebuilt_node folder inside the node_information folder ,than Place all `.ts` files flat into the **extensions** folder, and place the four folders flat into the **skills** folder.
 
 4. Make sure Python and its dependency packages are installed (see below).
 
