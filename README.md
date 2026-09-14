@@ -72,6 +72,9 @@ A modular task list. The AI calls this tool after completing the early-stage tes
 
 A fixed channel for sending scripts into Blender. When the tools above cannot help the AI, it will write code directly and send it to Blender to get what it wants.
 
-### py_environment.ts
+### py_environment.josn
 
 The environment configuration file.
+
+### py_environment.ts
+
