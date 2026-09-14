@@ -28,11 +28,11 @@ Python **3.13.14**
 
 | Package   | Version |
 |-----------|---------|
-| pyvista   | 0.48.4  |
-| trimesh   | 5.0.0   |
-| numpy     | 2.5.2   |
+| pyvista   | 0.49.0  |
+| trimesh   | 5.1.0   |
+| numpy     | 2.5.3   |
 | scipy     | 1.18.1  |
-| manifold3d| 3.5.2   |
+| manifold3d| 3.5.3   |
 
 ## Workflow
 
@@ -76,5 +76,6 @@ A fixed channel for sending scripts into Blender. When the tools above cannot he
 
 The environment configuration file.
 
-### py_environment.ts
+### zone_probe.ts
 
+Specifically designed to help AI work with node trees that contain Simulation Zone nodes, making it easier for it to write its own code and pull data as time advances.
