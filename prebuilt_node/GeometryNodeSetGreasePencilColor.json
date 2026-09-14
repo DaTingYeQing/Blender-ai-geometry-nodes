@@ -1,0 +1,13 @@
+{"idname":"GeometryNodeSetGreasePencilColor","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Set color and opacity attributes on Grease Pencil geometry","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Opacity","identifier":"Opacity","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"STROKE","subtype":"NONE","enum_items":[
+        {"id":"STROKE","name":"Stroke","description":"Set the color and opacity for the points of the stroke"},
+        {"id":"FILL","name":"Fill","description":"Set the color and opacity for the stroke fills"}
+      ]}},"dynamic":[],"supports":[
+    "GreasePencil"
+  ],"supports_note":"仅支持: 蜡笔"}

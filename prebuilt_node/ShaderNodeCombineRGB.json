@@ -1,0 +1,7 @@
+{"idname":"ShaderNodeCombineRGB","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_CONVERTER","description":"Deprecated","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"R","identifier":"R","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"G","identifier":"G","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Image","identifier":"Image","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[]}

@@ -1,0 +1,50 @@
+{"idname":"GeometryNodeStoreNamedGrid","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Store grid data in a volume geometry with the specified name","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Name","identifier":"Name","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"Grid","identifier":"Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"data_type":{"type":"ENUM","readonly":false,"default":"FLOAT","subtype":"NONE","enum_items":[
+        {"id":"BOOLEAN","name":"Boolean","description":"Boolean"},
+        {"id":"FLOAT","name":"Float","description":"Single precision float"},
+        {"id":"DOUBLE","name":"Double","description":"Double precision"},
+        {"id":"INT","name":"Integer","description":"32-bit integer"},
+        {"id":"INT64","name":"Integer 64-bit","description":"64-bit integer"},
+        {"id":"MASK","name":"Mask","description":"No data, boolean mask of active voxels"},
+        {"id":"VECTOR_FLOAT","name":"Float Vector","description":"3D float vector"},
+        {"id":"VECTOR_DOUBLE","name":"Double Vector","description":"3D double vector"},
+        {"id":"VECTOR_INT","name":"Integer Vector","description":"3D integer vector"},
+        {"id":"POINTS","name":"Points (Unsupported)","description":"Points grid, currently unsupported by volume objects"},
+        {"id":"UNKNOWN","name":"Unknown","description":"Unsupported data type"}
+      ]}},"dynamic":[
+    {"property":"data_type","variants":[
+        {"value":"BOOLEAN","inputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Name","identifier":"Name","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Grid","identifier":"Grid","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"INT","inputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Name","identifier":"Name","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Grid","identifier":"Grid","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"VECTOR_FLOAT","inputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Name","identifier":"Name","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Grid","identifier":"Grid","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

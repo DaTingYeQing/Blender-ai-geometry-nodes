@@ -1,0 +1,76 @@
+{"idname":"GeometryNodeStringToCurves","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate a paragraph of text with a specific font, using a curve instance to store each ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"String","identifier":"String","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"Size","identifier":"Size","type":"NodeSocketFloatDistance","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Character Spacing","identifier":"Character Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Word Spacing","identifier":"Word Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Line Spacing","identifier":"Line Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Text Box Width","identifier":"Text Box Width","type":"NodeSocketFloatDistance","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Text Box Height","identifier":"Text Box Height","type":"NodeSocketFloatDistance","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve Instances","identifier":"Curve Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Remainder","identifier":"Remainder","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"Line","identifier":"Line","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Pivot Point","identifier":"Pivot Point","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"font":{"type":"POINTER","readonly":false,"subtype":"NONE"},"overflow":{"type":"ENUM","readonly":false,"default":"OVERFLOW","subtype":"NONE","enum_items":[
+        {"id":"OVERFLOW","name":"Overflow","description":"Let the text use more space than the specified height"},
+        {"id":"SCALE_TO_FIT","name":"Scale To Fit","description":"Scale the text size to fit inside the width and height"},
+        {"id":"TRUNCATE","name":"Truncate","description":"Only output curves that fit within the width and height. Output the remainder to the \"Remainder\" output."}
+      ]},"align_x":{"type":"ENUM","readonly":false,"default":"LEFT","subtype":"NONE","enum_items":[
+        {"id":"LEFT","name":"Left","description":"Align text to the left"},
+        {"id":"CENTER","name":"Center","description":"Align text to the center"},
+        {"id":"RIGHT","name":"Right","description":"Align text to the right"},
+        {"id":"JUSTIFY","name":"Justify","description":"Align text to the left and the right"},
+        {"id":"FLUSH","name":"Flush","description":"Align text to the left and the right, with equal character spacing"}
+      ]},"align_y":{"type":"ENUM","readonly":false,"default":"TOP_BASELINE","subtype":"NONE","enum_items":[
+        {"id":"TOP","name":"Top","description":"Align text to the top"},
+        {"id":"TOP_BASELINE","name":"Top Baseline","description":"Align text to the top line's baseline"},
+        {"id":"MIDDLE","name":"Middle","description":"Align text to the middle"},
+        {"id":"BOTTOM_BASELINE","name":"Bottom Baseline","description":"Align text to the bottom line's baseline"},
+        {"id":"BOTTOM","name":"Bottom","description":"Align text to the bottom"}
+      ]},"pivot_mode":{"type":"ENUM","readonly":false,"default":"BOTTOM_LEFT","subtype":"NONE","enum_items":[
+        {"id":"MIDPOINT","name":"Midpoint","description":"Midpoint"},
+        {"id":"TOP_LEFT","name":"Top Left","description":"Top Left"},
+        {"id":"TOP_CENTER","name":"Top Center","description":"Top Center"},
+        {"id":"TOP_RIGHT","name":"Top Right","description":"Top Right"},
+        {"id":"BOTTOM_LEFT","name":"Bottom Left","description":"Bottom Left"},
+        {"id":"BOTTOM_CENTER","name":"Bottom Center","description":"Bottom Center"},
+        {"id":"BOTTOM_RIGHT","name":"Bottom Right","description":"Bottom Right"}
+      ]}},"dynamic":[
+    {"property":"overflow","variants":[
+        {"value":"SCALE_TO_FIT","inputs":[
+            {"name":"String","identifier":"String","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Size","identifier":"Size","type":"NodeSocketFloatDistance","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Character Spacing","identifier":"Character Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Word Spacing","identifier":"Word Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Line Spacing","identifier":"Line Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Text Box Width","identifier":"Text Box Width","type":"NodeSocketFloatDistance","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Text Box Height","identifier":"Text Box Height","type":"NodeSocketFloatDistance","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve Instances","identifier":"Curve Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Remainder","identifier":"Remainder","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Line","identifier":"Line","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Pivot Point","identifier":"Pivot Point","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"TRUNCATE","inputs":[
+            {"name":"String","identifier":"String","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Size","identifier":"Size","type":"NodeSocketFloatDistance","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Character Spacing","identifier":"Character Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Word Spacing","identifier":"Word Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Line Spacing","identifier":"Line Spacing","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Text Box Width","identifier":"Text Box Width","type":"NodeSocketFloatDistance","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Text Box Height","identifier":"Text Box Height","type":"NodeSocketFloatDistance","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve Instances","identifier":"Curve Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Remainder","identifier":"Remainder","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"Line","identifier":"Line","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Pivot Point","identifier":"Pivot Point","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

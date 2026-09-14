@@ -1,0 +1,234 @@
+{"idname":"ShaderNodeMath","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_CONVERTER","description":"Perform math operations","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"ADD","subtype":"NONE","enum_items":[
+        {"id":"ADD","name":"Add","description":"A + B"},
+        {"id":"SUBTRACT","name":"Subtract","description":"A - B"},
+        {"id":"MULTIPLY","name":"Multiply","description":"A * B"},
+        {"id":"DIVIDE","name":"Divide","description":"A / B"},
+        {"id":"MULTIPLY_ADD","name":"Multiply Add","description":"A * B + C"},
+        {"id":"POWER","name":"Power","description":"A power B"},
+        {"id":"LOGARITHM","name":"Logarithm","description":"Logarithm A base B"},
+        {"id":"SQRT","name":"Square Root","description":"Square root of A"},
+        {"id":"INVERSE_SQRT","name":"Inverse Square Root","description":"1 / Square root of A"},
+        {"id":"ABSOLUTE","name":"Absolute","description":"Magnitude of A"},
+        {"id":"EXPONENT","name":"Exponent","description":"exp(A)"},
+        {"id":"MINIMUM","name":"Minimum","description":"The minimum from A and B"},
+        {"id":"MAXIMUM","name":"Maximum","description":"The maximum from A and B"},
+        {"id":"LESS_THAN","name":"Less Than","description":"1 if A < B else 0"},
+        {"id":"GREATER_THAN","name":"Greater Than","description":"1 if A > B else 0"},
+        {"id":"SIGN","name":"Sign","description":"Returns the sign of A"},
+        {"id":"COMPARE","name":"Compare","description":"1 if (A == B) within tolerance C else 0"},
+        {"id":"SMOOTH_MIN","name":"Smooth Minimum","description":"The minimum from A and B with smoothing C"},
+        {"id":"SMOOTH_MAX","name":"Smooth Maximum","description":"The maximum from A and B with smoothing C"},
+        {"id":"ROUND","name":"Round","description":"Round A to the nearest integer. Round upward if the fraction part is 0.5"},
+        {"id":"FLOOR","name":"Floor","description":"The largest integer smaller than or equal A"},
+        {"id":"CEIL","name":"Ceil","description":"The smallest integer greater than or equal A"},
+        {"id":"TRUNC","name":"Truncate","description":"The integer part of A, removing fractional digits"},
+        {"id":"FRACT","name":"Fraction","description":"The fraction part of A"},
+        {"id":"MODULO","name":"Truncated Modulo","description":"The remainder of truncated division using fmod(A,B)"},
+        {"id":"FLOORED_MODULO","name":"Floored Modulo","description":"The remainder of floored division"},
+        {"id":"WRAP","name":"Wrap","description":"Wrap value to range, wrap(A,B)"},
+        {"id":"SNAP","name":"Snap","description":"Snap to increment, snap(A,B)"},
+        {"id":"PINGPONG","name":"Ping-Pong","description":"Wraps a value and reverses every other cycle (A,B)"},
+        {"id":"SINE","name":"Sine","description":"sin(A)"},
+        {"id":"COSINE","name":"Cosine","description":"cos(A)"},
+        {"id":"TANGENT","name":"Tangent","description":"tan(A)"},
+        {"id":"ARCSINE","name":"Arcsine","description":"arcsin(A)"},
+        {"id":"ARCCOSINE","name":"Arccosine","description":"arccos(A)"},
+        {"id":"ARCTANGENT","name":"Arctangent","description":"arctan(A)"},
+        {"id":"ARCTAN2","name":"Arctan2","description":"The signed angle arctan(A / B)"},
+        {"id":"SINH","name":"Hyperbolic Sine","description":"sinh(A)"},
+        {"id":"COSH","name":"Hyperbolic Cosine","description":"cosh(A)"},
+        {"id":"TANH","name":"Hyperbolic Tangent","description":"tanh(A)"},
+        {"id":"RADIANS","name":"To Radians","description":"Convert from degrees to radians"},
+        {"id":"DEGREES","name":"To Degrees","description":"Convert from radians to degrees"}
+      ]},"use_clamp":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"MULTIPLY_ADD","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SQRT","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"INVERSE_SQRT","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ABSOLUTE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"EXPONENT","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SIGN","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"COMPARE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SMOOTH_MIN","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SMOOTH_MAX","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ROUND","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"FLOOR","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"CEIL","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"TRUNC","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"FRACT","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"WRAP","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SINE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"COSINE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"TANGENT","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ARCSINE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ARCCOSINE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ARCTANGENT","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SINH","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"COSH","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"TANH","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"RADIANS","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"DEGREES","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

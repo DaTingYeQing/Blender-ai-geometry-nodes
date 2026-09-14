@@ -1,0 +1,29 @@
+{"idname":"ShaderNodeTexWave","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_TEXTURE","description":"Generate procedural bands or rings with noise","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Detail Scale","identifier":"Detail Scale","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Detail Roughness","identifier":"Detail Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Phase Offset","identifier":"Phase Offset","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"texture_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"color_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"wave_type":{"type":"ENUM","readonly":false,"default":"BANDS","subtype":"NONE","enum_items":[
+        {"id":"BANDS","name":"Bands","description":"Use standard wave texture in bands"},
+        {"id":"RINGS","name":"Rings","description":"Use wave texture in rings"}
+      ]},"bands_direction":{"type":"ENUM","readonly":false,"default":"X","subtype":"NONE","enum_items":[
+        {"id":"X","name":"X","description":"Bands across X axis"},
+        {"id":"Y","name":"Y","description":"Bands across Y axis"},
+        {"id":"Z","name":"Z","description":"Bands across Z axis"},
+        {"id":"DIAGONAL","name":"Diagonal","description":"Bands across diagonal axis"}
+      ]},"rings_direction":{"type":"ENUM","readonly":false,"default":"X","subtype":"NONE","enum_items":[
+        {"id":"X","name":"X","description":"Rings along X axis"},
+        {"id":"Y","name":"Y","description":"Rings along Y axis"},
+        {"id":"Z","name":"Z","description":"Rings along Z axis"},
+        {"id":"SPHERICAL","name":"Spherical","description":"Rings along spherical distance"}
+      ]},"wave_profile":{"type":"ENUM","readonly":false,"default":"SIN","subtype":"NONE","enum_items":[
+        {"id":"SIN","name":"Sine","description":"Use a standard sine profile"},
+        {"id":"SAW","name":"Saw","description":"Use a sawtooth profile"},
+        {"id":"TRI","name":"Triangle","description":"Use a triangle profile"}
+      ]}},"dynamic":[]}

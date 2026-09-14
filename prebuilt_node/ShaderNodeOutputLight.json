@@ -1,0 +1,7 @@
+{"idname":"ShaderNodeOutputLight","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_OUTPUT","description":"Output light information to a light object","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Surface","identifier":"Surface","type":"NodeSocketShader","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[]},"runtime_properties":{"is_active_output":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"target":{"type":"ENUM","readonly":false,"default":"ALL","subtype":"NONE","enum_items":[
+        {"id":"ALL","name":"All","description":"Use shaders for all renderers and viewports, unless there exists a more specific output"},
+        {"id":"EEVEE","name":"EEVEE","description":"Use shaders for EEVEE renderer"},
+        {"id":"CYCLES","name":"Cycles","description":"Use shaders for Cycles renderer"}
+      ]}},"dynamic":[]}

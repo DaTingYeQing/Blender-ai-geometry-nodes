@@ -1,0 +1,123 @@
+{"idname":"ShaderNodeTexVoronoi","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_TEXTURE","description":"Generate Worley noise based on the distance to random points. Typically used to generate ","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Smoothness","identifier":"Smoothness","type":"NodeSocketFloatFactor","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Exponent","identifier":"Exponent","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Randomness","identifier":"Randomness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Radius","identifier":"Radius","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"texture_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"color_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"voronoi_dimensions":{"type":"ENUM","readonly":false,"default":"1D","subtype":"NONE","enum_items":[
+        {"id":"1D","name":"1D","description":"Use the scalar value W as input"},
+        {"id":"2D","name":"2D","description":"Use the 2D vector (X, Y) as input. The Z component is ignored."},
+        {"id":"3D","name":"3D","description":"Use the 3D vector (X, Y, Z) as input"},
+        {"id":"4D","name":"4D","description":"Use the 4D vector (X, Y, Z, W) as input"}
+      ]},"distance":{"type":"ENUM","readonly":false,"default":"EUCLIDEAN","subtype":"NONE","enum_items":[
+        {"id":"EUCLIDEAN","name":"Euclidean","description":"Euclidean distance"},
+        {"id":"MANHATTAN","name":"Manhattan","description":"Manhattan distance"},
+        {"id":"CHEBYCHEV","name":"Chebychev","description":"Chebychev distance"},
+        {"id":"MINKOWSKI","name":"Minkowski","description":"Minkowski distance"}
+      ]},"feature":{"type":"ENUM","readonly":false,"default":"F1","subtype":"NONE","enum_items":[
+        {"id":"F1","name":"F1","description":"Computes the distance to the closest point as well as its position and color"},
+        {"id":"F2","name":"F2","description":"Computes the distance to the second closest point as well as its position and color"},
+        {"id":"SMOOTH_F1","name":"Smooth F1","description":"Smoothed version of F1. Weighted sum of neighbor voronoi cells."},
+        {"id":"DISTANCE_TO_EDGE","name":"Distance to Edge","description":"Computes the distance to the edge of the voronoi cell"},
+        {"id":"N_SPHERE_RADIUS","name":"N-Sphere Radius","description":"Computes the radius of the n-sphere inscribed in the voronoi cell"}
+      ]},"normalize":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[
+    {"property":"voronoi_dimensions","variants":[
+        {"value":"1D","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Smoothness","identifier":"Smoothness","type":"NodeSocketFloatFactor","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Exponent","identifier":"Exponent","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Randomness","identifier":"Randomness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"4D","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Smoothness","identifier":"Smoothness","type":"NodeSocketFloatFactor","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Exponent","identifier":"Exponent","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Randomness","identifier":"Randomness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]},
+    {"property":"feature","variants":[
+        {"value":"SMOOTH_F1","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Smoothness","identifier":"Smoothness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Exponent","identifier":"Exponent","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Randomness","identifier":"Randomness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"DISTANCE_TO_EDGE","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Smoothness","identifier":"Smoothness","type":"NodeSocketFloatFactor","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Exponent","identifier":"Exponent","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Randomness","identifier":"Randomness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"N_SPHERE_RADIUS","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":false,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Smoothness","identifier":"Smoothness","type":"NodeSocketFloatFactor","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Exponent","identifier":"Exponent","type":"NodeSocketFloat","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Randomness","identifier":"Randomness","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

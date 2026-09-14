@@ -1,0 +1,12 @@
+{"idname":"ShaderNodeNormalMap","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_OP_VECTOR","description":"Generate a perturbed normal from an RGB normal map image. Typically used for faking highly ","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Strength","identifier":"Strength","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"space":{"type":"ENUM","readonly":false,"default":"TANGENT","subtype":"NONE","enum_items":[
+        {"id":"TANGENT","name":"Tangent Space","description":"Tangent space normal mapping"},
+        {"id":"OBJECT","name":"Object Space","description":"Object space normal mapping"},
+        {"id":"WORLD","name":"World Space","description":"World space normal mapping"},
+        {"id":"BLENDER_OBJECT","name":"Blender Object Space","description":"Object space normal mapping, compatible with Blender render baking"},
+        {"id":"BLENDER_WORLD","name":"Blender World Space","description":"World space normal mapping, compatible with Blender render baking"}
+      ]},"uv_map":{"type":"STRING","readonly":false,"default":"","subtype":"NONE"}},"dynamic":[]}

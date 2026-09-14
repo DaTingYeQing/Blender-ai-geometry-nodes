@@ -1,0 +1,18 @@
+{"idname":"GeometryNodeUVUnwrap","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_CONVERTER","description":"Generate a UV map based on seam edges","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Seam","identifier":"Seam","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":true,"is_multi_input":false},
+      {"name":"Margin","identifier":"Margin","type":"NodeSocketFloat","enabled":true,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false},
+      {"name":"Fill Holes","identifier":"Fill Holes","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"UV","identifier":"UV","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"method":{"type":"ENUM","readonly":false,"default":"ANGLE_BASED","subtype":"NONE","enum_items":[
+        {"id":"ANGLE_BASED","name":"Angle Based","description":"This method gives a good 2D representation of a mesh"},
+        {"id":"CONFORMAL","name":"Conformal","description":"Uses LSCM (Least Squares Conformal Mapping). This usually gives a less accurate UV mapping than Angle Based, but works better for simpler objects"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

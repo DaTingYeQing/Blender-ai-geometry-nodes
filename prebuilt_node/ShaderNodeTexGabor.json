@@ -1,0 +1,30 @@
+{"idname":"ShaderNodeTexGabor","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_TEXTURE","description":"Generate Gabor noise","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Frequency","identifier":"Frequency","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Anisotropy","identifier":"Anisotropy","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Orientation","identifier":"Orientation 2D","type":"NodeSocketFloatAngle","enabled":true,"default":0.7853981852531433,"hide_value":false,"is_multi_input":false},
+      {"name":"Orientation","identifier":"Orientation 3D","type":"NodeSocketVectorDirection","enabled":false,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Phase","identifier":"Phase","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Intensity","identifier":"Intensity","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"texture_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"color_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"gabor_type":{"type":"ENUM","readonly":false,"default":"2D","subtype":"NONE","enum_items":[
+        {"id":"2D","name":"2D","description":"Use the 2D vector (X, Y) as input. The Z component is ignored."},
+        {"id":"3D","name":"3D","description":"Use the 3D vector (X, Y, Z) as input"}
+      ]}},"dynamic":[
+    {"property":"gabor_type","variants":[
+        {"value":"3D","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Frequency","identifier":"Frequency","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Anisotropy","identifier":"Anisotropy","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Orientation","identifier":"Orientation 2D","type":"NodeSocketFloatAngle","enabled":false,"default":0.7853981852531433,"hide_value":false,"is_multi_input":false},
+            {"name":"Orientation","identifier":"Orientation 3D","type":"NodeSocketVectorDirection","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Phase","identifier":"Phase","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Intensity","identifier":"Intensity","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

@@ -1,0 +1,17 @@
+{"idname":"GeometryNodeWarning","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INTERFACE","description":"Create custom warnings in node groups","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Show","identifier":"Show","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Message","identifier":"Message","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Show","identifier":"Show","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"warning_type":{"type":"ENUM","readonly":false,"default":"ERROR","subtype":"NONE","enum_items":[
+        {"id":"ERROR","name":"Error","description":""},
+        {"id":"WARNING","name":"Warning","description":""},
+        {"id":"INFO","name":"Info","description":""}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

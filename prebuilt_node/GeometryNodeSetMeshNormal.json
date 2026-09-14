@@ -1,0 +1,33 @@
+{"idname":"GeometryNodeSetMeshNormal","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Store a normal vector for each mesh element","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Remove Custom","identifier":"Remove Custom","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":false,"is_multi_input":false},
+      {"name":"Edge Sharpness","identifier":"Edge Sharpness","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Face Sharpness","identifier":"Face Sharpness","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"SHARPNESS","subtype":"NONE","enum_items":[
+        {"id":"SHARPNESS","name":"Sharpness","description":"Store the sharpness of each face or edge. Similar to the \"Shade Smooth\" and \"Shade Flat\" operators."},
+        {"id":"FREE","name":"Free","description":"Store custom normals as simple vectors in the local space of the mesh. Values are not necessarily updated automatically later on as the mesh is deformed."},
+        {"id":"TANGENT_SPACE","name":"Tangent Space","description":"Store normals in a deformation dependent custom transformation space. This method is slower, but can be better when subsequent operations change the mesh without handling normals specifically."}
+      ]},"domain":{"type":"ENUM","readonly":false,"default":"POINT","subtype":"NONE","enum_items":[
+        {"id":"POINT","name":"Point","description":"Attribute on point"},
+        {"id":"FACE","name":"Face","description":"Attribute on mesh faces"},
+        {"id":"CORNER","name":"Face Corner","description":"Attribute on mesh face corner"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"FREE","inputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Custom Normal","identifier":"Custom Normal","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"TANGENT_SPACE","inputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Custom Normal","identifier":"Custom Normal","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

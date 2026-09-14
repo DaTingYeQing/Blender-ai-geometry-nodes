@@ -1,0 +1,10 @@
+{"idname":"GeometryNodeSetGreasePencilDepth","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Set the Grease Pencil depth order to use","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"depth_order":{"type":"ENUM","readonly":false,"default":"2D","subtype":"NONE","enum_items":[
+        {"id":"2D","name":"2D Layers","description":"Display strokes using Grease Pencil layer order and stroke order to define depth"},
+        {"id":"3D","name":"3D Location","description":"Display strokes using real 3D position in 3D space"}
+      ]}},"dynamic":[],"supports":[
+    "GreasePencil"
+  ],"supports_note":"仅支持: 蜡笔"}

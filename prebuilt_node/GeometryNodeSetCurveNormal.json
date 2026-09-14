@@ -1,0 +1,24 @@
+{"idname":"GeometryNodeSetCurveNormal","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Set the evaluation mode for curve normals","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVectorXYZ","enabled":false,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"MINIMUM_TWIST","subtype":"NONE","enum_items":[
+        {"id":"MINIMUM_TWIST","name":"Minimum Twist","description":"Calculate normals with the smallest twist around the curve tangent across the whole curve"},
+        {"id":"Z_UP","name":"Z Up","description":"Calculate normals perpendicular to the Z axis and the curve tangent. If a series of points is vertical, the X axis is used."},
+        {"id":"FREE","name":"Free","description":"Use the stored custom normal attribute as the final normals"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"FREE","inputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Normal","identifier":"Normal","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Curve",
+    "GreasePencil"
+  ],"supports_note":"仅支持: 曲线/蜡笔"}
