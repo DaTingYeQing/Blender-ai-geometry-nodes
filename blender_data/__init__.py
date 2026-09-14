@@ -1,1 +1,0 @@
-"""blender_data 子包 — Blender 内运行的后端，控制 data_groups 完成烘焙 + 数据计算。"""
