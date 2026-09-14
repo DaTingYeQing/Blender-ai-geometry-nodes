@@ -1,0 +1,60 @@
+{"idname":"GeometryNodeMeshBoolean","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Cut, subtract, or join multiple mesh inputs","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Mesh 2","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+      {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Intersecting Edges","identifier":"Intersecting Edges","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"INTERSECT","subtype":"NONE","enum_items":[
+        {"id":"INTERSECT","name":"Intersect","description":"Keep the part of the mesh that is common between all operands"},
+        {"id":"UNION","name":"Union","description":"Combine meshes in an additive way"},
+        {"id":"DIFFERENCE","name":"Difference","description":"Combine meshes in a subtractive way"}
+      ]},"solver":{"type":"ENUM","readonly":false,"default":"FLOAT","subtype":"NONE","enum_items":[
+        {"id":"EXACT","name":"Exact","description":"Slower solver with the best results for coplanar faces"},
+        {"id":"FLOAT","name":"Float","description":"Simple solver with good performance, without support for overlapping geometry"},
+        {"id":"MANIFOLD","name":"Manifold","description":"Fastest solver that works only on manifold meshes but gives better results"}
+      ]}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"INTERSECT","inputs":[
+            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Mesh","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+            {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Intersecting Edges","identifier":"Intersecting Edges","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"UNION","inputs":[
+            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Mesh","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+            {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Intersecting Edges","identifier":"Intersecting Edges","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]},
+    {"property":"solver","variants":[
+        {"value":"EXACT","inputs":[
+            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Mesh","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+            {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Intersecting Edges","identifier":"Intersecting Edges","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"MANIFOLD","inputs":[
+            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Mesh","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+            {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Intersecting Edges","identifier":"Intersecting Edges","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

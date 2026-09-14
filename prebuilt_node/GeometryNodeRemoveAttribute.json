@@ -1,0 +1,16 @@
+{"idname":"GeometryNodeRemoveAttribute","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_ATTRIBUTE","description":"Delete an attribute with a specified name from a geometry. Typically used to optimize ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Name","identifier":"Name","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"pattern_mode":{"type":"ENUM","readonly":false,"default":"EXACT","subtype":"NONE","enum_items":[
+        {"id":"EXACT","name":"Exact","description":"Remove the one attribute with the given name"},
+        {"id":"WILDCARD","name":"Wildcard","description":"Remove all attributes that match the pattern which is allowed to contain a single wildcard (*)"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

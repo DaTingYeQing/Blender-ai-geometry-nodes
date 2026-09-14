@@ -1,0 +1,10 @@
+{"idname":"GeometryNodeInputShadeSmooth","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve whether each face is marked for smooth or sharp normals","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[],"outputs":[
+      {"name":"Smooth","identifier":"Smooth","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

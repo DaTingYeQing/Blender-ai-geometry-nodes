@@ -1,0 +1,20 @@
+{"idname":"GeometryNodeObjectInfo","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve information from an object","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Object","identifier":"Object","type":"NodeSocketObject","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"As Instance","identifier":"As Instance","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Transform","identifier":"Transform","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Location","identifier":"Location","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"transform_space":{"type":"ENUM","readonly":false,"default":"ORIGINAL","subtype":"NONE","enum_items":[
+        {"id":"ORIGINAL","name":"Original","description":"Output the geometry relative to the input object transform, and the location, rotation and scale relative to the world origin"},
+        {"id":"RELATIVE","name":"Relative","description":"Bring the input object geometry, location, rotation and scale into the modified object, maintaining the relative position between the two objects in the scene"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

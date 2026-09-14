@@ -1,0 +1,29 @@
+{"idname":"GeometryNodeScaleElements","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Scale groups of connected edges and faces","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Center","identifier":"Center","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Axis","identifier":"Axis","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"domain":{"type":"ENUM","readonly":false,"default":"FACE","subtype":"NONE","enum_items":[
+        {"id":"FACE","name":"Face","description":"Scale individual faces or neighboring face islands"},
+        {"id":"EDGE","name":"Edge","description":"Scale individual edges or neighboring edge islands"}
+      ]},"scale_mode":{"type":"ENUM","readonly":false,"default":"UNIFORM","subtype":"NONE","enum_items":[
+        {"id":"UNIFORM","name":"Uniform","description":"Scale elements by the same factor in every direction"},
+        {"id":"SINGLE_AXIS","name":"Single Axis","description":"Scale elements in a single direction"}
+      ]}},"dynamic":[
+    {"property":"scale_mode","variants":[
+        {"value":"SINGLE_AXIS","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Center","identifier":"Center","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Axis","identifier":"Axis","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

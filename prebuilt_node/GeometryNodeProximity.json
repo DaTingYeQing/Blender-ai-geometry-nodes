@@ -1,0 +1,17 @@
+{"idname":"GeometryNodeProximity","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Compute the closest location on the target geometry","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Target","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Group ID","identifier":"Group ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+      {"name":"Sample Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Sample Group ID","identifier":"Sample Group ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Distance","identifier":"Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Is Valid","identifier":"Is Valid","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"target_element":{"type":"ENUM","readonly":false,"default":"FACES","subtype":"NONE","enum_items":[
+        {"id":"POINTS","name":"Points","description":"Calculate the proximity to the target's points (faster than the other modes)"},
+        {"id":"EDGES","name":"Edges","description":"Calculate the proximity to the target's edges"},
+        {"id":"FACES","name":"Faces","description":"Calculate the proximity to the target's faces"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "PointCloud"
+  ],"supports_note":"仅支持: 网格/点云"}

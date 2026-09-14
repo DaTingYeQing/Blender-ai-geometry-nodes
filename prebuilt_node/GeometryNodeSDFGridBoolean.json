@@ -1,0 +1,32 @@
+{"idname":"GeometryNodeSDFGridBoolean","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Cut, subtract, or join multiple SDF volume grid inputs","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Grid 1","identifier":"Grid 1","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false},
+      {"name":"Grid 2","identifier":"Grid 2","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":true}
+    ],"outputs":[
+      {"name":"Grid","identifier":"Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"DIFFERENCE","subtype":"NONE","enum_items":[
+        {"id":"INTERSECT","name":"Intersect","description":"Keep the part of the grids that is common between all operands"},
+        {"id":"UNION","name":"Union","description":"Combine grids in an additive way"},
+        {"id":"DIFFERENCE","name":"Difference","description":"Combine grids in a subtractive way"}
+      ]}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"INTERSECT","inputs":[
+            {"name":"Grid 1","identifier":"Grid 1","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":true,"is_multi_input":false},
+            {"name":"Grid","identifier":"Grid 2","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":true}
+          ],"outputs":[
+            {"name":"Grid","identifier":"Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false}
+          ]},
+        {"value":"UNION","inputs":[
+            {"name":"Grid 1","identifier":"Grid 1","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":true,"is_multi_input":false},
+            {"name":"Grid","identifier":"Grid 2","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":true}
+          ],"outputs":[
+            {"name":"Grid","identifier":"Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

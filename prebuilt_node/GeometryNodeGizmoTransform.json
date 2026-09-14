@@ -1,0 +1,14 @@
+{"idname":"GeometryNodeGizmoTransform","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INTERFACE","description":"Show a transform gizmo in the viewport","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+      {"name":"Position","identifier":"Position","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Transform","identifier":"Transform","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"use_translation_x":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_translation_y":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_translation_z":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_rotation_x":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_rotation_y":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_rotation_z":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_scale_x":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_scale_y":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_scale_z":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

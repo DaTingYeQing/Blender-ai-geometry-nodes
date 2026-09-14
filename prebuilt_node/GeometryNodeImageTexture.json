@@ -1,0 +1,24 @@
+{"idname":"GeometryNodeImageTexture","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_TEXTURE","description":"Sample values from an image texture","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Image","identifier":"Image","type":"NodeSocketImage","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Frame","identifier":"Frame","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Alpha","identifier":"Alpha","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"interpolation":{"type":"ENUM","readonly":false,"default":"Linear","subtype":"NONE","enum_items":[
+        {"id":"Linear","name":"Linear","description":"Linear interpolation"},
+        {"id":"Closest","name":"Closest","description":"No interpolation (sample closest texel)"},
+        {"id":"Cubic","name":"Cubic","description":"Cubic interpolation"}
+      ]},"extension":{"type":"ENUM","readonly":false,"default":"REPEAT","subtype":"NONE","enum_items":[
+        {"id":"REPEAT","name":"Repeat","description":"Cause the image to repeat horizontally and vertically"},
+        {"id":"EXTEND","name":"Extend","description":"Extend by repeating edge pixels of the image"},
+        {"id":"CLIP","name":"Clip","description":"Clip to image size and set exterior pixels as transparent"},
+        {"id":"MIRROR","name":"Mirror","description":"Repeatedly flip the image horizontally and vertically"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

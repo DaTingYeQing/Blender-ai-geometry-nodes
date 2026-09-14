@@ -1,0 +1,34 @@
+{"idname":"GeometryNodeResampleCurve","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate a poly spline for each input spline","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":true,"default":10,"hide_value":false,"is_multi_input":false},
+      {"name":"Length","identifier":"Length","type":"NodeSocketFloatDistance","enabled":false,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"COUNT","subtype":"NONE","enum_items":[
+        {"id":"EVALUATED","name":"Evaluated","description":"Output the input spline's evaluated points, based on the resolution attribute for NURBS and Bézier splines. Poly splines are unchanged"},
+        {"id":"COUNT","name":"Count","description":"Sample the specified number of points along each spline"},
+        {"id":"LENGTH","name":"Length","description":"Calculate the number of samples by splitting each spline into segments with the specified length"}
+      ]},"keep_last_segment":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"EVALUATED","inputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":false,"default":10,"hide_value":false,"is_multi_input":false},
+            {"name":"Length","identifier":"Length","type":"NodeSocketFloatDistance","enabled":false,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"LENGTH","inputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":false,"default":10,"hide_value":false,"is_multi_input":false},
+            {"name":"Length","identifier":"Length","type":"NodeSocketFloatDistance","enabled":true,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Curve",
+    "GreasePencil"
+  ],"supports_note":"仅支持: 曲线/蜡笔"}

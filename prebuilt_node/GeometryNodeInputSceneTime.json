@@ -1,0 +1,11 @@
+{"idname":"GeometryNodeInputSceneTime","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve the current time in the scene's animation in units of seconds or frames","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[],"outputs":[
+      {"name":"Seconds","identifier":"Seconds","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Frame","identifier":"Frame","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}
