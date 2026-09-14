@@ -34,16 +34,18 @@ Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build fro
 
 ## Setup
 
-1. In the `py_environment` file, three paths are marked that need to be changed.
+1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
+
+2. In the `py_environment` file, three paths are marked that need to be changed.
 > "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
 
 >-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe----- Replace this entire block, from the dashes to the dashes.
 
-2. Place all `.ts` files flat into the **extensions** folder, and place the four folders flat into the **skills** folder.
+3. Place all `.ts` files flat into the **extensions** folder, and place the four folders flat into the **skills** folder.
 
-3. Make sure Python and its dependency packages are installed (see below).
+4. Make sure Python and its dependency packages are installed (see below).
 
-4. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
+5. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
 
 
 ## Python environment
@@ -67,6 +69,7 @@ Just tell the AI: *"Load the math or node_information skill, and help me build s
 After one skill finishes its task, the AI will load the next skill by itself; it does not load all of them at once (occasionally it does, but that is rare). Also, sometimes after finishing one skill the AI may fail to load the next one (this happened in my testing, but it is also rare).
 
 ## Tool descriptions
+>（These are nothing more than thin wrappers around the tool calls; all the real backend logic lives in the Python files.）
 
 ### blender_math.ts
 
