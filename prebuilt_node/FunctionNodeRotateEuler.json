@@ -1,0 +1,25 @@
+{"idname":"FunctionNodeRotateEuler","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVectorEuler","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Rotate By","identifier":"Rotate By","type":"NodeSocketVectorEuler","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Axis","identifier":"Axis","type":"NodeSocketVectorXYZ","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"rotation_type":{"type":"ENUM","readonly":false,"default":"EULER","subtype":"NONE","enum_items":[
+        {"id":"AXIS_ANGLE","name":"Axis Angle","description":"Rotate around an axis by an angle"},
+        {"id":"EULER","name":"Euler","description":"Rotate around the X, Y, and Z axes"}
+      ]},"space":{"type":"ENUM","readonly":false,"default":"OBJECT","subtype":"NONE","enum_items":[
+        {"id":"OBJECT","name":"Object","description":"Rotate the input rotation in the local space of the object"},
+        {"id":"LOCAL","name":"Local","description":"Rotate the input rotation in its local space"}
+      ]}},"dynamic":[
+    {"property":"rotation_type","variants":[
+        {"value":"AXIS_ANGLE","inputs":[
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVectorEuler","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Rotate By","identifier":"Rotate By","type":"NodeSocketVectorEuler","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Axis","identifier":"Axis","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

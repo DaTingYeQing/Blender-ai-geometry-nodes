@@ -1,0 +1,5 @@
+{"idname":"FunctionNodeStringLength","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"String","identifier":"String","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Length","identifier":"Length","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[]}

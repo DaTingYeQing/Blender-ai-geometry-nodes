@@ -1,0 +1,40 @@
+{"idname":"GeometryNodeCurveToPoints","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate a point cloud by sampling positions along curves","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":true,"default":10,"hide_value":false,"is_multi_input":false},
+      {"name":"Length","identifier":"Length","type":"NodeSocketFloatDistance","enabled":false,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Tangent","identifier":"Tangent","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"COUNT","subtype":"NONE","enum_items":[
+        {"id":"EVALUATED","name":"Evaluated","description":"Create points from the curve's evaluated points, based on the resolution attribute for NURBS and Bézier splines"},
+        {"id":"COUNT","name":"Count","description":"Sample each spline by evenly distributing the specified number of points"},
+        {"id":"LENGTH","name":"Length","description":"Sample each spline by splitting it into segments with the specified length"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"EVALUATED","inputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":false,"default":10,"hide_value":false,"is_multi_input":false},
+            {"name":"Length","identifier":"Length","type":"NodeSocketFloatDistance","enabled":false,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Tangent","identifier":"Tangent","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"LENGTH","inputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":false,"default":10,"hide_value":false,"is_multi_input":false},
+            {"name":"Length","identifier":"Length","type":"NodeSocketFloatDistance","enabled":true,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Tangent","identifier":"Tangent","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Curve",
+    "GreasePencil"
+  ],"supports_note":"仅支持: 曲线/蜡笔"}

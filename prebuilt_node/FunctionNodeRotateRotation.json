@@ -1,0 +1,9 @@
+{"idname":"FunctionNodeRotateRotation","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotate By","identifier":"Rotate By","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"rotation_space":{"type":"ENUM","readonly":false,"default":"GLOBAL","subtype":"NONE","enum_items":[
+        {"id":"GLOBAL","name":"Global","description":"Rotate the input rotation in global space"},
+        {"id":"LOCAL","name":"Local","description":"Rotate the input rotation in its local space"}
+      ]}},"dynamic":[]}

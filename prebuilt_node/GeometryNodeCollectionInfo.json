@@ -1,0 +1,17 @@
+{"idname":"GeometryNodeCollectionInfo","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve geometry instances from a collection","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Collection","identifier":"Collection","type":"NodeSocketCollection","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Separate Children","identifier":"Separate Children","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Reset Children","identifier":"Reset Children","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Instances","identifier":"Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"transform_space":{"type":"ENUM","readonly":false,"default":"ORIGINAL","subtype":"NONE","enum_items":[
+        {"id":"ORIGINAL","name":"Original","description":"Output the geometry relative to the collection offset"},
+        {"id":"RELATIVE","name":"Relative","description":"Bring the input collection geometry into the modified object, maintaining the relative position between the objects in the scene"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

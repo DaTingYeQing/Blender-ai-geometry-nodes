@@ -1,0 +1,38 @@
+{"idname":"FunctionNodeBitMath","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"Perform bitwise operations on 32-bit integers","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"A","identifier":"A","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Shift","identifier":"Shift","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"AND","subtype":"NONE","enum_items":[
+        {"id":"AND","name":"And","description":"Returns a value where the bits of A and B are both set"},
+        {"id":"OR","name":"Or","description":"Returns a value where the bits of either A or B are set"},
+        {"id":"XOR","name":"Exclusive Or","description":"Returns a value where only one bit from A and B is set"},
+        {"id":"NOT","name":"Not","description":"Returns the opposite bit value of A, in decimal it is equivalent of A = -A - 1"},
+        {"id":"SHIFT","name":"Shift","description":"Shifts the bit values of A by the specified Shift amount. Positive values shift left, negative values shift right."},
+        {"id":"ROTATE","name":"Rotate","description":"Rotates the bit values of A by the specified Shift amount. Positive values rotate left, negative values rotate right."}
+      ]}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"NOT","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Shift","identifier":"Shift","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SHIFT","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Shift","identifier":"Shift","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ROTATE","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Shift","identifier":"Shift","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

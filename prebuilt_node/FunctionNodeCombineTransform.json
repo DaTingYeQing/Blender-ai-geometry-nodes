@@ -1,0 +1,7 @@
+{"idname":"FunctionNodeCombineTransform","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Translation","identifier":"Translation","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Transform","identifier":"Transform","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[]}

@@ -1,0 +1,15 @@
+{"idname":"GeometryNodeCurveQuadraticBezier","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate a poly spline in a parabola shape with control points positions","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Resolution","identifier":"Resolution","type":"NodeSocketIntUnsigned","enabled":true,"default":16,"hide_value":false,"is_multi_input":false},
+      {"name":"Start","identifier":"Start","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Middle","identifier":"Middle","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"End","identifier":"End","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}
