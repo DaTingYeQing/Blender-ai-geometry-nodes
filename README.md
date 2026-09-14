@@ -76,6 +76,10 @@ Gives the AI static and dynamic information about nodes. From a vague memory, th
 
 A modular task list. The AI calls this tool after completing the early-stage testing.
 
+### zone_probe.ts
+
+Specifically designed to help AI work with node trees that contain Simulation Zone nodes, making it easier for it to write its own code and pull data as time advances.
+
 ### blender.ts
 
 A fixed channel for sending scripts into Blender. When the tools above cannot help the AI, it will write code directly and send it to Blender to get what it wants.
@@ -84,6 +88,4 @@ A fixed channel for sending scripts into Blender. When the tools above cannot he
 
 The environment configuration file.
 
-### zone_probe.ts
 
-Specifically designed to help AI work with node trees that contain Simulation Zone nodes, making it easier for it to write its own code and pull data as time advances.
