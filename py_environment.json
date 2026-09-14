@@ -1,0 +1,45 @@
+{
+  "_comment": "Single source of truth for the Blender nodes skill environment. Always reference this file; do not hardcode these paths anywhere else.",
+
+  "_updated": "2026-09-13",
+
+  "python": {
+
+    "_role": "External Python (the one running outside Blender): executes all glue scripts that do not touch bpy; third-party geometry libraries are installed here",
+
+    "_exe_note": "This is your own external Python path.",
+
+    "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
+
+    "version": "3.13.14",
+
+    "site_packages_hint": "numpy / scipy / trimesh / pyvista / manifold3d / matplotlib / PIL"
+
+  },
+
+  "blender": {
+
+    "_role": "Inner environment: every script that needs bpy must be run through it (--background, no GUI)",
+
+    "_exe_note": "This is your own Blender 4.5 path.",
+
+    "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\blender.exe",
+
+    "version": "4.5.0",
+
+    "python_version": "3.11.11",
+
+    "_note": "Note: this points to blender.exe, NOT the python.exe inside its folder."
+
+  },
+
+  "workspace": {
+
+    "_role": "Workspace: where .blend files, batch files, payloads, generated scripts and other runtime artifacts are written (Python side reads it via envcard.WORKSPACE; TS side reads this file directly)",
+
+    "_root_note": "This is your own workspace path.",
+
+    "root": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----"
+
+  }
+}
