@@ -2,6 +2,22 @@
 
 AI-generated Blender Geometry Nodes.
 
+## How This Project Was Built
+
+> [!IMPORTANT]
+> The requirements and overall direction of this project come from me; the implementation was carried out with heavy AI assistance. My actual role was tool design, workflow definition, and validating results — not writing code line by line.
+>
+> This means:
+>
+> - The code was shaped by repeated trial and error on real cases and incremental refactoring. I cannot guarantee it covers every edge case.
+> - If you hit a problem, feel free to open an issue with the error message and I'll look into it. But I'm not a full-time developer, so fixes may take some time.
+> - If you need a production-grade library that keeps evolving, this probably isn't it. But if you want to see how far this AI-driven geometry nodes workflow can go, this project has already gone as far as its author could take it. Feel free to use it as a reference and adapt it.
+> - If you're after a production-grade library with dedicated maintainers, this isn't it. If you want to see an AI-driven geometry nodes workflow that actually runs end to end, feel free to study it and adapt it.
+>
+> Describing how this was built isn't about disclaiming responsibility — it's so you can judge whether it suits your use case.
+
+
+
 ## Introduction
 
 Tell the AI what you need (in as much detail as possible). The AI will break your request down into math problems, verify them, then look up node information, and finally build the geometry nodes inside Blender.
