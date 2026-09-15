@@ -30,7 +30,7 @@ On this path, the first thing I tackled wasn't the algorithm — it was **inform
 
 The reason is straightforward: **an AI has to know certain things accurately before it can start working.** Without accurate input, everything downstream is wrong. This is what gave rise to the **node information skill**.
 
-Its design is extremely restrained:
+Its design:
 
 > **The AI only needs to know a node's `idname` to pull up a large amount of data about that node.**
 
@@ -234,7 +234,7 @@ Beyond that, the skill has plenty of other gaps:
 
 And more fundamentally: **I consider this skill a toy in the end.**
 
-The reason is that I **never tested it on anything extremely complex** — or rather, I never gave it a prompt like "**make boiling water**," the kind of request that is **highly abstract and heavily dependent on visual feel**. That kind of request can be broken down into concrete algorithms, but whether I could break it down well, **I can't say.**
+The reason is that I **never tested it on anything extremely complex** — or rather, I never gave it a prompt like "**make water visibly boiling — bubbles rising and popping on the surface**," the kind of request that is **highly abstract and heavily dependent on visual feel**. That kind of request can be broken down into concrete algorithms, but whether I could break it down well, **I can't say.**
 
 So my judgment is:
 
