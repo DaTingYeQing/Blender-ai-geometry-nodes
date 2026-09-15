@@ -22,6 +22,9 @@ AI-generated Blender Geometry Nodes.
 
 Tell the AI what you need (in as much detail as possible). The AI will break your request down into math problems, verify them, then look up node information, and finally build the geometry nodes inside Blender.
 
+
+[Design Notes](DESIGN.md) — how these tools were designed, and what didn't work
+
 ## Skills
 
 - **math** — used for early-stage math verification in Python; some packages need to be installed (see [Python environment](#python-environment))
