@@ -1,4 +1,4 @@
-# ai-geometry-nodes
+# Blender-ai-geometry-nodes
 
 AI-generated Blender Geometry Nodes.
 
