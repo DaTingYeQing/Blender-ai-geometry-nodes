@@ -240,7 +240,7 @@ The reason is that I **never tested it on anything extremely complex** — or ra
 
 So my judgment is:
 
-> **How strong the AI is, in the end, depends on you.
+> How strong the AI is, in the end, depends on you.
 
 If you understand Geometry Nodes well, **you can perhaps abstract it into tasks that help the AI**; conversely, however strong the AI is, it lacks the person who points it in the right direction.
 
@@ -248,5 +248,4 @@ If you understand Geometry Nodes well, **you can perhaps abstract it into tasks 
 ## 9. Finally
 
 **There were many, many other ideas besides these, but eventually I always ran into the limits of my own ability. So I consider the project incomplete: a work in progress.**
-> This project doesn't seem to have much point — it's not really worth doing. What would be meaningful to me is getting hands-on with AI.
-
+> This project doesn't seem to have much point — it's not really worth doing. What is meaningful to me is using whatever ability I have to see AI's ceiling clearly and get hands-on with AI 
