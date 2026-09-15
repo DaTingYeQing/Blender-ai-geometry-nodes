@@ -86,7 +86,7 @@ This is the escape hatch — scenarios the tools don't cover won't leave it stuc
 
 > **Keep shrinking what the AI has to remember, keep reducing what it has to learn anew — and lean on what it is already good at.**
 
-## 7. Debugging
+## 6. Debugging
 
 At this point the AI had a **brain** (reasoning) and **hands** (operating the node tree), but it was still missing one thing: **debugging**.
 
@@ -196,7 +196,7 @@ Unlike the fully wrapped forms before it, this one leans **semi-custom**:
 - **How many frames to bake — the AI chooses**;
 - **What data to get — the AI writes it itself**.
 
-## 8. Back to the Starting Point
+## 7. Back to the Starting Point
 
 **In the end I came back to where I started — let the AI write its own code.**
 
@@ -221,7 +221,7 @@ But a problem came with it: **I don't have a good way to help the AI write that 
 
 Honestly, **I don't know how to help the AI either.** I'm confident in the direction, but I haven't found that hand to steady it.
 
-## 9. Shortcomings
+## 8. Shortcomings
 
 In the end I tried to **tackle debugging head-on** — and **failed every time**.
 
@@ -245,8 +245,8 @@ So my judgment is:
 If you understand Geometry Nodes well, **you can perhaps abstract it into tasks that help the AI**; conversely, however strong the AI is, it lacks the person who points it in the right direction.
 
 
-## 10. Finally
+## 9. Finally
 
 **There were many, many other ideas besides these, but eventually I always ran into the limits of my own ability. So I consider the project incomplete: a work in progress.**
-> This project doesn't seem to have much point — it's not really worth doing. What would be meaningful to me is getting hands-on with AI.**
+> This project doesn't seem to have much point — it's not really worth doing. What would be meaningful to me is getting hands-on with AI.
 
