@@ -244,14 +244,4 @@ If you understand Geometry Nodes well, **you can perhaps abstract it into tasks 
 
 ## 10. Finally
 
-Beyond all this, I had some other ideas along the way.
-
-For instance, to get **the AI to read source code**, the idea went:
-
-1. Have it **wire up every node once**;
-2. Then **grab the algorithms being called from the C code**;
-3. That way you would **indirectly learn what the AI is thinking**.
-
-But it **required recompiling Blender**, so I **never did it**.
-
 **There were many, many other ideas besides these, but eventually I always ran into the limits of my own ability — and the limits of AI design. So I consider the project incomplete: a work in progress.**
