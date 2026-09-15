@@ -1,5 +1,7 @@
 # How These Tools Were Designed
 
+>The AI model I run on is DeepSeek-Flash. It has no vision capability, which is why I haven't given the AI any real vision tools either.
+
 ## 1. The Core Idea
 
 The design of every tool here boils down to one sentence: **fill in a form — wrap up the code you'd otherwise rewrite every time.**
@@ -238,10 +240,13 @@ The reason is that I **never tested it on anything extremely complex** — or ra
 
 So my judgment is:
 
-> **How strong the AI is, in the end, depends on you.**
+> **How strong the AI is, in the end, depends on you.
 
 If you understand Geometry Nodes well, **you can perhaps abstract it into tasks that help the AI**; conversely, however strong the AI is, it lacks the person who points it in the right direction.
 
+
 ## 10. Finally
 
-**There were many, many other ideas besides these, but eventually I always ran into the limits of my own ability — and the limits of AI design. So I consider the project incomplete: a work in progress.**
+**There were many, many other ideas besides these, but eventually I always ran into the limits of my own ability. So I consider the project incomplete: a work in progress.**
+> This project doesn't seem to have much point — it's not really worth doing. What would be meaningful to me is getting hands-on with AI.**
+
