@@ -75,6 +75,8 @@ Just tell the AI: *"Load the math or node_information skill, and help me build s
 
 > I say "or" because some tasks are simple enough that no math verification is needed — the AI can look up the nodes and build directly. Sometimes the AI will load the math skill on its own, but ultimately that is up to you.
 
+>There's also a minor issue that comes up sometimes: the AI doesn't always use bpy or Blender Data, and instead goes straight to the more low-level blender_run to write its own code. I'm still working out how to fix that. But at the start of each task, you can ask it to use the first two tools more, and only fall back to the last one when necessary.
+
 After one skill finishes its task, the AI will load the next skill by itself; it does not load all of them at once (occasionally it does, but that is rare). Also, sometimes after finishing one skill the AI may fail to load the next one (this happened in my testing, but it is also rare).
 
 ## Tool descriptions
