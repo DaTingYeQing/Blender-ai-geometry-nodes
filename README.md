@@ -53,6 +53,7 @@ There are still some design details that aren't handled well — not bugs, exact
 
 5. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
 
+6. Put the file py_environment in the directory ~\.pi\agent
 
 ## Python environment
 
