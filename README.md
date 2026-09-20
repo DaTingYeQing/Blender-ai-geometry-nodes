@@ -49,7 +49,7 @@ There are still some design details that aren't handled well — not bugs, exact
 
 3. Please put the prebuilt_node folder inside the node_information folder ,than Place all `.ts` files flat into the **extensions** folder, and place the four folders（_shared,execution,math,node_information) flat into the **skills** folder.
 
-4. Put the file py_environment in the directory ~\.pi\agent
+4. Put the file py_environment and APPEND_SYSTEM.md in the directory ~\.pi\agent
 
 5. Make sure Python and its dependency packages are installed (see below).
 
