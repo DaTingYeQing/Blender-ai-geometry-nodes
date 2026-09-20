@@ -45,15 +45,17 @@ There are still some design details that aren't handled well — not bugs, exact
 2. In the `py_environment` file, three paths are marked that need to be changed.
 > "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
 
->-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe----- Replace this entire block, from the dashes to the dashes.
+>-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----(Replace this entire block, from the dashes to the dashes.)
 
-3. Please put the prebuilt_node folder inside the node_information folder ,than Place all `.ts` files flat into the **extensions** folder, and place the four folders flat into the **skills** folder.
+3. Please put the prebuilt_node folder inside the node_information folder ,than Place all `.ts` files flat into the **extensions** folder, and place the four folders（_shared,execution,math,node_information) flat into the **skills** folder.
 
-4. Make sure Python and its dependency packages are installed (see below).
+4. Put the file py_environment in the directory ~\.pi\agent
 
-5. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
+5. Make sure Python and its dependency packages are installed (see below).
 
-6. Put the file py_environment in the directory ~\.pi\agent
+6. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
+
+
 
 ## Python environment
 
