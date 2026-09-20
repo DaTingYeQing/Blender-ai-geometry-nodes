@@ -1,0 +1,14 @@
+{"idname":"ShaderNodeTexGradient","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_TEXTURE","description":"Generate interpolated color and intensity values based on the input vector","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"texture_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"color_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"gradient_type":{"type":"ENUM","readonly":false,"default":"LINEAR","subtype":"NONE","enum_items":[
+        {"id":"LINEAR","name":"Linear","description":"Create a linear progression"},
+        {"id":"QUADRATIC","name":"Quadratic","description":"Create a quadratic progression"},
+        {"id":"EASING","name":"Easing","description":"Create a progression easing from one step to the next"},
+        {"id":"DIAGONAL","name":"Diagonal","description":"Create a diagonal progression"},
+        {"id":"SPHERICAL","name":"Spherical","description":"Create a spherical progression"},
+        {"id":"QUADRATIC_SPHERE","name":"Quadratic Sphere","description":"Create a quadratic progression in the shape of a sphere"},
+        {"id":"RADIAL","name":"Radial","description":"Create a radial progression"}
+      ]}},"dynamic":[]}

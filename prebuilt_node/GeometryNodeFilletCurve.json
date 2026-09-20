@@ -1,0 +1,25 @@
+{"idname":"GeometryNodeFilletCurve","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Round corners by generating circular arcs on each control point","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":false,"default":1,"hide_value":false,"is_multi_input":false},
+      {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":true,"default":0.25,"hide_value":false,"is_multi_input":false},
+      {"name":"Limit Radius","identifier":"Limit Radius","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"BEZIER","subtype":"NONE","enum_items":[
+        {"id":"BEZIER","name":"Bézier","description":"Align Bézier handles to create circular arcs at each control point"},
+        {"id":"POLY","name":"Poly","description":"Add control points along a circular arc (handle type is vector if Bézier Spline)"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"POLY","inputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":true,"default":1,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":true,"default":0.25,"hide_value":false,"is_multi_input":false},
+            {"name":"Limit Radius","identifier":"Limit Radius","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Curve",
+    "GreasePencil"
+  ],"supports_note":"仅支持: 曲线/蜡笔"}

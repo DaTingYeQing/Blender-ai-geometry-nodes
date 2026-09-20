@@ -1,0 +1,15 @@
+{"idname":"ShaderNodeTexBrick","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_TEXTURE","description":"Generate a procedural texture producing bricks","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Color1","identifier":"Color1","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Color2","identifier":"Color2","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Mortar","identifier":"Mortar","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Mortar Size","identifier":"Mortar Size","type":"NodeSocketFloat","enabled":true,"default":0.019999999552965164,"hide_value":false,"is_multi_input":false},
+      {"name":"Mortar Smooth","identifier":"Mortar Smooth","type":"NodeSocketFloat","enabled":true,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false},
+      {"name":"Bias","identifier":"Bias","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Brick Width","identifier":"Brick Width","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Row Height","identifier":"Row Height","type":"NodeSocketFloat","enabled":true,"default":0.25,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"texture_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"color_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"offset_frequency":{"type":"INT","readonly":false,"default":2,"default_array":null,"step":1,"subtype":"NONE","soft_min":1,"soft_max":99},"squash_frequency":{"type":"INT","readonly":false,"default":2,"default_array":null,"step":1,"subtype":"NONE","soft_min":1,"soft_max":99},"offset":{"type":"FLOAT","readonly":false,"default":0.5,"default_array":null,"step":10.0,"subtype":"NONE","soft_min":0.0,"soft_max":1.0},"squash":{"type":"FLOAT","readonly":false,"default":1.0,"default_array":null,"step":10.0,"subtype":"NONE","soft_min":0.0,"soft_max":99.0}},"dynamic":[]}

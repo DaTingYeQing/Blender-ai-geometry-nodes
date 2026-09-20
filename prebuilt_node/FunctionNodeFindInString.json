@@ -1,0 +1,7 @@
+{"idname":"FunctionNodeFindInString","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"String","identifier":"String","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"Search","identifier":"Search","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"First Found","identifier":"First Found","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Count","identifier":"Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[]}

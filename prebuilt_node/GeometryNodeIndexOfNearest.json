@@ -1,0 +1,14 @@
+{"idname":"GeometryNodeIndexOfNearest","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_CONVERTER","description":"Find the nearest element in a group. Similar to the \\","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Group ID","identifier":"Group ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Index","identifier":"Index","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Has Neighbor","identifier":"Has Neighbor","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

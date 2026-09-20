@@ -1,0 +1,57 @@
+{"idname":"FunctionNodeIntegerMath","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_001","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"ADD","subtype":"NONE","enum_items":[
+        {"id":"ADD","name":"Add","description":"A + B"},
+        {"id":"SUBTRACT","name":"Subtract","description":"A - B"},
+        {"id":"MULTIPLY","name":"Multiply","description":"A * B"},
+        {"id":"DIVIDE","name":"Divide","description":"A / B"},
+        {"id":"MULTIPLY_ADD","name":"Multiply Add","description":"A * B + C"},
+        {"id":"ABSOLUTE","name":"Absolute","description":"Non-negative value of A, abs(A)"},
+        {"id":"NEGATE","name":"Negate","description":"-A"},
+        {"id":"POWER","name":"Power","description":"A power B, pow(A,B)"},
+        {"id":"MINIMUM","name":"Minimum","description":"The minimum value from A and B, min(A,B)"},
+        {"id":"MAXIMUM","name":"Maximum","description":"The maximum value from A and B, max(A,B)"},
+        {"id":"SIGN","name":"Sign","description":"Return the sign of A, sign(A)"},
+        {"id":"DIVIDE_ROUND","name":"Divide Round","description":"Divide and round result toward zero"},
+        {"id":"DIVIDE_FLOOR","name":"Divide Floor","description":"Divide and floor result, the largest integer smaller than or equal A"},
+        {"id":"DIVIDE_CEIL","name":"Divide Ceiling","description":"Divide and ceil result, the smallest integer greater than or equal A"},
+        {"id":"FLOORED_MODULO","name":"Floored Modulo","description":"Modulo that is periodic for both negative and positive operands"},
+        {"id":"MODULO","name":"Modulo","description":"Modulo which is the remainder of A / B"},
+        {"id":"GCD","name":"Greatest Common Divisor","description":"The largest positive integer that divides into each of the values A and B, e.g. GCD(8,12) = 4"},
+        {"id":"LCM","name":"Least Common Multiple","description":"The smallest positive integer that is divisible by both A and B, e.g. LCM(6,10) = 30"}
+      ]}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"MULTIPLY_ADD","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"ABSOLUTE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"NEGATE","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"SIGN","inputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

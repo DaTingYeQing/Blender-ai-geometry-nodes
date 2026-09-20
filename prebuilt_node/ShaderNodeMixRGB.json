@@ -1,0 +1,27 @@
+{"idname":"ShaderNodeMixRGB","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_OP_COLOR","description":"Mix two input colors","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Fac","identifier":"Fac","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Color1","identifier":"Color1","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Color2","identifier":"Color2","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"blend_type":{"type":"ENUM","readonly":false,"default":"MIX","subtype":"NONE","enum_items":[
+        {"id":"MIX","name":"Mix","description":""},
+        {"id":"DARKEN","name":"Darken","description":""},
+        {"id":"MULTIPLY","name":"Multiply","description":""},
+        {"id":"BURN","name":"Color Burn","description":""},
+        {"id":"LIGHTEN","name":"Lighten","description":""},
+        {"id":"SCREEN","name":"Screen","description":""},
+        {"id":"DODGE","name":"Color Dodge","description":""},
+        {"id":"ADD","name":"Add","description":""},
+        {"id":"OVERLAY","name":"Overlay","description":""},
+        {"id":"SOFT_LIGHT","name":"Soft Light","description":""},
+        {"id":"LINEAR_LIGHT","name":"Linear Light","description":""},
+        {"id":"DIFFERENCE","name":"Difference","description":""},
+        {"id":"EXCLUSION","name":"Exclusion","description":""},
+        {"id":"SUBTRACT","name":"Subtract","description":""},
+        {"id":"DIVIDE","name":"Divide","description":""},
+        {"id":"HUE","name":"Hue","description":""},
+        {"id":"SATURATION","name":"Saturation","description":""},
+        {"id":"COLOR","name":"Color","description":""},
+        {"id":"VALUE","name":"Value","description":""}
+      ]},"use_alpha":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"},"use_clamp":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[]}

@@ -1,0 +1,11 @@
+{"idname":"ShaderNodeBsdfSheen","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_SHADER","description":"Reflection for materials such as cloth.\\nTypically mixed with other shaders (such as a ","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Weight","identifier":"Weight","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"BSDF","identifier":"BSDF","type":"NodeSocketShader","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"distribution":{"type":"ENUM","readonly":false,"default":"ASHIKHMIN","subtype":"NONE","enum_items":[
+        {"id":"ASHIKHMIN","name":"Ashikhmin","description":"Classic Ashikhmin velvet (legacy model)"},
+        {"id":"MICROFIBER","name":"Microfiber","description":"Microflake-based model of multiple scattering between normal-oriented fibers"}
+      ]}},"dynamic":[]}
