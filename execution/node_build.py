@@ -20,7 +20,7 @@ payload.json = **批次本身**，外加几个可选的传送字段：
 
     {
       "tree": "AI_Break",                       // 节点组名（也可写 "group"，等价）
-      "interface": [{"direction":"input","name":"Scale","socket_type":"NodeSocketFloat"}],
+      "interface": [{"direction":"input","name":"Scale","socket_type":"Float"}],   // 只写类型名；NodeSocketFloat 老写法也认
       "add":   ["GeometryNodeMeshCube", "GeometryNodeSetPosition"],
       "set":   [{"node":"Cube","prop":"Vertices X","value":3}],
       "link":  ["Cube.Mesh → Set Position.Geometry"],
@@ -329,7 +329,8 @@ def _demo():
     """
     demo = {
         "tree": "AI_Demo_Build",
-        "interface": [{"direction": "input", "name": "Scale", "socket_type": "NodeSocketFloat"},
+        # 两条各验一路：短名（新写法，小写）与长名（老写法，验向后兼容）
+        "interface": [{"direction": "input", "name": "Scale", "socket_type": "float"},
                       {"direction": "output", "name": "Geometry", "socket_type": "NodeSocketGeometry"}],
         "add": ["GeometryNodeMeshCube", "GeometryNodeSetPosition"],
         "set": [{"node": "Cube", "prop": "Vertices X", "value": 3},

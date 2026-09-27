@@ -1,0 +1,16 @@
+{"idname":"GeometryNodeCurveSetHandles","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Set the handle type for the control points of a Bézier curve","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"handle_type":{"type":"ENUM","readonly":false,"default":"FREE","subtype":"NONE","enum_items":[
+        {"id":"FREE","name":"Free","description":"The handle can be moved anywhere, and doesn't influence the point's other handle"},
+        {"id":"AUTO","name":"Auto","description":"The location is automatically calculated to be smooth"},
+        {"id":"VECTOR","name":"Vector","description":"The location is calculated to point to the next/previous control point"},
+        {"id":"ALIGN","name":"Align","description":"The location is constrained to point in the opposite direction as the other handle"}
+      ]},"mode":{"type":"ENUM","readonly":false,"default":"","subtype":"NONE","enum_items":[
+        {"id":"LEFT","name":"Left","description":"Use the left handles"},
+        {"id":"RIGHT","name":"Right","description":"Use the right handles"}
+      ]}},"dynamic":[],"supports":[
+    "Curve"
+  ],"supports_note":"仅支持: 曲线"}

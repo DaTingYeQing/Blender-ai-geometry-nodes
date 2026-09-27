@@ -94,16 +94,12 @@ const blenderScreenTool = defineTool({
 	name: "blender_screen",
 	label: "Blender Screen",
 	description:
-		"只读查节点树（不改档、不存盘，自动读工作档）。\n" +
-		"  group: 必填，指定要查的节点组名（如 AI_Break）\n" +
-		"  overview: 返回全节点清单(idname/name)，字符量小，先看整个树有哪些节点\n" +
-		"  detail(默认): 返回指定节点的全部接口+每根线连到哪；需 nodes 参数\n" +
-		"示例:\n" +
-		"  group=AI_Break detail=overview\n" +
-		"  group=AI_Break detail=detail nodes=[\"GeometryNodeMeshCube\"]\n" +
+		"只读查节点树。\n" +
+		"  overview: 返回全节点清单(idname/name)。\n" +
+		"  detail: 返回指定节点的全部接口+每根线连到哪；需 nodes 参数\n" +
 		"  group=AI_Break detail=detail nodes=[\"GeometryNodeMeshCube\",\"GeometryNodeSetPosition\"]\n" +
 		"nodes 里每条是 name（Blender 唯一名）或 idname（支持子串模糊）；同 idname 多个时用 name 区分。改树用 blender_build。\n" +
-		"工作档: 自动读工作区 workflow_state.json 里的唯一工作档；还没建档(wf_plan)时会报错——先建档再查。",
+		"工作档: 自动读工作区 workflow_state.json 里的唯一工作档。",
 	parameters: Type.Object({
 		group: Type.String({
 			description: "必填。要查的节点组名（如 AI_Break）。改树用 blender_build 的 group。",

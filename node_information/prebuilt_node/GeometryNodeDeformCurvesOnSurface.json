@@ -1,0 +1,7 @@
+{"idname":"GeometryNodeDeformCurvesOnSurface","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Translate and rotate curves based on changes between the object's original and evaluated ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curves","identifier":"Curves","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curves","identifier":"Curves","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Curve"
+  ],"supports_note":"仅支持: 曲线"}

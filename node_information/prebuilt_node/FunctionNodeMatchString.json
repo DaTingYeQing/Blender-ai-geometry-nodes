@@ -1,0 +1,10 @@
+{"idname":"FunctionNodeMatchString","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"String","identifier":"String","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"Key","identifier":"Key","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"STARTS_WITH","subtype":"NONE","enum_items":[
+        {"id":"STARTS_WITH","name":"Starts With","description":"True when the first input starts with the second"},
+        {"id":"ENDS_WITH","name":"Ends With","description":"True when the first input ends with the second"},
+        {"id":"CONTAINS","name":"Contains","description":"True when the first input contains the second as a substring"}
+      ]}},"dynamic":[]}

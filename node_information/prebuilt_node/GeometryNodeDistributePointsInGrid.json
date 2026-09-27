@@ -1,0 +1,31 @@
+{"idname":"GeometryNodeDistributePointsInGrid","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate points inside a volume grid","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Grid","identifier":"Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false},
+      {"name":"Density","identifier":"Density","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Spacing","identifier":"Spacing","type":"NodeSocketVectorXYZ","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Threshold","identifier":"Threshold","type":"NodeSocketFloat","enabled":false,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"DENSITY_RANDOM","subtype":"NONE","enum_items":[
+        {"id":"DENSITY_RANDOM","name":"Random","description":"Distribute points randomly inside of the volume"},
+        {"id":"DENSITY_GRID","name":"Grid","description":"Distribute the points in a grid pattern inside of the volume"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"DENSITY_GRID","inputs":[
+            {"name":"Grid","identifier":"Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false},
+            {"name":"Density","identifier":"Density","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Spacing","identifier":"Spacing","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Threshold","identifier":"Threshold","type":"NodeSocketFloat","enabled":true,"default":0.10000000149011612,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

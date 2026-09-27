@@ -1,0 +1,14 @@
+{"idname":"FunctionNodeAxesToRotation","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"Create a rotation from a primary and (ideally orthogonal) secondary axis","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Primary Axis","identifier":"Primary Axis","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Secondary Axis","identifier":"Secondary Axis","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"primary_axis":{"type":"ENUM","readonly":false,"default":"X","subtype":"NONE","enum_items":[
+        {"id":"X","name":"X","description":""},
+        {"id":"Y","name":"Y","description":""},
+        {"id":"Z","name":"Z","description":""}
+      ]},"secondary_axis":{"type":"ENUM","readonly":false,"default":"X","subtype":"NONE","enum_items":[
+        {"id":"X","name":"X","description":""},
+        {"id":"Y","name":"Y","description":""},
+        {"id":"Z","name":"Z","description":""}
+      ]}},"dynamic":[]}

@@ -1,0 +1,14 @@
+{"idname":"GeometryNodePointsToSDFGrid","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Create a signed distance volume grid from points","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Voxel Size","identifier":"Voxel Size","type":"NodeSocketFloatDistance","enabled":true,"default":0.30000001192092896,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"SDF Grid","identifier":"SDF Grid","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

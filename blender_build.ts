@@ -173,18 +173,15 @@ const blenderBuildTool = defineTool({
 	name: "blender_build",
 	label: "Blender Build",
 	description:
-		"节点树结构操作：建/删/连/断节点、设值、建组边界接口。每次调用只用一个 action，各 action 用哪些参数见参数说明。\n" +
-		"顺序：后端按 interface→add→add_item→set→link→unlink→del 执行，所以 set 先落地、link 后连；action=link 时可同时带 sets。\n" +
-		"引用规则：节点一律用 name（Blender 唯一名，add 后返回的也是 name）；同 idname 多个节点也用 name 区分。\n" +
-		"建接口：socket_type 必须写完整 idname（NodeSocketGeometry / NodeSocketFloat / NodeSocketVector / NodeSocketInt / NodeSocketBool），写 Geometry 这类简写会 enum 报错。\n" +
-		"接口写法：照抄节点详情里接口行开头那个词（括号前）—— 节点组相关节点(GeometryNodeGroup / Group Input / Group Output)显示接口 name，写 Group.hi；其他节点显示 identifier，写 Merge by Distance.Distance。转换由脚本自动做，只有接口名在本节点重名时才需改用 identifier。\n" +
+		"节点树结构操作：建/删/连/断节点/设值/建组边界接口。每次调用只用一个 action，各 action 用哪些参数见参数说明。\n" +
+		"引用规则：节点一律用 name；同 idname 多个节点也用 name 区分。\n" +
 		"不确定接口先 node_find/node_full 查准再填。",
 	parameters: Type.Object({
 		action: Type.String({
 			description: "七选一：add/del/link/unlink/set/interface/add_item",
 		}),
 		group: Type.String({
-			description: "必填。要操作的目标节点组名（如 AI_Break）。组不存在时 add / interface / link / set 都会自动新建一个空组（只有 del 要求组已存在）；但 add 建出的树没有 Group Input/Output，interface 建的树自带这两个节点。注意组名拼错会静默产生一个垃圾空组。",
+			description: "必填。要操作的目标节点组名。组不存在时 add / interface / link / set 都会自动新建一个空组；但 add 建出的树没有 Group Input/Output，interface 建的树自带这两个节点。注意组名拼错会静默产生一个垃圾空组。",
 		}),
 		ids: Type.Optional(Type.Array(Type.String(), {
 			description: "action=add：要建的节点 idname，如 [\"GeometryNodeMeshCube\", \"GeometryNodeSetPosition\"]",
@@ -198,10 +195,13 @@ const blenderBuildTool = defineTool({
 				+ "unlink：全式=断这根线；短式「节点.接口」只断该节点的输入线，输出侧必须用全式。",
 		})),
 		sets: Type.Optional(Type.Array(Type.Any(), {
-			description: 'action=set（或 link 顺带）：[{"node":name,"prop":接口name或属性名,"value":值}]，node 填节点 name',
+			description: 'action=set（或 link 顺带）：[{"node":name,"prop":...,"value":值}]，node 填节点 name。prop 就两种用途：'
+				+ 'a) 设值 → prop 写接口（identifier 或 name，同 name 重名时必须写 identifier，如 Math 的第二个输入写 Value_001）→ 设该接口的默认值；'
+				+ 'b) 改属性，如 {"node":"Math","prop":"operation","value":"MULTIPLY"}、{"prop":"use_clamp","value":true}。'
+				+  node 可以填 Group Input / Output，这时 prop 写本组接口名，改的是组接口的默认值。'
 		})),
 		ifs: Type.Optional(Type.Array(Type.Any(), {
-			description: 'action=interface：[{"direction":"input/output","name":接口名,"socket_type":接口类型}]。socket_type 必须写完整 idname（NodeSocketGeometry / NodeSocketFloat / NodeSocketVector / NodeSocketInt / NodeSocketBool），写简写如 "Geometry" 会 enum 报错。',
+			description: 'action=interface：[{"direction":"input/output","name":接口名,"socket_type":接口类型}]。socket_type 只写类型名，大小写不限，如 "Float" / "float"。',
 		})),
 		items: Type.Optional(Type.Array(Type.Any(), {
 			description: 'action=add_item：[{"zone":zone输出节点name,"socket_type":"Float/Vector/Geometry","item_name":状态名}]',

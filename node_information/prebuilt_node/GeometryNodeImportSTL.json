@@ -1,0 +1,12 @@
+{"idname":"GeometryNodeImportSTL","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Import a mesh from an STL file","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Path","identifier":"Path","type":"NodeSocketStringFilePath","enabled":true,"default":"","hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

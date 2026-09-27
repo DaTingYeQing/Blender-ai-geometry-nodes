@@ -1,0 +1,33 @@
+{"idname":"GeometryNodeCurvePrimitiveCircle","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate a poly spline circle","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Resolution","identifier":"Resolution","type":"NodeSocketInt","enabled":true,"default":32,"hide_value":false,"is_multi_input":false},
+      {"name":"Point 1","identifier":"Point 1","type":"NodeSocketVectorTranslation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Point 2","identifier":"Point 2","type":"NodeSocketVectorTranslation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Point 3","identifier":"Point 3","type":"NodeSocketVectorTranslation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Center","identifier":"Center","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"RADIUS","subtype":"NONE","enum_items":[
+        {"id":"POINTS","name":"Points","description":"Define the radius and location with three points"},
+        {"id":"RADIUS","name":"Radius","description":"Define the radius with a float"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"POINTS","inputs":[
+            {"name":"Resolution","identifier":"Resolution","type":"NodeSocketInt","enabled":true,"default":32,"hide_value":false,"is_multi_input":false},
+            {"name":"Point 1","identifier":"Point 1","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Point 2","identifier":"Point 2","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Point 3","identifier":"Point 3","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Center","identifier":"Center","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

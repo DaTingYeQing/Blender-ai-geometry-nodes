@@ -1,0 +1,17 @@
+{"idname":"ShaderNodeVectorTransform","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_OP_VECTOR","description":"Convert a vector, point, or normal between world, camera, and object coordinate space","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"vector_type":{"type":"ENUM","readonly":false,"default":"VECTOR","subtype":"NONE","enum_items":[
+        {"id":"POINT","name":"Point","description":"Transform a point"},
+        {"id":"VECTOR","name":"Vector","description":"Transform a direction vector"},
+        {"id":"NORMAL","name":"Normal","description":"Transform a normal vector with unit length"}
+      ]},"convert_from":{"type":"ENUM","readonly":false,"default":"WORLD","subtype":"NONE","enum_items":[
+        {"id":"WORLD","name":"World","description":""},
+        {"id":"OBJECT","name":"Object","description":""},
+        {"id":"CAMERA","name":"Camera","description":""}
+      ]},"convert_to":{"type":"ENUM","readonly":false,"default":"WORLD","subtype":"NONE","enum_items":[
+        {"id":"WORLD","name":"World","description":""},
+        {"id":"OBJECT","name":"Object","description":""},
+        {"id":"CAMERA","name":"Camera","description":""}
+      ]}},"dynamic":[]}

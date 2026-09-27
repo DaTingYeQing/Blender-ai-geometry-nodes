@@ -156,11 +156,11 @@ const blenderMathTool = defineTool({
 	name: "blender_math",
 	label: "Blender Math",
 	description:
-		"把数学表达式编译成 Blender 数学节点组（自动建节点，不用手摆 Math/Vector Math）。\n" +
-		"用法：先 action=eval 用纯 Python 试算（与 Blender 同语义）确认公式，再 action=build 进 Blender 建出来。\n" +
-		"expr 直接写数学式子（sin(x) * 2 + y、sqrt(abs(x))、dot(a, b) + length(c)），不是 Python 表达式；标量用 type=math，矢量用 type=vector_math（标量*矢量自动转 SCALE）。\n" +
+		"把数学表达式编译成 Blender 数学节点组。\n" +
+		"用法：先 action=eval 用纯 Python 试算确认公式，再 action=build 进 Blender 建出来。\n" +
+		"expr 直接写数学式子（sin(x) * 2 + y、sqrt(abs(x))、dot(a, b) + length(c)），不是 Python 表达式；标量用 type=math，矢量用 type=vector_math。\n" +
 		"变量只在封装子组里建输入接口、结果只连子组输出，顺序按变量在表达式里出现的先后（length(hi - lo) * precision → hi, lo, precision）。\n" +
-		"数学节点封装在一个子组里，指定的 group 中会自动放一个引用它的 Group 节点（node_tree 已绑好，不用自己 add GeometryNodeGroup）；它在主组里的 name = 你填的 node_name（重名会变 xxx.001，以返回的 node_name 为准）。注意：它只会创建这个节点组，不会替你连任何线 —— 主组里的输入/输出都得自己用 blender_build 连。",
+		"数学节点封装在一个子组里，指定的 group 中会放一个 Group 节点，它只会创建节点组，不会替你连线 —— 主组里的输入/输出自己用 blender_build 连。",
 	parameters: Type.Object({
 		action: Type.String({
 			description: "eval(先算数值验证公式) 或 build(编译并进 Blender 建出节点组)",

@@ -31,14 +31,41 @@ CONV = {
     "Shader":     {"Shader"},
 }
 
-# socket base 名 -> 组 interface 的 .new() 可用的大写枚举
+# socket base 名 -> 组 interface 的 .new() 可用的大写枚举。
+# key 与 INTERFACE_SOCKET_TYPES 一一对应：都是实测能建出来的 15 种。
 BASE_TO_ENUM = {
     "Float": "FLOAT", "Int": "INT", "Bool": "BOOLEAN", "Vector": "VECTOR",
     "Rotation": "ROTATION", "Matrix": "MATRIX", "String": "STRING", "Menu": "MENU",
     "Color": "RGBA", "Object": "OBJECT", "Image": "IMAGE", "Geometry": "GEOMETRY",
     "Collection": "COLLECTION", "Texture": "TEXTURE", "Material": "MATERIAL",
-    "Bundle": "BUNDLE", "Closure": "CLOSURE",
 }
+
+# interface.new_socket 实测可用的 socket_type 全集。
+# 2026-09-27 在 Blender 4.5.0 / GeometryNodeTree 上，把 dir(bpy.types) 里 61 个
+# NodeSocket* 逐个试建得出：只有下列 15 个能建。带后缀的变体（NodeSocketVectorTranslation、
+# NodeSocketFloatFactor 等 44 个）与 Bundle / Closure 全部建不出来，所以不认。
+INTERFACE_SOCKET_TYPES = (
+    "Bool", "Collection", "Color", "Float", "Geometry", "Image", "Int",
+    "Material", "Matrix", "Menu", "Object", "Rotation", "String",
+    "Texture", "Vector",
+)
+
+
+def canon_socket_idname(raw):
+    """AI 写的 socket 类型 → 建接口要的完整 idname；认不出返回 None。
+
+    float / FLOAT / Float / NodeSocketFloat 一律归到 NodeSocketFloat（大小写不限、可省前缀）。
+    带后缀的变体（NodeSocketVectorTranslation 等）不认 —— 实测建不出来。
+    """
+    s = str(raw or "").strip()
+    if s.startswith("NodeSocket"):
+        s = s[len("NodeSocket"):]
+    low = s.lower()
+    for base in INTERFACE_SOCKET_TYPES:
+        if low == base.lower():
+            return "NodeSocket" + base
+    return None
+
 
 # 剥离顺序：长前缀在前，避免短的抢先命中。
 _BASE_ORDER = ("Geometry", "Collection", "Material", "Rotation", "Texture",

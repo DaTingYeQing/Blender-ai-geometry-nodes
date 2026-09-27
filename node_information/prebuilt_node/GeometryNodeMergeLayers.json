@@ -1,0 +1,22 @@
+{"idname":"GeometryNodeMergeLayers","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Join groups of Grease Pencil layers into one","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Group ID","identifier":"Group ID","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"MERGE_BY_NAME","subtype":"NONE","enum_items":[
+        {"id":"MERGE_BY_NAME","name":"By Name","description":"Combine all layers which have the same name"},
+        {"id":"MERGE_BY_ID","name":"By Group ID","description":"Provide a custom group ID for each layer and all layers with the same ID will be merged into one"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"MERGE_BY_ID","inputs":[
+            {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Group ID","identifier":"Group ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "GreasePencil"
+  ],"supports_note":"仅支持: 蜡笔"}

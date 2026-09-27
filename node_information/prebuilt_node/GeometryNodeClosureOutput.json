@@ -1,0 +1,12 @@
+{"idname":"GeometryNodeClosureOutput","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INTERFACE","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"","identifier":"__extend__","type":"NodeSocketVirtual","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Closure","identifier":"Closure","type":"NodeSocketClosure","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"input_items":{"type":"COLLECTION","readonly":true,"subtype":"NONE"},"output_items":{"type":"COLLECTION","readonly":true,"subtype":"NONE"},"active_input_index":{"type":"INT","readonly":false,"default":0,"default_array":null,"step":1,"subtype":"UNSIGNED","soft_min":0,"soft_max":10000},"active_output_index":{"type":"INT","readonly":false,"default":0,"default_array":null,"step":1,"subtype":"UNSIGNED","soft_min":0,"soft_max":10000}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

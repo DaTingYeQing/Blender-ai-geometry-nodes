@@ -1,0 +1,157 @@
+{"idname":"FunctionNodeCompare","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+      {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+      {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+      {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":false,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"EQUAL","subtype":"NONE","enum_items":[
+        {"id":"LESS_THAN","name":"Less Than","description":"True when the first input is smaller than second input"},
+        {"id":"LESS_EQUAL","name":"Less Than or Equal","description":"True when the first input is smaller than the second input or equal"},
+        {"id":"GREATER_THAN","name":"Greater Than","description":"True when the first input is greater than the second input"},
+        {"id":"GREATER_EQUAL","name":"Greater Than or Equal","description":"True when the first input is greater than the second input or equal"},
+        {"id":"EQUAL","name":"Equal","description":"True when both inputs are approximately equal"},
+        {"id":"NOT_EQUAL","name":"Not Equal","description":"True when both inputs are not approximately equal"},
+        {"id":"BRIGHTER","name":"Brighter","description":"True when the first input is brighter"},
+        {"id":"DARKER","name":"Darker","description":"True when the first input is darker"}
+      ]},"data_type":{"type":"ENUM","readonly":false,"default":"FLOAT","subtype":"NONE","enum_items":[
+        {"id":"FLOAT","name":"Float","description":""},
+        {"id":"INT","name":"Integer","description":""},
+        {"id":"BOOLEAN","name":"Boolean","description":""},
+        {"id":"VECTOR","name":"Vector","description":""},
+        {"id":"ROTATION","name":"Rotation","description":""},
+        {"id":"MATRIX","name":"Matrix","description":""},
+        {"id":"STRING","name":"String","description":""},
+        {"id":"MENU","name":"Menu","description":""},
+        {"id":"RGBA","name":"Color","description":""},
+        {"id":"OBJECT","name":"Object","description":""},
+        {"id":"IMAGE","name":"Image","description":""},
+        {"id":"GEOMETRY","name":"Geometry","description":""},
+        {"id":"COLLECTION","name":"Collection","description":""},
+        {"id":"TEXTURE","name":"Texture","description":""},
+        {"id":"MATERIAL","name":"Material","description":""},
+        {"id":"BUNDLE","name":"Bundle","description":""},
+        {"id":"CLOSURE","name":"Closure","description":""}
+      ]},"mode":{"type":"ENUM","readonly":false,"default":"ELEMENT","subtype":"NONE","enum_items":[
+        {"id":"ELEMENT","name":"Element-Wise","description":"Compare each element of the input vectors"},
+        {"id":"LENGTH","name":"Length","description":"Compare the length of the input vectors"},
+        {"id":"AVERAGE","name":"Average","description":"Compare the average of the input vectors elements"},
+        {"id":"DOT_PRODUCT","name":"Dot Product","description":"Compare the dot products of the input vectors"},
+        {"id":"DIRECTION","name":"Direction","description":"Compare the direction of the input vectors"}
+      ]}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"EQUAL","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+            {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":true,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"NOT_EQUAL","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+            {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":true,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]},
+    {"property":"data_type","variants":[
+        {"value":"INT","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+            {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":false,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"VECTOR","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+            {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":false,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"STRING","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":true,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+            {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":false,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"RGBA","inputs":[
+            {"name":"A","identifier":"A","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_INT","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_VEC3","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_COL","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_COL","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"A","identifier":"A_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"B","identifier":"B_STR","type":"NodeSocketString","enabled":false,"default":"","hide_value":false,"is_multi_input":false},
+            {"name":"C","identifier":"C","type":"NodeSocketFloat","enabled":false,"default":0.8999999761581421,"hide_value":false,"is_multi_input":false},
+            {"name":"Angle","identifier":"Angle","type":"NodeSocketFloatAngle","enabled":false,"default":0.08726649731397629,"hide_value":false,"is_multi_input":false},
+            {"name":"Epsilon","identifier":"Epsilon","type":"NodeSocketFloat","enabled":true,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Result","identifier":"Result","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

@@ -1,0 +1,71 @@
+{"idname":"GeometryNodeAttributeDomainSize","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_ATTRIBUTE","description":"Retrieve the number of elements in a geometry for each attribute domain","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Point Count","identifier":"Point Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Edge Count","identifier":"Edge Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Face Count","identifier":"Face Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Face Corner Count","identifier":"Face Corner Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Spline Count","identifier":"Spline Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Instance Count","identifier":"Instance Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Layer Count","identifier":"Layer Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"component":{"type":"ENUM","readonly":false,"default":"MESH","subtype":"NONE","enum_items":[
+        {"id":"MESH","name":"Mesh","description":"Mesh component containing point, corner, edge and face data"},
+        {"id":"POINTCLOUD","name":"Point Cloud","description":"Point cloud component containing only point data"},
+        {"id":"CURVE","name":"Curve","description":"Curve component containing spline and control point data"},
+        {"id":"INSTANCES","name":"Instances","description":"Instances of objects or collections"},
+        {"id":"GREASEPENCIL","name":"Grease Pencil","description":"Grease Pencil component containing layers and curves data"}
+      ]}},"dynamic":[
+    {"property":"component","variants":[
+        {"value":"POINTCLOUD","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Point Count","identifier":"Point Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Edge Count","identifier":"Edge Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Count","identifier":"Face Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Corner Count","identifier":"Face Corner Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Spline Count","identifier":"Spline Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Instance Count","identifier":"Instance Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Layer Count","identifier":"Layer Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"CURVE","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Point Count","identifier":"Point Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Edge Count","identifier":"Edge Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Count","identifier":"Face Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Corner Count","identifier":"Face Corner Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Spline Count","identifier":"Spline Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Instance Count","identifier":"Instance Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Layer Count","identifier":"Layer Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"INSTANCES","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Point Count","identifier":"Point Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Edge Count","identifier":"Edge Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Count","identifier":"Face Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Corner Count","identifier":"Face Corner Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Spline Count","identifier":"Spline Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Instance Count","identifier":"Instance Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Layer Count","identifier":"Layer Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"GREASEPENCIL","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Point Count","identifier":"Point Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Edge Count","identifier":"Edge Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Count","identifier":"Face Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Face Corner Count","identifier":"Face Corner Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Spline Count","identifier":"Spline Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Instance Count","identifier":"Instance Count","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Layer Count","identifier":"Layer Count","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}
