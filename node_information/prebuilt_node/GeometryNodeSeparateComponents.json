@@ -1,0 +1,17 @@
+{"idname":"GeometryNodeSeparateComponents","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Split a geometry into a separate output for each type of data in the geometry","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Grease Pencil","identifier":"Grease Pencil","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Point Cloud","identifier":"Point Cloud","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Instances","identifier":"Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

@@ -1,0 +1,21 @@
+{"idname":"GeometryNodeSubdivisionSurface","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Divide mesh faces to form a smooth surface, using the Catmull-Clark subdivision method","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Level","identifier":"Level","type":"NodeSocketInt","enabled":true,"default":1,"hide_value":false,"is_multi_input":false},
+      {"name":"Edge Crease","identifier":"Edge Crease","type":"NodeSocketFloatFactor","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Vertex Crease","identifier":"Vertex Crease","type":"NodeSocketFloatFactor","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Limit Surface","identifier":"Limit Surface","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"uv_smooth":{"type":"ENUM","readonly":false,"default":"PRESERVE_BOUNDARIES","subtype":"NONE","enum_items":[
+        {"id":"NONE","name":"None","description":"UVs are not smoothed, boundaries are kept sharp"},
+        {"id":"PRESERVE_CORNERS","name":"Keep Corners","description":"UVs are smoothed, corners on discontinuous boundary are kept sharp"},
+        {"id":"PRESERVE_CORNERS_AND_JUNCTIONS","name":"Keep Corners, Junctions","description":"UVs are smoothed, corners on discontinuous boundary and junctions of 3 or more regions are kept sharp"},
+        {"id":"PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE","name":"Keep Corners, Junctions, Concave","description":"UVs are smoothed, corners on discontinuous boundary, junctions of 3 or more regions and darts and concave corners are kept sharp"},
+        {"id":"PRESERVE_BOUNDARIES","name":"Keep Boundaries","description":"UVs are smoothed, boundaries are kept sharp"},
+        {"id":"SMOOTH_ALL","name":"All","description":"UVs and boundaries are smoothed"}
+      ]},"boundary_smooth":{"type":"ENUM","readonly":false,"default":"ALL","subtype":"NONE","enum_items":[
+        {"id":"PRESERVE_CORNERS","name":"Keep Corners","description":"Smooth boundaries, but corners are kept sharp"},
+        {"id":"ALL","name":"All","description":"Smooth boundaries, including corners"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

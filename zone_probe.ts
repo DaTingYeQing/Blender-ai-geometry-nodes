@@ -77,9 +77,6 @@ const zoneProbeTool = defineTool({
 		"你只填 group（节点树名）、frames（如 \"1-20\"；\"30-40\" 会自动预热 29 帧）和 code（探针代码，至少定义 probe(ctx)）。\n" +
 		"probe(ctx) 每帧返回一个 dict（键名随意）；大数组自动落盘 npz、输出只回摘要。ctx 可用：frame / centers() / matrices() / verts() / attrs(name) / emit(name, value)。\n" +
 		"code 里还可写 selftest()（开档前跑，用已知答案校准判据，assert 失败立即中止，不给假结论）和 setup(tree, obj)（开档后、推帧前的任意代码：设值/加删节点/重接线都行）。",
-	promptGuidelines: [
-		"动态/逐帧探测（模拟区、ForEach、Repeat，或要看帧演化）首选 zone_probe，不要用 blender_data 的逐帧模式。",
-	],
 	parameters: Type.Object({
 		group: Type.String({
 			description: "必填。节点树名（如 M3）",

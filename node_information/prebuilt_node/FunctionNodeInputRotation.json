@@ -1,0 +1,3 @@
+{"idname":"FunctionNodeInputRotation","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_INPUT","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[],"outputs":[
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"rotation_euler":{"type":"FLOAT","readonly":false,"default":0.0,"default_array":null,"step":10.0,"subtype":"EULER","soft_min":-10000.0,"soft_max":10000.0}},"dynamic":[]}

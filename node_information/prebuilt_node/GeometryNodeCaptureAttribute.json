@@ -1,0 +1,22 @@
+{"idname":"GeometryNodeCaptureAttribute","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_ATTRIBUTE","description":"Store the result of a field on a geometry and output the data as a node socket. Allows ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"","identifier":"__extend__","type":"NodeSocketVirtual","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"","identifier":"__extend__","type":"NodeSocketVirtual","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"capture_items":{"type":"COLLECTION","readonly":true,"subtype":"NONE"},"domain":{"type":"ENUM","readonly":false,"default":"POINT","subtype":"NONE","enum_items":[
+        {"id":"POINT","name":"Point","description":"Attribute on point"},
+        {"id":"EDGE","name":"Edge","description":"Attribute on mesh edge"},
+        {"id":"FACE","name":"Face","description":"Attribute on mesh faces"},
+        {"id":"CORNER","name":"Face Corner","description":"Attribute on mesh face corner"},
+        {"id":"CURVE","name":"Spline","description":"Attribute on spline"},
+        {"id":"INSTANCE","name":"Instance","description":"Attribute on instance"},
+        {"id":"LAYER","name":"Layer","description":"Attribute on Grease Pencil layer"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

@@ -1,0 +1,12 @@
+{"idname":"GeometryNodeInputMeshFaceIsPlanar","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve whether all triangles in a face are on the same plane, i.e. whether they have the ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Threshold","identifier":"Threshold","type":"NodeSocketFloatDistance","enabled":true,"default":0.009999999776482582,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Planar","identifier":"Planar","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

@@ -1,0 +1,12 @@
+{"idname":"GeometryNodeConvexHull","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Create a mesh that encloses all points in the input geometry with the smallest number of ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Convex Hull","identifier":"Convex Hull","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

@@ -58,8 +58,8 @@ const blenderRunTool = defineTool({
 	name: "blender_run",
 	label: "Blender Run",
 	description:
-		"把一段 Python 代码（expr）或一个脚本文件（script）送进 Blender 后台执行，Blender 的输出原样返回（报错不会吞）。expr / script 二选一。\n" +
-		"自动读工作区 workflow_state.json 里记的唯一工作档：先打开它再跑，跑完存回它（不用传 read/save）。还没建档会报错——先建档再 run。",
+		"把一段 Python 代码（expr）或一个脚本文件（script）送进 Blender 后台执行。\n" +
+		"自动读工作区 workflow_state.json 里的工作档，跑完存回它（不用传 read/save）。",
 	promptGuidelines: [
 		"blender_run 是最后的兜底：只有 blender_data / bpy / zone_probe / blender_screen / blender_build 都取不到你要的数据时，才用它执行任意 Python。",
 	],

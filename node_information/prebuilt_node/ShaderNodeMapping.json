@@ -1,0 +1,32 @@
+{"idname":"ShaderNodeMapping","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_OP_VECTOR","description":"Transform the input vector by applying translation, rotation, and scale","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Location","identifier":"Location","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVectorEuler","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"vector_type":{"type":"ENUM","readonly":false,"default":"POINT","subtype":"NONE","enum_items":[
+        {"id":"POINT","name":"Point","description":"Transform a point"},
+        {"id":"TEXTURE","name":"Texture","description":"Transform a texture by inverse mapping the texture coordinate"},
+        {"id":"VECTOR","name":"Vector","description":"Transform a direction vector (Location is ignored)"},
+        {"id":"NORMAL","name":"Normal","description":"Transform a unit normal vector (Location is ignored)"}
+      ]}},"dynamic":[
+    {"property":"vector_type","variants":[
+        {"value":"VECTOR","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Location","identifier":"Location","type":"NodeSocketVectorTranslation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVectorEuler","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"NORMAL","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Location","identifier":"Location","type":"NodeSocketVectorTranslation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketVectorEuler","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

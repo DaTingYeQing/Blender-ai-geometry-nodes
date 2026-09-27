@@ -1,0 +1,11 @@
+{"idname":"GeometryNodeInputNormal","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve a unit length vector indicating the direction pointing away from the geometry at ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[],"outputs":[
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"True Normal","identifier":"True Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"legacy_corner_normals":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

@@ -1,0 +1,25 @@
+{"idname":"FunctionNodeBooleanMath","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Boolean","identifier":"Boolean","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Boolean","identifier":"Boolean_001","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Boolean","identifier":"Boolean","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"operation":{"type":"ENUM","readonly":false,"default":"AND","subtype":"NONE","enum_items":[
+        {"id":"AND","name":"And","description":"True when both inputs are true"},
+        {"id":"OR","name":"Or","description":"True when at least one input is true"},
+        {"id":"NOT","name":"Not","description":"Opposite of the input"},
+        {"id":"NAND","name":"Not And","description":"True when at least one input is false"},
+        {"id":"NOR","name":"Nor","description":"True when both inputs are false"},
+        {"id":"XNOR","name":"Equal","description":"True when both inputs are equal (exclusive nor)"},
+        {"id":"XOR","name":"Not Equal","description":"True when both inputs are different (exclusive or)"},
+        {"id":"IMPLY","name":"Imply","description":"True unless the first input is true and the second is false"},
+        {"id":"NIMPLY","name":"Subtract","description":"True when the first input is true and the second is false (not imply)"}
+      ]}},"dynamic":[
+    {"property":"operation","variants":[
+        {"value":"NOT","inputs":[
+            {"name":"Boolean","identifier":"Boolean","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Boolean","identifier":"Boolean_001","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Boolean","identifier":"Boolean","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

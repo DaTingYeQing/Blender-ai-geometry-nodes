@@ -1,0 +1,3 @@
+{"idname":"ShaderNodeUVAlongStroke","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_INPUT","description":"","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[],"outputs":[
+      {"name":"UV","identifier":"UV","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"use_tips":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[]}

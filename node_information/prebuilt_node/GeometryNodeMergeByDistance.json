@@ -1,0 +1,13 @@
+{"idname":"GeometryNodeMergeByDistance","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Merge vertices or points within a given distance","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Distance","identifier":"Distance","type":"NodeSocketFloatDistance","enabled":true,"default":0.0010000000474974513,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"ALL","subtype":"NONE","enum_items":[
+        {"id":"ALL","name":"All","description":"Merge all close selected points, whether or not they are connected"},
+        {"id":"CONNECTED","name":"Connected","description":"Only merge mesh vertices along existing edges. This method can be much faster"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "PointCloud"
+  ],"supports_note":"仅支持: 网格/点云"}

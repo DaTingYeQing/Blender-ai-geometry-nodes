@@ -1,0 +1,14 @@
+{"idname":"GeometryNodeSetInstanceTransform","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Set the transformation matrix of every instance","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Instances","identifier":"Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Transform","identifier":"Transform","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Instances","identifier":"Instances","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

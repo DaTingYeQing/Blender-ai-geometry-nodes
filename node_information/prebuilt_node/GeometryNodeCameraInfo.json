@@ -1,0 +1,20 @@
+{"idname":"GeometryNodeCameraInfo","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_INPUT","description":"Retrieve information from a camera object","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Camera","identifier":"Camera","type":"NodeSocketObject","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Projection Matrix","identifier":"Projection Matrix","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Focal Length","identifier":"Focal Length","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Sensor","identifier":"Sensor","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Shift","identifier":"Shift","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Clip Start","identifier":"Clip Start","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Clip End","identifier":"Clip End","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Focus Distance","identifier":"Focus Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Is Orthographic","identifier":"Is Orthographic","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Orthographic Scale","identifier":"Orthographic Scale","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

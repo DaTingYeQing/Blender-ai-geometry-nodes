@@ -1,0 +1,42 @@
+{"idname":"GeometryNodeExtrudeMesh","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate new vertices, edges, or faces from selected elements and move them based on an ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Offset","identifier":"Offset","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Offset Scale","identifier":"Offset Scale","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Individual","identifier":"Individual","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Top","identifier":"Top","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Side","identifier":"Side","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"FACES","subtype":"NONE","enum_items":[
+        {"id":"VERTICES","name":"Vertices","description":""},
+        {"id":"EDGES","name":"Edges","description":""},
+        {"id":"FACES","name":"Faces","description":""}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"VERTICES","inputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Offset Scale","identifier":"Offset Scale","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Individual","identifier":"Individual","type":"NodeSocketBool","enabled":false,"default":true,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Top","identifier":"Top","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Side","identifier":"Side","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"EDGES","inputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Offset Scale","identifier":"Offset Scale","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Individual","identifier":"Individual","type":"NodeSocketBool","enabled":false,"default":true,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Top","identifier":"Top","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Side","identifier":"Side","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

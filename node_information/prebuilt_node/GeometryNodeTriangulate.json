@@ -1,0 +1,17 @@
+{"idname":"GeometryNodeTriangulate","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Convert all faces in a mesh to triangular faces","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"quad_method":{"type":"ENUM","readonly":false,"default":"BEAUTY","subtype":"NONE","enum_items":[
+        {"id":"BEAUTY","name":"Beauty","description":"Split the quads in nice triangles, slower method"},
+        {"id":"FIXED","name":"Fixed","description":"Split the quads on the first and third vertices"},
+        {"id":"FIXED_ALTERNATE","name":"Fixed Alternate","description":"Split the quads on the 2nd and 4th vertices"},
+        {"id":"SHORTEST_DIAGONAL","name":"Shortest Diagonal","description":"Split the quads along their shortest diagonal"},
+        {"id":"LONGEST_DIAGONAL","name":"Longest Diagonal","description":"Split the quads along their longest diagonal"}
+      ]},"ngon_method":{"type":"ENUM","readonly":false,"default":"BEAUTY","subtype":"NONE","enum_items":[
+        {"id":"BEAUTY","name":"Beauty","description":"Arrange the new triangles evenly (slow)"},
+        {"id":"CLIP","name":"Clip","description":"Split the polygons with an ear clipping algorithm"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

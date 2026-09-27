@@ -1,0 +1,8 @@
+{"idname":"GeometryNodeDualMesh","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Convert Faces into vertices and vertices into faces","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Keep Boundaries","identifier":"Keep Boundaries","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Dual Mesh","identifier":"Dual Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{},"dynamic":[],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

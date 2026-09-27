@@ -1,0 +1,100 @@
+{"idname":"ShaderNodeTexNoise","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_TEXTURE","description":"Generate fractal Perlin noise","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Offset","identifier":"Offset","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Gain","identifier":"Gain","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"texture_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"color_mapping":{"type":"POINTER","readonly":true,"subtype":"NONE"},"noise_dimensions":{"type":"ENUM","readonly":false,"default":"1D","subtype":"NONE","enum_items":[
+        {"id":"1D","name":"1D","description":"Use the scalar value W as input"},
+        {"id":"2D","name":"2D","description":"Use the 2D vector (X, Y) as input. The Z component is ignored."},
+        {"id":"3D","name":"3D","description":"Use the 3D vector (X, Y, Z) as input"},
+        {"id":"4D","name":"4D","description":"Use the 4D vector (X, Y, Z, W) as input"}
+      ]},"noise_type":{"type":"ENUM","readonly":false,"default":"MULTIFRACTAL","subtype":"NONE","enum_items":[
+        {"id":"MULTIFRACTAL","name":"Multifractal","description":"More uneven result (varies with location), more similar to a real terrain"},
+        {"id":"RIDGED_MULTIFRACTAL","name":"Ridged Multifractal","description":"Create sharp peaks"},
+        {"id":"HYBRID_MULTIFRACTAL","name":"Hybrid Multifractal","description":"Create peaks and valleys with different roughness values"},
+        {"id":"FBM","name":"fBM","description":"The standard fractal Perlin noise"},
+        {"id":"HETERO_TERRAIN","name":"Hetero Terrain","description":"Similar to Hybrid Multifractal creates a heterogeneous terrain, but with the likeness of river channels"}
+      ]},"normalize":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[
+    {"property":"noise_dimensions","variants":[
+        {"value":"1D","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Gain","identifier":"Gain","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"4D","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Gain","identifier":"Gain","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]},
+    {"property":"noise_type","variants":[
+        {"value":"RIDGED_MULTIFRACTAL","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Gain","identifier":"Gain","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"HYBRID_MULTIFRACTAL","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Gain","identifier":"Gain","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"HETERO_TERRAIN","inputs":[
+            {"name":"Vector","identifier":"Vector","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"W","identifier":"W","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":5.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Detail","identifier":"Detail","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Roughness","identifier":"Roughness","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"Lacunarity","identifier":"Lacunarity","type":"NodeSocketFloat","enabled":true,"default":2.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Offset","identifier":"Offset","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Gain","identifier":"Gain","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Distortion","identifier":"Distortion","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Fac","identifier":"Fac","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Color","identifier":"Color","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

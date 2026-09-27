@@ -89,17 +89,24 @@ def cmd_interface(tree, spec, col):
     direction = spec.get("direction", "input")
     in_out = "INPUT" if direction in ("input", "in") else "OUTPUT"
     name = spec.get("name", "")
-    stype = spec.get("socket_type", "NodeSocketFloat")
+    raw_type = spec.get("socket_type", "Float")
     if not name:
         col.error("interface 失败：缺少 name", code="interface_no_name",
-                  hint='补上 name，如 {"direction":"input","name":"Object","socket_type":"NodeSocketObject"}')
+                  hint='补上 name，如 {"direction":"input","name":"Object","socket_type":"Object"}')
+        return
+    stype = T.canon_socket_idname(raw_type)
+    if stype is None:
+        col.error(f"interface 失败 [{name}]：认不出 socket 类型 {raw_type}",
+                  code="bad_socket_type", where={"name": name, "socket_type": raw_type},
+                  hint="socket_type 写类型名即可（大小写不限）。可用："
+                       + "、".join(T.INTERFACE_SOCKET_TYPES))
         return
     try:
         tree.interface.new_socket(name=name, in_out=in_out, socket_type=stype)
     except Exception as e:
         col.error(f"interface 失败 [{name}]: {e}", code="interface_new_failed",
-                  where={"name": name, "socket_type": stype},
-                  hint="socket_type 需是完整 idname，如 NodeSocketFloat / NodeSocketGeometry")
+                  where={"name": name, "socket_type": raw_type},
+                  hint="Blender 拒了这个 socket 类型，核对应是上列 15 种之一")
         return
     for gtype in ("NodeGroupInput", "NodeGroupOutput"):
         if not any(n.bl_idname == gtype for n in tree.nodes):

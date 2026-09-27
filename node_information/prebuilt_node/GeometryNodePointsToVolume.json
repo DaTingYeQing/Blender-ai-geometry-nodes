@@ -1,0 +1,31 @@
+{"idname":"GeometryNodePointsToVolume","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate a fog volume sphere around every point","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Density","identifier":"Density","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Voxel Size","identifier":"Voxel Size","type":"NodeSocketFloatDistance","enabled":false,"default":0.30000001192092896,"hide_value":false,"is_multi_input":false},
+      {"name":"Voxel Amount","identifier":"Voxel Amount","type":"NodeSocketFloat","enabled":true,"default":64.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"resolution_mode":{"type":"ENUM","readonly":false,"default":"VOXEL_AMOUNT","subtype":"NONE","enum_items":[
+        {"id":"VOXEL_AMOUNT","name":"Amount","description":"Specify the approximate number of voxels along the diagonal"},
+        {"id":"VOXEL_SIZE","name":"Size","description":"Specify the voxel side length"}
+      ]}},"dynamic":[
+    {"property":"resolution_mode","variants":[
+        {"value":"VOXEL_SIZE","inputs":[
+            {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Density","identifier":"Density","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Voxel Size","identifier":"Voxel Size","type":"NodeSocketFloatDistance","enabled":true,"default":0.30000001192092896,"hide_value":false,"is_multi_input":false},
+            {"name":"Voxel Amount","identifier":"Voxel Amount","type":"NodeSocketFloat","enabled":false,"default":64.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Radius","identifier":"Radius","type":"NodeSocketFloatDistance","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Volume","identifier":"Volume","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

@@ -1,0 +1,61 @@
+{"idname":"GeometryNodeViewer","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_OUTPUT","description":"Display the input data in the Spreadsheet Editor","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[]},"runtime_properties":{"data_type":{"type":"ENUM","readonly":false,"default":"FLOAT","subtype":"NONE","enum_items":[
+        {"id":"FLOAT","name":"Float","description":"Floating-point value"},
+        {"id":"INT","name":"Integer","description":"32-bit integer"},
+        {"id":"FLOAT_VECTOR","name":"Vector","description":"3D vector with floating-point values"},
+        {"id":"FLOAT_COLOR","name":"Color","description":"RGBA color with 32-bit floating-point values"},
+        {"id":"BYTE_COLOR","name":"Byte Color","description":"RGBA color with 8-bit positive integer values"},
+        {"id":"STRING","name":"String","description":"Text string"},
+        {"id":"BOOLEAN","name":"Boolean","description":"True or false"},
+        {"id":"FLOAT2","name":"2D Vector","description":"2D vector with floating-point values"},
+        {"id":"INT8","name":"8-Bit Integer","description":"Smaller integer with a range from -128 to 127"},
+        {"id":"INT16_2D","name":"2D 16-Bit Integer Vector","description":"16-bit signed integer vector"},
+        {"id":"INT32_2D","name":"2D Integer Vector","description":"32-bit signed integer vector"},
+        {"id":"QUATERNION","name":"Quaternion","description":"Floating point quaternion rotation"},
+        {"id":"FLOAT4X4","name":"4x4 Matrix","description":"Floating point matrix"}
+      ]},"domain":{"type":"ENUM","readonly":false,"default":"POINT","subtype":"NONE","enum_items":[
+        {"id":"AUTO","name":"Auto","description":""},
+        {"id":"POINT","name":"Point","description":"Attribute on point"},
+        {"id":"EDGE","name":"Edge","description":"Attribute on mesh edge"},
+        {"id":"FACE","name":"Face","description":"Attribute on mesh faces"},
+        {"id":"CORNER","name":"Face Corner","description":"Attribute on mesh face corner"},
+        {"id":"CURVE","name":"Spline","description":"Attribute on spline"},
+        {"id":"INSTANCE","name":"Instance","description":"Attribute on instance"},
+        {"id":"LAYER","name":"Layer","description":"Attribute on Grease Pencil layer"}
+      ]},"ui_shortcut":{"type":"INT","readonly":false,"default":0,"default_array":null,"step":1,"subtype":"NONE","soft_min":-10000,"soft_max":10000}},"dynamic":[
+    {"property":"data_type","variants":[
+        {"value":"INT","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[]},
+        {"value":"FLOAT_VECTOR","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[]},
+        {"value":"FLOAT_COLOR","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[]},
+        {"value":"BOOLEAN","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[]},
+        {"value":"QUATERNION","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[]},
+        {"value":"FLOAT4X4","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+          ],"outputs":[]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

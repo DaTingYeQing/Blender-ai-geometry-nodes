@@ -6,8 +6,7 @@ description: "几何节点任务的纯数学推演。先用 bpy 工具写纯数�
 
 # Math-First 数学先行
 
-## 总路线（每次任务必须走，不许跳步）
-
+## 总路线
 1. **想方法**：把任务抽象成纯数学建模，列出**所有候选方法**（禁止想节点）。
 2. **最小验证**：每个候选方法先跑最小数值实验（bpy 工具），拿初步数据。
 3. **判定**：用「验证基准」（见下）逐条判定数据对不对。
@@ -18,9 +17,9 @@ description: "几何节点任务的纯数学推演。先用 bpy 工具写纯数�
 
 ## 阶段一：纯数学推演（禁止想节点）
 
-- 只能用 bpy 工具环境里已装的库（trimesh / manifold3d / pyvista / numpy / scipy），**禁止** import bpy（Blender API）、禁止任何节点/Blender 界面术语。
+- 只能用 bpy 工具环境里已装的库（trimesh / manifold3d / pyvista / numpy / scipy），禁止任何节点/Blender 界面术语。
 - 写脚本时把"要算什么"拆成纯数值问题：输入是什么、输出想要什么。
-- 用 bpy 工具跑脚本：expr 参数直接传 Python 代码（多行/中文均可），无需自己指定 Python 路径。
+- 用 bpy 工具跑脚本：expr 参数直接传 Python 代码，无需自己指定 Python 路径。
 
 
 ## 落盘规范（每次推演完必写，落盘即成果）
@@ -42,7 +41,7 @@ description: "几何节点任务的纯数学推演。先用 bpy 工具写纯数�
 
 ## 阶段二：节点实现（拿到数据后）
 
-- 再加载 blender-node-query（blender-node-query-v2）：
+- 再加载 node-information：
 - **写 wf_plan 时可以参考 result.json ，用它架构任务**：
 
 ## 硬规则

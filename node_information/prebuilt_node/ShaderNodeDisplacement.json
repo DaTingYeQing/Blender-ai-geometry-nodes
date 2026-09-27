@@ -1,0 +1,11 @@
+{"idname":"ShaderNodeDisplacement","found":true,"blender":"4.5.0","identity":{"category":"着色器节点","nclass":"NODE_CLASS_OP_VECTOR","description":"Displace the surface along the surface normal","created_in_tree":"ShaderNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Height","identifier":"Height","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Midlevel","identifier":"Midlevel","type":"NodeSocketFloat","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketFloat","enabled":true,"default":0.009999999776482582,"hide_value":false,"is_multi_input":false},
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Displacement","identifier":"Displacement","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"space":{"type":"ENUM","readonly":false,"default":"OBJECT","subtype":"NONE","enum_items":[
+        {"id":"OBJECT","name":"Object Space","description":"Displacement is in object space, affected by object scale"},
+        {"id":"WORLD","name":"World Space","description":"Displacement is in world space, not affected by object scale"}
+      ]}},"dynamic":[]}

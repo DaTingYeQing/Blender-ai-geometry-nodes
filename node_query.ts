@@ -92,8 +92,8 @@ const nodeFullTool = defineTool({
 	name: "node_full",
 	label: "Node Full",
 	description:
-		"拿节点的 idname，直接返回它的预生成精简 JSON（半紧凑格式，已清洗脏数据）。\n" +
-		"stdout 就是完整数据，不用再 read 文件。重点看：\n" +
+		"拿节点的 idname，直接返回它的预生成精简 JSON。\n" +
+		"stdout 就是完整数据。重点看：\n" +
 		"runtime_sockets（插口 identifier 和类型、enabled、默认值）、runtime_properties（可设属性名、默认值、枚举）、dynamic（切枚举后的插口变化）、supports（几何类型支持）。",
 	parameters: Type.Object({
 		idname: Type.String({ description: "节点 idname，如 GeometryNodeSetPosition" }),

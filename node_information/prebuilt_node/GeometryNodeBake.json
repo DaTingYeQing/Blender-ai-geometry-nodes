@@ -1,0 +1,14 @@
+{"idname":"GeometryNodeBake","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Cache the incoming data so that it can be used without recomputation","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"几何数据","identifier":"Item_0","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"","identifier":"__extend__","type":"NodeSocketVirtual","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"几何数据","identifier":"Item_0","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"","identifier":"__extend__","type":"NodeSocketVirtual","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"bake_items":{"type":"COLLECTION","readonly":true,"subtype":"NONE"}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

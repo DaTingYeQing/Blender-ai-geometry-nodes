@@ -51,13 +51,12 @@ def _sock_section(sock):
 
 def _sock_line(sock, direction):
     tag = sock.get("ref") or sock.get("identifier")
-    badge = f"({sock.get('base_type') or sock.get('type') or '?'})"
     linked = sock.get("linked_to") or []
     if not linked:
-        return f"  {tag}{badge}  未连接"
+        return f"  {tag}  未连接"
     srcs = ", ".join(f"{l.get('node', '?')} {l.get('socket', '')}".strip() for l in linked)
     arrow = "←" if direction == "in" else "→"
-    return f"  {tag}{badge}  {arrow} {srcs}"
+    return f"  {tag}  {arrow} {srcs}"
 
 
 def _render_node_detail(n):

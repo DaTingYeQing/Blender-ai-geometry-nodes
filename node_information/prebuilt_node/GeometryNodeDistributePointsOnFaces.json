@@ -1,0 +1,34 @@
+{"idname":"GeometryNodeDistributePointsOnFaces","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Generate points spread out on the surface of a mesh","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Distance Min","identifier":"Distance Min","type":"NodeSocketFloatDistance","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Density Max","identifier":"Density Max","type":"NodeSocketFloat","enabled":false,"default":10.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Density","identifier":"Density","type":"NodeSocketFloat","enabled":true,"default":10.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Density Factor","identifier":"Density Factor","type":"NodeSocketFloatFactor","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"distribute_method":{"type":"ENUM","readonly":false,"default":"RANDOM","subtype":"NONE","enum_items":[
+        {"id":"RANDOM","name":"Random","description":"Distribute points randomly on the surface"},
+        {"id":"POISSON","name":"Poisson Disk","description":"Distribute the points randomly on the surface while taking a minimum distance between points into account"}
+      ]},"use_legacy_normal":{"type":"BOOLEAN","readonly":false,"default":false,"default_array":null,"subtype":"NONE"}},"dynamic":[
+    {"property":"distribute_method","variants":[
+        {"value":"POISSON","inputs":[
+            {"name":"Mesh","identifier":"Mesh","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+            {"name":"Distance Min","identifier":"Distance Min","type":"NodeSocketFloatDistance","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Density Max","identifier":"Density Max","type":"NodeSocketFloat","enabled":true,"default":10.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Density","identifier":"Density","type":"NodeSocketFloat","enabled":false,"default":10.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Density Factor","identifier":"Density Factor","type":"NodeSocketFloatFactor","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Points","identifier":"Points","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Normal","identifier":"Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

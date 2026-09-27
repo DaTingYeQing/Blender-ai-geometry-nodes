@@ -1,0 +1,113 @@
+{"idname":"GeometryNodeRaycast","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Cast rays from the context geometry onto a target geometry, and retrieve information from ","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Attribute","identifier":"Attribute","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false},
+      {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+      {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Attribute","identifier":"Attribute","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mapping":{"type":"ENUM","readonly":false,"default":"INTERPOLATED","subtype":"NONE","enum_items":[
+        {"id":"INTERPOLATED","name":"Interpolated","description":"Interpolate the attribute from the corners of the hit face"},
+        {"id":"NEAREST","name":"Nearest","description":"Use the attribute value of the closest mesh element"}
+      ]},"data_type":{"type":"ENUM","readonly":false,"default":"FLOAT","subtype":"NONE","enum_items":[
+        {"id":"FLOAT","name":"Float","description":"Floating-point value"},
+        {"id":"INT","name":"Integer","description":"32-bit integer"},
+        {"id":"FLOAT_VECTOR","name":"Vector","description":"3D vector with floating-point values"},
+        {"id":"FLOAT_COLOR","name":"Color","description":"RGBA color with 32-bit floating-point values"},
+        {"id":"BYTE_COLOR","name":"Byte Color","description":"RGBA color with 8-bit positive integer values"},
+        {"id":"STRING","name":"String","description":"Text string"},
+        {"id":"BOOLEAN","name":"Boolean","description":"True or false"},
+        {"id":"FLOAT2","name":"2D Vector","description":"2D vector with floating-point values"},
+        {"id":"INT8","name":"8-Bit Integer","description":"Smaller integer with a range from -128 to 127"},
+        {"id":"INT16_2D","name":"2D 16-Bit Integer Vector","description":"16-bit signed integer vector"},
+        {"id":"INT32_2D","name":"2D Integer Vector","description":"32-bit signed integer vector"},
+        {"id":"QUATERNION","name":"Quaternion","description":"Floating point quaternion rotation"},
+        {"id":"FLOAT4X4","name":"4x4 Matrix","description":"Floating point matrix"}
+      ]}},"dynamic":[
+    {"property":"data_type","variants":[
+        {"value":"INT","inputs":[
+            {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+            {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"FLOAT_VECTOR","inputs":[
+            {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"FLOAT_COLOR","inputs":[
+            {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketColor","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"BOOLEAN","inputs":[
+            {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":true,"is_multi_input":false},
+            {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"QUATERNION","inputs":[
+            {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"FLOAT4X4","inputs":[
+            {"name":"Target Geometry","identifier":"Target Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Source Position","identifier":"Source Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+            {"name":"Ray Direction","identifier":"Ray Direction","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Ray Length","identifier":"Ray Length","type":"NodeSocketFloatDistance","enabled":true,"default":100.0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Is Hit","identifier":"Is Hit","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Position","identifier":"Hit Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Normal","identifier":"Hit Normal","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Hit Distance","identifier":"Hit Distance","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Attribute","identifier":"Attribute","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

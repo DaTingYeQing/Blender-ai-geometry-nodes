@@ -134,14 +134,11 @@ const blenderDataTool = defineTool({
 	name: "blender_data",
 	label: "Blender Data",
 	description:
-		"数据探针：改值 → 双轮烘焙 → room.diff。恒 --save=no 零污染（自动还原，不存原档）。\n" +
-		"两种模式：geometry 给一个带几何输出的节点 name（脚本抓它上游闭包、烘出该几何输出、比改值前后）；numeric 给 节点名.插座名 数组，只读这些 socket 的数值（不设值）。\n" +
-		"geometry 只吃几何节点，numeric 只吃标量/向量字段，给错会提示转模式。\n" +
-		"frames 填了就是逐帧（≤15帧）：geometry 只回跨帧有变化的项，numeric 回逐帧值列表；不填=单帧。sets 只在 geometry 单帧模式生效。\n" +
+		"数据探针：改值 → 双轮烘焙 → room.diff。\n" +
+		"两种模式：geometry 给一个带几何输出的节点 name（脚本抓它上游闭包、烘出该几何输出、比改值前后）；numeric 给 节点名.插座名 数组，只读这些 socket 的数值。\n" +
+		"geometry 只吃几何节点，numeric 只吃标量/向量字段。\n" +
+		"sets 只在 geometry 单帧模式生效。\n" +
 		"示例：blender_data group=AI_Shard_Main mode=geometry node=设置位置 sets='[{\"node\":\"细分网格\",\"prop\":\"Level\",\"value\":1}]'",
-	promptGuidelines: [
-		"blender_data 只用numeric模式读函数值：静态几何用 bpy、动态逐帧探测用 zone_probe",
-	],
 	parameters: Type.Object({
 		mode: Type.Optional(Type.String({ description: "geometry | numeric，默认 geometry" })),
 		group: Type.String({ description: "必填。要烘焙的目标几何组名（如 AI_Shard_Main）" }),

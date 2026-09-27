@@ -70,18 +70,14 @@ const bpyTool = defineTool({
 	name: "bpy",
 	label: "Bpy",
 	description:
-		"往 meshkit 环境（venv13）执行 Python 代码。expr 必填，stdout 与 [stderr] 原样返回；可直接 import meshkit / numpy / trimesh / pyvista。\n" +
-		"meshkit 现成函数（返回 dict，字段名见返回值或 skills/math/meshkit.py 源码）：\n" +
+		"往 meshkit 环境执行 Python 代码。expr 必填，stdout 与 [stderr] 原样返回；可直接 import meshkit / numpy / trimesh / pyvista。\n" +
 		"- mesh_summary(mesh)：网格摘要 32 项 —— 计数 / 包围盒 / 体积面积 / 惯性 / 拓扑(watertight、euler、body_count…) / manifold 体检 / 凸包·OBB·外接球\n" +
 		"- pointcloud_summary(pc)：点云摘要 10 项 —— n_points / bounds / centroid / 主轴 / std / 凸包 / OBB / 外接球\n" +
 		"- summarize_from_blender(blend, object, modifier, node, summary, frame=None)：一步从 .blend 拿上述摘要（无头 10-30s）。\n" +
 		"    summary 用 out(\"mesh\") / out(\"pointcloud\") 指定，不写=全部；node=\"LIST\"（字符串字面量，不是列表；此时 summary 仍需随便填个非空值）只看树里有哪些节点、谁带几何输出，不烘几何；\n" +
 		"    frame=N 取第 N 帧（模拟区/ForEach 从第 1 帧逐帧推进，跳帧拿到的是第 1 帧）；不填=当前帧；\n" +
-		"    实例几何会在组输出前自动 Realize Instances，不需要 apply 修改器（走 depsgraph，不改档）。\n" +
+		"    实例几何会在组输出前自动 Realize Instances，不需要 apply 修改器。\n" +
 		"- load_mesh(path)：读 PLY/GLB/OBJ/STL，再喂给上面两个 summary。",
-	promptGuidelines: [
-		"静态几何（给 .blend 求值后取网格/点云摘要）首选 bpy，不要绕道 blender_data。",
-	],
 	parameters: Type.Object({
 		expr: Type.String({
 			description:

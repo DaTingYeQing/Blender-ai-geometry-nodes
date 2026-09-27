@@ -1,0 +1,31 @@
+{"idname":"GeometryNodeTransform","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Translate, rotate or scale the geometry","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Translation","identifier":"Translation","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Scale","identifier":"Scale","type":"NodeSocketVectorXYZ","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Transform","identifier":"Transform","type":"NodeSocketMatrix","enabled":false,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"COMPONENTS","subtype":"NONE","enum_items":[
+        {"id":"COMPONENTS","name":"Components","description":"Provide separate location, rotation and scale"},
+        {"id":"MATRIX","name":"Matrix","description":"Use a transformation matrix"}
+      ]}},"dynamic":[
+    {"property":"mode","variants":[
+        {"value":"MATRIX","inputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Translation","identifier":"Translation","type":"NodeSocketVectorTranslation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Rotation","identifier":"Rotation","type":"NodeSocketRotation","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Scale","identifier":"Scale","type":"NodeSocketVectorXYZ","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Transform","identifier":"Transform","type":"NodeSocketMatrix","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

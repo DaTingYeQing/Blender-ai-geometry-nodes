@@ -1,0 +1,21 @@
+{"idname":"GeometryNodeSortElements","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Rearrange geometry elements, changing their indices","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Group ID","identifier":"Group ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+      {"name":"Sort Weight","identifier":"Sort Weight","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":true,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"domain":{"type":"ENUM","readonly":false,"default":"POINT","subtype":"NONE","enum_items":[
+        {"id":"POINT","name":"Point","description":"Attribute on point"},
+        {"id":"EDGE","name":"Edge","description":"Attribute on mesh edge"},
+        {"id":"FACE","name":"Face","description":"Attribute on mesh faces"},
+        {"id":"CURVE","name":"Spline","description":"Attribute on spline"},
+        {"id":"INSTANCE","name":"Instance","description":"Attribute on instance"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh",
+    "Curve",
+    "PointCloud",
+    "Volume",
+    "Instances",
+    "GreasePencil"
+  ],"supports_note":"全部几何类型(默认)"}

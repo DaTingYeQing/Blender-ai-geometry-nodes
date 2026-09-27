@@ -1,0 +1,12 @@
+{"idname":"GeometryNodeSetShadeSmooth","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Control the smoothness of mesh normals around each face by changing the \\","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Shade Smooth","identifier":"Shade Smooth","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"domain":{"type":"ENUM","readonly":false,"default":"EDGE","subtype":"NONE","enum_items":[
+        {"id":"EDGE","name":"Edge","description":"Attribute on mesh edge"},
+        {"id":"FACE","name":"Face","description":"Attribute on mesh faces"}
+      ]}},"dynamic":[],"supports":[
+    "Mesh"
+  ],"supports_note":"仅支持: 网格"}

@@ -1,0 +1,13 @@
+{"idname":"GeometryNodeSetCurveHandlePositions","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Set the positions for the handles of Bézier curves","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
+      {"name":"Position","identifier":"Position","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":true,"is_multi_input":false},
+      {"name":"Offset","identifier":"Offset","type":"NodeSocketVectorTranslation","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Curve","identifier":"Curve","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"mode":{"type":"ENUM","readonly":false,"default":"LEFT","subtype":"NONE","enum_items":[
+        {"id":"LEFT","name":"Left","description":"Use the left handles"},
+        {"id":"RIGHT","name":"Right","description":"Use the right handles"}
+      ]}},"dynamic":[],"supports":[
+    "Curve"
+  ],"supports_note":"仅支持: 曲线"}

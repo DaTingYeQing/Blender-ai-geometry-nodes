@@ -1,6 +1,6 @@
-"""meshkit.py — 网格工具统一封装
+"""meshkit.py — gn_verify 网格工具统一封装
 
-用法：把本文件放在 math 目录，AI 脚本与它同目录运行即可：
+用法：把本文件放在 gn_verify 目录，AI 脚本与它同目录运行即可：
     import meshkit
     mesh = meshkit.load_mesh("model.glb")
     summ = meshkit.summarize_from_blender(
