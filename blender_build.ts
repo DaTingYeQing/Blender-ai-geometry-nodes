@@ -198,7 +198,7 @@ const blenderBuildTool = defineTool({
 			description: 'action=set（或 link 顺带）：[{"node":name,"prop":...,"value":值}]，node 填节点 name。prop 就两种用途：'
 				+ 'a) 设值 → prop 写接口（identifier 或 name，同 name 重名时必须写 identifier，如 Math 的第二个输入写 Value_001）→ 设该接口的默认值；'
 				+ 'b) 改属性，如 {"node":"Math","prop":"operation","value":"MULTIPLY"}、{"prop":"use_clamp","value":true}。'
-				+  node 可以填 Group Input / Output，这时 prop 写本组接口名，改的是组接口的默认值。'
+				+ 'node 可以填 Group Input / Output，这时 prop 写本组接口名，改的是组接口的默认值。'
 		})),
 		ifs: Type.Optional(Type.Array(Type.Any(), {
 			description: 'action=interface：[{"direction":"input/output","name":接口名,"socket_type":接口类型}]。socket_type 只写类型名，大小写不限，如 "Float" / "float"。',
