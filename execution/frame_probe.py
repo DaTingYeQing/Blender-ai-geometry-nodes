@@ -23,12 +23,12 @@
     ctx.emit(name, v)    把这一帧的 v 累积进序列；结束后统一落盘 + 汇总（这才是“烘焙”）
     ctx.attrs(name)      按名字读求值几何的属性（通用按名取数）；实例化几何读不到 → None
 可选：
-    SETTINGS  list   跑之前给节点设值 [{"node": 名, "prop": 插口, "value": 值}]（声明式，不能写逻辑）
-    setup(tree, obj) 开档后、推帧前调一次；【任意代码】：设值/加删节点/重接线都行
-    selftest()       开档前调用一次（仪器校准；assert 失败立刻中止，不给假结论）
     ARRAYS_NPZ str   大数组落盘路径（默认 ./evidence/probe_arrays_<时间戳>.npz）
 
-执行顺序：装配置 → selftest() → 开档 → 找 tree/obj → SETTINGS → setup(tree,obj) → 逐帧 probe(ctx)
+本工具【只探测】：开档用 --save=no，不改树、不改值、不设初始条件。
+要改初始条件，先用 blender_build 的 set 改档，再用本工具探。
+
+执行顺序：装配置 → 开档 → 找 tree/obj → 逐帧 probe(ctx)
 
 ctx 提供什么（通用取数，只搬形状、不问业务含义）：
     ctx.frame     当前帧号
@@ -44,14 +44,15 @@ ctx 提供什么（通用取数，只搬形状、不问业务含义）：
 import os
 import sys
 import time
+import traceback
 
 import bpy
 import numpy as np
 
 PREFIX = "[frame_probe]"
 ARRAY_MIN = 64          # 数组元素超过这个数就落盘，不往输出里塞
-COLLECT_LIMIT = 500     # 一次最多【采集】多少帧（采集才是成本：取数+落盘）
-END_LIMIT = 100000      # 终点帧号上限（预热很便宜，约 0.25 ms/帧 → 1 万帧 ~3s）
+COLLECT_LIMIT = 100     # 一次最多【采集】多少帧（采集才是成本：取数+落盘）
+END_LIMIT = 100         # 终点帧号上限（预热很便宜，约 0.25 ms/帧 → 100 帧 ~0.03s）
 
 
 # ---------------------------------------------------------------- 配置装载
@@ -96,10 +97,13 @@ def parse_frames(spec):
     if a < 1 or b < a:
         raise SystemExit("%s ERROR: FRAMES 区间不合法: %r" % (PREFIX, spec))
     if b - a + 1 > COLLECT_LIMIT:
-        raise SystemExit("%s ERROR: 一次最多采集 %d 帧，这个区间要采 %d 帧（%d..%d）"
+        raise SystemExit(("%s ERROR: 一次最多采集 %d 帧，这个区间要采 %d 帧（%d..%d）"
+                          "（要采更长区间，改 frame_probe.py 的 COLLECT_LIMIT）")
                          % (PREFIX, COLLECT_LIMIT, b - a + 1, a, b))
     if b > END_LIMIT:
-        raise SystemExit("%s ERROR: 终点帧 %d 超过上限 %d" % (PREFIX, b, END_LIMIT))
+        raise SystemExit(("%s ERROR: 终点帧 %d 超过上限 %d"
+                          "（要探更后面的帧，改 frame_probe.py 的 END_LIMIT）")
+                         % (PREFIX, b, END_LIMIT))
     return a, b
 
 
@@ -124,7 +128,7 @@ class Ctx(object):
         """按名字读求值几何的属性（通用按名取数，不问业务含义）。读不到返回 None。
 
         注意：物体输出若是“实例”，求值成 mesh 会是空的，属性读不到——
-        这时要么探针改指向点云输出，要么在 setup 里插一个 Points to Vertices。
+        这时要么让探针改指向点云输出（本工具不改树，改树请用 blender_build）。
         """
         ev = self.obj.evaluated_get(self.dg)
         me = ev.to_mesh()
@@ -239,6 +243,30 @@ def fmt(v):
 
 
 # ---------------------------------------------------------------- 主流程
+def _short_traceback(exc) -> str:
+    """只留 AI 写的那段配置代码（zone_probe_config.py）那一帧 + 异常行。
+
+    driver / runpy / frame_probe 的内部帧不往输出里塞——AI 改不了那些，看了也没用。
+    语法错没有配置帧，但 SyntaxError 的异常行自带 File/行号/源码/^，照样能定位。
+    """
+    try:
+        cfg = _config_path()
+    except SystemExit:
+        cfg = None
+    tb, frame = exc.__traceback__, None
+    while tb is not None:
+        fn = tb.tb_frame.f_code.co_filename
+        if (cfg and os.path.abspath(fn) == cfg) or os.path.basename(fn) == "zone_probe_config.py":
+            frame = tb
+        tb = tb.tb_next
+    text = ""
+    if frame is not None:
+        text += '  File "%s", line %d, in %s\n' % (
+            frame.tb_frame.f_code.co_filename, frame.tb_lineno, frame.tb_frame.f_code.co_name)
+    text += "".join(traceback.format_exception_only(type(exc), exc))
+    return text
+
+
 def main():
     cfg_path = _config_path()
     ns = {}
@@ -250,17 +278,11 @@ def main():
     group_name = _need(ns, "GROUP")
     obj_name = ns.get("OBJECT", "") or ""
     frames_spec = _need(ns, "FRAMES")
-    settings = ns.get("SETTINGS") or []
     probe = ns.get("probe")
     if probe is None:
         raise SystemExit("%s ERROR: 配置文件缺少 probe(ctx) 函数" % PREFIX)
 
     a, b = parse_frames(frames_spec)
-
-    # --- 仪器校准：在碰数据之前 ---
-    if callable(ns.get("selftest")):
-        ns["selftest"]()
-        print("%s selftest 通过（仪器已校准）" % PREFIX)
 
     # --- 开档 ---
     bp = blend if os.path.isabs(blend) else os.path.abspath(blend)
@@ -288,17 +310,6 @@ def main():
                 break
         if obj is None:
             raise SystemExit("%s ERROR: 没有物体挂节点树 %r（请填 OBJECT）" % (PREFIX, group_name))
-
-    for s in settings:
-        sock = tree.nodes[s["node"]].inputs[s["prop"]]
-        sock.default_value = s["value"]
-    if settings:
-        print("%s 已设值 %d 处（SETTINGS）" % (PREFIX, len(settings)))
-
-    # --- setup：开档后、推帧前的任意代码 ---
-    if callable(ns.get("setup")):
-        ns["setup"](tree, obj)
-        print("%s setup(tree, obj) 已执行" % PREFIX)
 
     print("%s blend=%s | group=%s | object=%s | 预热 %d 帧，采集 %d..%d"
           % (PREFIX, os.path.basename(bp), group_name, obj.name, a - 1, a, b))
@@ -394,4 +405,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise                      # 引擎自己的一句式报错（[frame_probe] ERROR: ...），原样放行
+    except BaseException as exc:
+        # 只把 AI 自己那段的错给他看，内部帧不进输出
+        sys.stderr.write(_short_traceback(exc))
+        sys.exit(1)

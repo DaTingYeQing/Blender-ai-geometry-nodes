@@ -91,6 +91,66 @@ function needObjs(v: unknown, what: string): unknown[] | { err: string } {
 	return arr;
 }
 
+// ============ 结构化连线 → 后端字符串 ============
+// 后端 _refs.parse_wire 接受 "节点.接口 to 节点.接口"（to/→/-> 都认）。
+// AI 只填四个字段，点号和连接词由这里拼——AI 永远不用碰格式。
+type LinkRow = {
+	from_node?: unknown; from_socket?: unknown;
+	to_node?: unknown; to_socket?: unknown;
+};
+
+/** 一条结构化连线 → "A.b to C.d"。缺关键字段返回 err。 */
+function linkToString(w: LinkRow, what: string): string | { err: string } {
+	const fn = String(w?.from_node ?? "").trim();
+	const fs = String(w?.from_socket ?? "").trim();
+	const tn = String(w?.to_node ?? "").trim();
+	const ts = String(w?.to_socket ?? "").trim();
+	if (!fn || !fs || !tn || !ts) {
+		return { err: `ERROR: ${what} 每项需要 from_node / from_socket / to_node / to_socket 四个字段，如 `
+			+ '{"from_node":"Cube","from_socket":"Mesh","to_node":"Set Position","to_socket":"Geometry"}' };
+	}
+	return `${fn}.${fs} to ${tn}.${ts}`;
+}
+
+/** 连线数组归一化：读结构化 links，拼成后端认的串。 */
+function toWires(p: Record<string, unknown>, what: string): string[] | { err: string } {
+	const rows = Array.isArray(p.links) ? p.links : [];
+	if (!rows.length) return { err: `ERROR: ${what} 需要 links` };
+	const out: string[] = [];
+	for (const row of rows) {
+		const s = linkToString(row as LinkRow, what);
+		if (typeof s !== "string") return s;
+		out.push(s);
+	}
+	return out;
+}
+
+/** 断线数组归一化：读结构化 breaks（可短式）。 */
+function toBreaks(p: Record<string, unknown>): string[] | { err: string } {
+	const rows = Array.isArray(p.breaks) ? p.breaks : [];
+	if (!rows.length) return { err: "ERROR: action=unlink 需要 breaks" };
+	const out: string[] = [];
+	for (const row of rows) {
+		const r = row as LinkRow;
+		const tn = String(r?.to_node ?? "").trim();
+		const ts = String(r?.to_socket ?? "").trim();
+		const fn = String(r?.from_node ?? "").trim();
+		const fs = String(r?.from_socket ?? "").trim();
+		if (fn && fs && tn && ts) {
+			// 全式：有起点四件套 → 断这一根线
+			out.push(`${fn}.${fs} to ${tn}.${ts}`);
+		} else if (tn && ts && !fn && !fs) {
+			// 短式：只给终点 → 断该节点这个输入上的线
+			out.push(`${tn}.${ts}`);
+		} else {
+			return { err: 'ERROR: action=unlink 的 breaks 每项要么给全四个字段（断一根线），'
+				+ '要么只给 to_node + to_socket（断该输入上的线），如 '
+				+ '{"to_node":"Set Position","to_socket":"Geometry"}' };
+		}
+	}
+	return out;
+}
+
 /** 各 action 的批次拼法；返回错误文案或批次片段 */
 const ACTIONS: Record<string, (p: Record<string, unknown>) => Batch | { err: string }> = {
 	add_item: (p) => {
@@ -106,21 +166,38 @@ const ACTIONS: Record<string, (p: Record<string, unknown>) => Batch | { err: str
 		return Array.isArray(nodes) ? { del: nodes } : nodes;
 	},
 	link: (p) => {
-		const wires = needList(p.wires, "action=link 需要 wires：[\"节点name.接口 → 节点name.接口\"]，如 [\"Cube.Mesh → Set Position.Geometry\"]");
+		const wires = toWires(p, "action=link 的 links");
 		if (!Array.isArray(wires)) return wires;
 		const batch: Batch = { link: wires };
 		if (Array.isArray(p.sets) && p.sets.length) batch.set = p.sets; // link 可顺带 set（后端顺序 set 在 link 之前）
 		return batch;
 	},
 	unlink: (p) => {
-		const wires = needList(p.wires, "action=unlink 需要 wires（同 link 格式；短式「节点.接口」只断该节点输入上的线）");
+		const wires = toBreaks(p);
 		return Array.isArray(wires) ? { unlink: wires } : wires;
 	},
 	set: (p) => {
-		const sets = needObjs(p.sets, 'action=set 需要 sets：[{"node":name,"prop":接口名或属性名,"value":值}]');
+		const sets = needObjs(p.sets, 'action=set 需要 sets：[{"node":name,"socket":接口名,"value":值}]');
 		if (!Array.isArray(sets)) return sets;
+		// socket（设接口默认值）与 prop（改节点属性）二选一：前端先拦，别等 Blender
+		for (const s of sets) {
+			const row = (s ?? {}) as Record<string, unknown>;
+			const hasSock = String(row.socket ?? "").trim() !== "";
+			const hasProp = String(row.prop ?? "").trim() !== "";
+			if (hasSock && hasProp) {
+				return { err: "ERROR: sets 每项的 socket 与 prop 只能填一个：设接口默认值用 socket，改节点属性用 prop" };
+			}
+			if (!hasSock && !hasProp) {
+				return { err: 'ERROR: sets 每项要填 socket（接口名）或 prop（属性名）之一，如 {"node":"Math","socket":"Value_001","value":2}' };
+			}
+		}
 		const batch: Batch = { set: sets };
-		if (Array.isArray(p.wires) && p.wires.length) batch.link = p.wires; // set 可顺带 link
+		// set 可顺带连线（后端顺序 set 在 link 之前）
+		if (Array.isArray(p.links) && p.links.length) {
+			const wires = toWires(p, "action=set 的 links");
+			if (!Array.isArray(wires)) return wires;
+			batch.link = wires;
+		}
 		return batch;
 	},
 	interface: (p) => {
@@ -133,7 +210,7 @@ function handleBuild(params: Record<string, unknown>) {
 	const action = ((params.action as string) ?? "").trim();
 	const handler = ACTIONS[action];
 	if (!handler) {
-		return errRes(`ERROR: action 六选一：${Object.keys(ACTIONS).join("/")}`);
+		return errRes(`ERROR: action 必须是以下之一：${Object.keys(ACTIONS).join("/")}`);
 	}
 	const group = ((params.group as string) ?? "").trim();
 	if (!group) {
@@ -173,38 +250,72 @@ const blenderBuildTool = defineTool({
 	name: "blender_build",
 	label: "Blender Build",
 	description:
-		"节点树结构操作：建/删/连/断节点/设值/建组边界接口。每次调用只用一个 action，各 action 用哪些参数见参数说明。\n" +
+		"所有参数都按字段填。\n" +
 		"引用规则：节点一律用 name；同 idname 多个节点也用 name 区分。\n" +
 		"不确定接口先 node_find/node_full 查准再填。",
 	parameters: Type.Object({
-		action: Type.String({
-			description: "七选一：add/del/link/unlink/set/interface/add_item",
+		action: Type.Union([
+			Type.Literal("add"), Type.Literal("del"),
+			Type.Literal("link"), Type.Literal("unlink"),
+			Type.Literal("set"), Type.Literal("interface"),
+			Type.Literal("add_item"),
+		], {
+			description: "本次要做的操作。add=建节点 / del=删节点 / link=连线 / unlink=断线 / set=设值或改属性 / interface=建组边界接口 / add_item=给 zone 加携带项",
 		}),
 		group: Type.String({
-			description: "必填。要操作的目标节点组名。组不存在时 add / interface / link / set 都会自动新建一个空组；但 add 建出的树没有 Group Input/Output，interface 建的树自带这两个节点。注意组名拼错会静默产生一个垃圾空组。",
+			description: "必填。节点组名。组不存在时 add / interface 都会自动新建一个空组；add 建出的树没有 Group Input/Output，interface 建的树自带。",
 		}),
 		ids: Type.Optional(Type.Array(Type.String(), {
-			description: "action=add：要建的节点 idname，如 [\"GeometryNodeMeshCube\", \"GeometryNodeSetPosition\"]",
+			description: "action=add：要建的节点 idname",
 		})),
 		nodes: Type.Optional(Type.Array(Type.String(), {
 			description: "action=del：要删的节点 name 或唯一 idname",
 		})),
-		wires: Type.Optional(Type.Array(Type.String(), {
-			description: "action=link/unlink：连线「节点name.接口 → 节点name.接口」，每个数组元素一条。"
-				+ "接口名照抄节点详情（括号前那个词）。"
-				+ "unlink：全式=断这根线；短式「节点.接口」只断该节点的输入线，输出侧必须用全式。",
+		links: Type.Optional(Type.Array(Type.Object({
+			from_node: Type.String({ description: "起点节点 name" }),
+			from_socket: Type.String({ description: "起点节点的输出接口名" }),
+			to_node: Type.String({ description: "终点节点 name" }),
+			to_socket: Type.String({ description: "终点节点的输入接口名" }),
+		}), {
+			description: "action=link：要连的线，四个字段都填。",
 		})),
-		sets: Type.Optional(Type.Array(Type.Any(), {
-			description: 'action=set（或 link 顺带）：[{"node":name,"prop":...,"value":值}]，node 填节点 name。prop 就两种用途：'
-				+ 'a) 设值 → prop 写接口（identifier 或 name，同 name 重名时必须写 identifier，如 Math 的第二个输入写 Value_001）→ 设该接口的默认值；'
-				+ 'b) 改属性，如 {"node":"Math","prop":"operation","value":"MULTIPLY"}、{"prop":"use_clamp","value":true}。'
-				+ 'node 可以填 Group Input / Output，这时 prop 写本组接口名，改的是组接口的默认值。'
+		breaks: Type.Optional(Type.Array(Type.Object({
+			from_node: Type.Optional(Type.String({ description: "断整根线时填：起点节点 name" })),
+			from_socket: Type.Optional(Type.String({ description: "断整根线时填：起点输出接口名" })),
+			to_node: Type.String({ description: "终点节点 name（只断一个输入时也填这个）" }),
+			to_socket: Type.String({ description: "终点输入接口名" }),
+		}), {
+			description: "action=unlink：要断的线。四个字段都填 = 断这一根线；"
+				+ "只填 to_node + to_socket = 断该输入上的线。",
 		})),
-		ifs: Type.Optional(Type.Array(Type.Any(), {
-			description: 'action=interface：[{"direction":"input/output","name":接口名,"socket_type":接口类型}]。socket_type 只写类型名，大小写不限，如 "Float" / "float"。',
+		sets: Type.Optional(Type.Array(Type.Object({
+			node: Type.String({ description: "节点 name（也可填 Group Input / Group Output）" }),
+			socket: Type.Optional(Type.String({
+				description: "设接口默认值时填：接口名（name 或 identifier），与 prop 二选一。"
+					+ "同名接口重名时必须写 identifier。"
+					+ "node 是 Group Input / Group Output 时，这里写组接口名，改的是组接口默认值。",
+			})),
+			prop: Type.Optional(Type.String({
+				description: "改节点属性时填：属性名（如 operation / data_type），与 socket 二选一；枚举写大写 id。",
+			})),
+			value: Type.Any({ description: "要设的值：数字 / 布尔 / 数组 / 字符串，按该接口或属性的类型给" }),
+		}), {
+			description: "action=set：改一个值，每条一个对象。"
+				+ "socket 与 prop 二选一：设接口默认值用 socket，改节点属性用 prop；都填会报错。",
 		})),
-		items: Type.Optional(Type.Array(Type.Any(), {
-			description: 'action=add_item：[{"zone":zone输出节点name,"socket_type":"Float/Vector/Geometry","item_name":状态名}]',
+		ifs: Type.Optional(Type.Array(Type.Object({
+			direction: Type.String({ description: "input 或 output" }),
+			name: Type.String({ description: "接口名" }),
+			socket_type: Type.String({ description: "接口类型名，大小写不限" }),
+		}), {
+			description: "action=interface：建组边界接口，每条一个对象。",
+		})),
+		items: Type.Optional(Type.Array(Type.Object({
+			zone: Type.String({ description: "zone 输出节点的 name" }),
+			socket_type: Type.String({ description: "类型名：Float / Vector / Geometry" }),
+			item_name: Type.String({ description: "状态名（携带项的名字）" }),
+		}), {
+			description: "action=add_item：给 zone 输出节点加携带项，每条一个对象。",
 		})),
 	}),
 	async execute(_toolCallId, params) {

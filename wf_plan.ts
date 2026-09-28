@@ -60,11 +60,14 @@ const wfPlanTool = defineTool({
 	name: "wf_plan",
 	label: "Workflow Plan",
 	description:
-		"出任务计划(最后一个动作前的必做步骤)。输入项目名 + 模块拆解(每个模块的节点 idname 清单), " +
+		"出任务计划。输入项目名 + 模块拆解(每模块：名称 + 涉及的节点 idname 清单)，" +
 		"落盘 workflow_state.json(计划+执行状态合一, 后续按模块逐个实现)。\n" +
+		"project 会用来建工作档 <project>.blend；模块数量没有限制，按任务实际拆。\n" +
 		"调用前必须先查过节点(先用 node_find / node_full)。",
 	parameters: Type.Object({
-		project: Type.String({ description: "项目名" }),
+		project: Type.String({
+			description: "项目名。会作为工作档文件名 <项目名>.blend，所以别带 \\ / : * ? \" < > | 这些 Windows 文件名非法字符，用短代号如 AI_Shard_Main",
+		}),
 		modules: Type.Array(
 			Type.Object({
 				name: Type.String({ description: "模块名, 如 距离计算" }),
