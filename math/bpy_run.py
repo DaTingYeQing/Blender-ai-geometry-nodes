@@ -156,6 +156,30 @@ def _parse(argv):
     return code, script, cwd, None
 
 
+def _short_traceback(exc, script) -> str:
+    """把异常缩成「AI 自己代码那一帧 + 异常类型/消息」，丢掉库内部与框架帧。
+
+    - -e 模式：用户代码帧的 filename 是 "<bpy_run -e>"，保留最深的（最后一个）那一帧
+    - 脚本模式：用户代码帧是脚本文件自己的路径
+    - 异常不在用户代码里（库内部，或 compile 阶段的 SyntaxError）→ 只给异常行；
+      SyntaxError 自带你那段代码的 File/行号/源码与 ^ 标记，位置不会丢
+    """
+    user_file = os.path.abspath(script) if script else None
+    tb, frame = exc.__traceback__, None
+    while tb is not None:
+        fn = tb.tb_frame.f_code.co_filename
+        hit = (fn == "<bpy_run -e>") if user_file is None else (os.path.abspath(fn) == user_file)
+        if hit:
+            frame = tb
+        tb = tb.tb_next
+    text = ""
+    if frame is not None:
+        text += '  File "%s", line %d, in %s\n' % (
+            frame.tb_frame.f_code.co_filename, frame.tb_lineno, frame.tb_frame.f_code.co_name)
+    text += "".join(traceback.format_exception_only(type(exc), exc))
+    return text
+
+
 def _run_code(argv):
     """在外部 python 里执行用户代码，返回退出码。"""
     code, script, cwd, err = _parse(argv)
@@ -179,8 +203,8 @@ def _run_code(argv):
             exec(compile(code, "<bpy_run -e>", "exec"), globs)
     except SystemExit as exc:                      # 用户代码自己 sys.exit
         status = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
-    except BaseException:                          # 其余异常：打印栈，退出码非 0
-        traceback.print_exc()
+    except BaseException as exc:                   # 其余异常：只留 AI 代码那一帧 + 异常行，退出码非 0
+        sys.stderr.write(_short_traceback(exc, script))
         status = 1
     finally:
         sys.stdout.flush()

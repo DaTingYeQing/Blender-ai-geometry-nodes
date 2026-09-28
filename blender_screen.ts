@@ -95,20 +95,22 @@ const blenderScreenTool = defineTool({
 	label: "Blender Screen",
 	description:
 		"只读查节点树。\n" +
-		"  overview: 返回全节点清单(idname/name)。\n" +
-		"  detail: 返回指定节点的全部接口+每根线连到哪；需 nodes 参数\n" +
-		"  group=AI_Break detail=detail nodes=[\"GeometryNodeMeshCube\",\"GeometryNodeSetPosition\"]\n" +
-		"nodes 里每条是 name（Blender 唯一名）或 idname（支持子串模糊）；同 idname 多个时用 name 区分。改树用 blender_build。\n" +
+		"  overview: 返回全节点清单。\n" +
+		"  detail: 返回指定节点的全部接口+每根线连到哪；\n" +
+		"nodes 里每条是 name（Blender 唯一名）或 idname ；同 idname 多个时用 name 区分。改树用 blender_build。\n" +
 		"工作档: 自动读工作区 workflow_state.json 里的唯一工作档。",
 	parameters: Type.Object({
 		group: Type.String({
-			description: "必填。要查的节点组名（如 AI_Break）。改树用 blender_build 的 group。",
+			description: "必填。要查的节点组名。",
 		}),
-		detail: Type.Optional(Type.String({
-			description: "overview | detail(默认)",
+		detail: Type.Optional(Type.Union([
+			Type.Literal("overview"),
+			Type.Literal("detail"),
+		], {
+			description: "overview=只看节点清单；detail=看指定节点的接口和连线（默认，需给 nodes）",
 		})),
 		nodes: Type.Optional(Type.Array(Type.String(), {
-			description: "detail 模式必填：节点 name 或 idname 数组，如 [\"Cube\",\"GeometryNodeSetPosition\"]；idname 支持子串模糊。同 idname 多个时用 name 区分",
+			description: "detail 模式必填：节点 name 或 idname 数组，同 idname 多个时用 name 区分",
 		})),
 	}),
 	async execute(_toolCallId, params) {

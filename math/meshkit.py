@@ -103,6 +103,26 @@ def _is_empty(obj) -> bool:
     return True
 
 
+def _pick(out: dict, keys, kind: str) -> dict:
+    """按 keys 从摘要里挑项。keys 为空/None → 原样全给。
+
+    未知项名直接报错并列出全部可用项 —— 不静默少给，否则 AI 会以为命令生效了。
+    """
+    if keys is None:
+        return out
+    if isinstance(keys, str):
+        keys = [k for k in re.split(r"[,\s]+", keys) if k]
+    keys = [str(k).strip() for k in keys if str(k).strip()]
+    if not keys:
+        return out
+    unknown = [k for k in keys if k not in out]
+    if unknown:
+        raise ValueError(
+            f"fields 里有未知项 {unknown}；{kind} 可用 {len(out)} 项：{list(out)}"
+        )
+    return {k: out[k] for k in keys}
+
+
 def export_from_blender(
     blend_path: str,
     object_name: str,
@@ -210,10 +230,11 @@ def _to_pyvista(mesh) -> "pv.PolyData":
     return pv.PolyData(np.asarray(mesh.vertices, dtype=float), faces)
 
 
-def mesh_summary(mesh) -> dict:
+def mesh_summary(mesh, keys=None) -> dict:
     """网格摘要（"小房间"之一）：统计级摘要，不含全量数组（坐标/拓扑/逐元素）。
 
     输入：trimesh.Trimesh（由 load_mesh / export_from_blender 得到）
+         keys（可选）：只要这几项，传给 _pick 筛；None/空 → 全给（32 项）
     输出：dict —— 全部是标量/小数组，JSON 友好，不会刷爆上下文
 
     AI 不直接调本函数，统一走 summarize_from_blender 入口。
@@ -294,13 +315,14 @@ def mesh_summary(mesh) -> dict:
         out["manifold_tris"] = None
         out["genus"] = None  # 非流形网格无法构造 Manifold
 
-    return out
+    return _pick(out, keys, "mesh")
 
 
-def pointcloud_summary(pc) -> dict:
+def pointcloud_summary(pc, keys=None) -> dict:
     """点云摘要（"小房间"之二）：纯统计，不回点坐标（大点云全量坐标会刷爆上下文）。
 
     输入：trimesh.points.PointCloud（由 load_mesh / export_from_blender 得到）
+         keys（可选）：只要这几项，传给 _pick 筛；None/空 → 全给（10 项）
     输出：dict —— 统计摘要，JSON 友好；字段命名与 mesh_summary 对齐（hull/obb_extents/bounding_sphere）
 
     AI 不直接调本函数，统一走 summarize_from_blender 入口。
@@ -350,7 +372,7 @@ def pointcloud_summary(pc) -> dict:
     except Exception:
         out["bounding_sphere"] = None
 
-    return out
+    return _pick(out, keys, "pointcloud")
 
 
 # 摘要类型注册表（"小房间"模式：新增类型 = 写一个 xxx_summary 函数 + 这里加一行）
@@ -375,6 +397,7 @@ def summarize_from_blender(
     node_name: str,
     summary: str = None,
     frame: int = None,
+    fields=None,
 ) -> dict:
     """从 Blender 按「物体 + 几何节点」取摘要（统一入口，AI 只调这个，一步返回）。
 
@@ -387,6 +410,8 @@ def summarize_from_blender(
                       如 "统计点云 out(pointcloud)"；没写 out() → 全返回）
         frame         要取哪一帧的数据（可选）。不填 → 场景当前帧；填 N → 先从第 1 帧
                       逐帧推进到第 N 帧。模拟区是有状态的，跳帧拿不到第 N 帧的数据。
+        fields        只要哪几项（可选，list 或逗号串）。None/空 → 全给；给错项名报错并列可用项。
+                      mesh 32 项 / pointcloud 10 项，名单见各自 summary 函数。
 
     返回：
         {
@@ -433,7 +458,7 @@ def summarize_from_blender(
     if data_type == "all":
         summaries = {}
         for comp in result["components"]:
-            summaries[comp] = _SUMMARY_TYPES[comp](result[comp])
+            summaries[comp] = _SUMMARY_TYPES[comp](result[comp], keys=fields)
         return {"status": "ok", "requested": "all", "available": result["components"], "summary": summaries}
 
     if data_type not in result["components"]:
@@ -443,7 +468,7 @@ def summarize_from_blender(
         "status": "ok",
         "requested": data_type,
         "available": result["components"],
-        "summary": _SUMMARY_TYPES[data_type](result[data_type]),
+        "summary": _SUMMARY_TYPES[data_type](result[data_type], keys=fields),
     }
 
 

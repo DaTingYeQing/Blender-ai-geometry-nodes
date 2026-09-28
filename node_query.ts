@@ -28,16 +28,19 @@ const PY: string = ENV.python.exe; // 起 python 用
 const WORK: string = ENV.workspace.root; // 工作区：python 的启动目录
 const QRY = path.join(AGENT, "skills", "node_information");
 
+function errRes(text: string, extra?: Record<string, unknown>) {
+	return { content: [{ type: "text", text }], details: { ok: false, ...extra }, isError: true };
+}
+function okRes(text: string, extra?: Record<string, unknown>) {
+	return { content: [{ type: "text", text }], details: { ok: true, ...extra } };
+}
+
 // 统一校验：只排除控制字符
 const ARG_RE = /^[^\x00-\x08\x0B\x0C\x0E-\x1F\x7F]{1,200}$/;
 
 function runPython(script: string, arg: string) {
 	if (!arg || !ARG_RE.test(arg)) {
-		return {
-			content: [{ type: "text", text: `ERROR: 非法参数 "${arg}"（含控制字符）` }],
-			details: { arg, ok: false },
-			isError: true,
-		};
+		return errRes(`ERROR: 非法参数 "${arg}"（含控制字符）`, { arg });
 	}
 	const res = spawnSync(PY, [path.join(QRY, script), arg], {
 		encoding: "utf8",
@@ -48,30 +51,12 @@ function runPython(script: string, arg: string) {
 	const stdout = (res.stdout ?? "").trim();
 	const stderr = (res.stderr ?? "").trim();
 	if (res.error) {
-		return {
-			content: [
-				{
-					type: "text",
-					text: `python 启动失败：${String(res.error)}\n（用的 python：${PY}，来自 py_environment.json）`,
-				},
-			],
-			details: { arg, ok: false, stdout, stderr },
-			isError: true,
-		};
+		return errRes(`python 启动失败：${String(res.error)}\n（用的 python：${PY}，来自 py_environment.json）`, { arg, stdout, stderr });
 	}
 	if (res.status !== 0) {
-		return {
-			content: [
-				{
-					type: "text",
-					text: `${script} 失败(exit=${res.status ?? "?"}):\n${stdout || stderr || String(res.error || "")}`,
-				},
-			],
-			details: { arg, ok: false, stdout, stderr },
-			isError: true,
-		};
+		return errRes(`${script} 失败(exit=${res.status ?? "?"}):\n${stdout || stderr || String(res.error || "")}`, { arg, stdout, stderr });
 	}
-	return { content: [{ type: "text", text: stdout }], details: { arg, ok: true, stdout } };
+	return okRes(stdout, { arg, stdout });
 }
 
 // 不知道节点叫什么名 → 用词找它的 idname
@@ -83,7 +68,7 @@ const nodeFindTool = defineTool({
 		keyword: Type.String({ description: "英文搜索词，如 rounding / set position / color" }),
 	}),
 	async execute(_toolCallId, params) {
-		return runPython("node_id_search.py", (params.keyword ?? "").trim());
+		return runPython("node_id_search.py", ((params.keyword ?? "") as string).trim());
 	},
 });
 
@@ -99,7 +84,7 @@ const nodeFullTool = defineTool({
 		idname: Type.String({ description: "节点 idname，如 GeometryNodeSetPosition" }),
 	}),
 	async execute(_toolCallId, params) {
-		return runPython("node_full_export.py", (params.idname ?? "").trim());
+		return runPython("node_full_export.py", ((params.idname ?? "") as string).trim());
 	},
 });
 

@@ -90,18 +90,34 @@ def _overview(screen):
 
 
 def _focus(screen, targets):
-    """详细模式：只渲染匹配到的节点（name 精确 / idname 精确 / idname 子串）。"""
+    """详细模式：只渲染精确命中的节点（name 相等 / idname 相等），不做模糊。
+
+    name 或 idname 都得写准：写错的会单独点名（"以下没找到"），不静默忽略。
+    idname 精确命中多个节点时（如 5 个 GeometryNodeGroup）全都渲染。
+    """
     all_nodes = screen.get("nodes") or []
     if not all_nodes:
         return "(节点为空)", []
     refs = [str(t).strip() for t in targets if str(t).strip()]
-    matched = [n for n in all_nodes
-               if any(t == n.get("name") or t == n.get("idname") or t in str(n.get("idname"))
-                      for t in refs)]
-    if not matched:
+    matched, missed = [], []
+    for t in refs:
+        hit = [n for n in all_nodes if t == n.get("name") or t == n.get("idname")]
+        if hit:
+            matched.extend(hit)
+        else:
+            missed.append(t)
+    seen, uniq = set(), []          # 同一节点被 name 和 idname 各命中一次时去重
+    for n in matched:
+        if n.get("name") not in seen:
+            seen.add(n.get("name"))
+            uniq.append(n)
+    if not uniq:
         avail = ", ".join(f"{n.get('name')} {n.get('idname')}" for n in all_nodes)
         return f"(未匹配到节点。可用: {avail})", []
-    return "\n\n".join(_render_node_detail(n) for n in matched), [n["name"] for n in matched]
+    body = "\n\n".join(_render_node_detail(n) for n in uniq)
+    if missed:
+        body += "\n\n(以下没找到，name/idname 都得写准: " + ", ".join(missed) + ")"
+    return body, [n["name"] for n in uniq]
 
 
 # ---------------------------------------------------------------- 主流程

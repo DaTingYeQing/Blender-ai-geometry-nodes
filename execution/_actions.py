@@ -86,8 +86,16 @@ def zone_item_collection(rout, kind=None):
 
 def cmd_interface(tree, spec, col):
     """创建节点组边界接口，并自动备好可连线的组输入/组输出节点。"""
-    direction = spec.get("direction", "input")
-    in_out = "INPUT" if direction in ("input", "in") else "OUTPUT"
+    direction = str(spec.get("direction", "input")).strip().lower()
+    if direction in ("input", "in"):
+        in_out = "INPUT"
+    elif direction in ("output", "out"):
+        in_out = "OUTPUT"
+    else:
+        col.error(f"interface 失败：direction 只能是 input 或 output，收到 {spec.get('direction')!r}",
+                  code="bad_direction", where={"name": spec.get("name", "")},
+                  hint='direction 填 "input" 或 "output"（大小写不限）')
+        return
     name = spec.get("name", "")
     raw_type = spec.get("socket_type", "Float")
     if not name:
@@ -167,53 +175,84 @@ def cmd_add_item(tree, spec, col):
 # ============ 取值：set ============
 
 def cmd_set(tree, spec, col):
-    """设节点属性或输入接口默认值（node 用 name）。"""
+    """设一个值：socket=接口默认值（含组边界）、prop=节点属性，两者二选一（node 用 name）。"""
     ref = spec.get("node", "")
     node, err = R.resolve_node(tree, ref)
     if node is None:
         col.error(f"set 失败：{err}", code="node_not_found", where={"node": ref})
         return
-    prop, value = spec.get("prop"), spec.get("value")
-    # 组输入/组输出节点：prop 映射到组边界 interface 默认值
+    socket_ref = str(spec.get("socket") or "").strip()
+    prop_ref = str(spec.get("prop") or "").strip()
+    value = spec.get("value")
+    if socket_ref and prop_ref:
+        col.error(f"set 失败：socket 与 prop 只能填一个（收到 socket={socket_ref!r}、prop={prop_ref!r}）",
+                  code="bad_set_spec", where={"node": node.name},
+                  hint="设接口默认值用 socket；改节点属性用 prop")
+        return
+    if not socket_ref and not prop_ref:
+        col.error("set 失败：要填 socket（接口名）或 prop（属性名）之一",
+                  code="bad_set_spec", where={"node": node.name},
+                  hint='例：{"node":"Math","socket":"Value_001","value":2}；'
+                       '{"node":"Math","prop":"operation","value":"MULTIPLY"}')
+        return
+
+    # ---- prop 支：只改节点属性（含 enum，如 operation / data_type）----
+    if prop_ref:
+        if not hasattr(node, prop_ref):
+            col.error(f"set 失败：{node.name} 没有属性 {prop_ref}",
+                      code="prop_not_found", where={"node": node.name, "prop": prop_ref},
+                      hint="prop 是节点属性名（node_full 的 runtime_properties）；设接口默认值请改用 socket")
+            return
+        try:
+            setattr(node, prop_ref, value)
+        except Exception as e:
+            col.error(f"set 失败 [{node.name}.{prop_ref}] 属性：{e}",
+                      code="set_prop_failed", where={"node": node.name, "prop": prop_ref})
+        return
+
+    # ---- socket 支：组边界节点 → interface 项；其余 → 输入口 ----
     if node.type in ("GROUP_INPUT", "GROUP_OUTPUT"):
         in_out = "INPUT" if node.type == "GROUP_INPUT" else "OUTPUT"
-        for it in tree.interface.items_tree:
-            if (it.item_type == "SOCKET" and it.in_out == in_out
-                    and (it.name == prop or it.identifier == prop)):
-                try:
-                    it.default_value = T.coerce_interface(it, value)
-                except Exception as e:
-                    col.error(f"set 失败 [{node.name}.{prop}] interface: {e}",
-                              code="set_interface_failed",
-                              where={"node": node.name, "prop": prop})
-                return
-        col.error(f"set 失败：{node.name} 没有对应 interface 项 {prop}（可用：{list_ifaces(tree, in_out)}）",
+        items = [it for it in tree.interface.items_tree
+                 if it.item_type == "SOCKET" and it.in_out == in_out]
+        # 复用 find_socket：identifier 精确优先，name 重名时报错并列 identifier（不闷头取第一个）
+        it, amb = R.find_socket(items, socket_ref, True)
+        if amb:
+            col.error(f"set 失败：{amb}", code="interface_ambiguous",
+                      where={"node": node.name, "socket": socket_ref},
+                      hint="同名接口必须写 identifier（screen 详情里接口名后面的那个词）")
+            return
+        if it is not None:
+            try:
+                it.default_value = T.coerce_interface(it, value)
+            except Exception as e:
+                col.error(f"set 失败 [{node.name}.{socket_ref}] interface：{e}",
+                          code="set_interface_failed",
+                          where={"node": node.name, "socket": socket_ref})
+            return
+        col.error(f"set 失败：{node.name} 没有对应 interface 项 {socket_ref}（可用：{list_ifaces(tree, in_out)}）",
                   code="interface_not_found",
-                  where={"node": node.name, "prop": prop},
+                  where={"node": node.name, "socket": socket_ref},
                   hint="先用 blender_screen 看该组边界接口，或直接用 identifier")
         return
-    # 优先：输入接口 default_value（如 Level、Vector）
-    for s in node.inputs:
-        if s.name == prop or s.identifier == prop:
-            try:
-                s.default_value = T.coerce(s, value)
-            except Exception as e:
-                col.error(f"set 失败 [{node.name}.{prop}]: {e}",
-                          code="set_socket_failed",
-                          where={"node": node.name, "prop": prop})
-            return
-    # 其次：节点属性（含 enum，如 data_type / operation）
-    if hasattr(node, prop):
-        try:
-            setattr(node, prop, value)
-        except Exception as e:
-            col.error(f"set 失败 [{node.name}.{prop}] 属性: {e}",
-                      code="set_prop_failed",
-                      where={"node": node.name, "prop": prop})
+    # 输入口：name 重名同样报错，不闷头取第一个
+    sock, amb = R.find_socket(node.inputs, socket_ref, True)
+    if amb:
+        col.error(f"set 失败：{amb}", code="socket_ambiguous",
+                  where={"node": node.name, "socket": socket_ref},
+                  hint="同名接口必须写 identifier（screen 详情里接口名后面的那个词）")
         return
-    col.error(f"set 失败：{node.name} 没有属性/接口叫 {prop}",
-              code="prop_not_found", where={"node": node.name, "prop": prop},
-              hint="先用 blender_screen 的 detail 模式查该节点有哪些接口与属性")
+    if sock is not None:
+        try:
+            sock.default_value = T.coerce(sock, value)
+        except Exception as e:
+            col.error(f"set 失败 [{node.name}.{socket_ref}]：{e}",
+                      code="set_socket_failed",
+                      where={"node": node.name, "socket": socket_ref})
+        return
+    col.error(f"set 失败：{node.name} 没有输入接口 {socket_ref}",
+              code="socket_not_found", where={"node": node.name, "socket": socket_ref},
+              hint="先用 blender_screen 的 detail 模式查该节点输入口名；改属性请改用 prop")
 
 
 # ============ 接线：link / unlink ============
@@ -273,13 +312,15 @@ def cmd_link(tree, spec, col):
 
 
 def cmd_unlink(tree, spec, col):
-    """断线。全式「A.口 → B.口」= 断这根线；短式「节点.口」只断该节点的【输入】线。"""
-    if "→" in spec or "->" in spec:
-        try:
-            sn, ss, dn, ds = R.parse_wire(spec)
-        except ValueError as e:
-            col.error(f"unlink 失败: {e}", code="wire_format", where={"spec": spec})
-            return
+    """断线。全式「A.口 → B.口」（→ / -> / to 都认）= 断这根线；短式「节点.口」只断该节点的【输入】线。"""
+    # 全式判定与 link 共用 parse_wire（三种连接词都认）；两边都得是「名字.接口」才算全式，
+    # 否则节点名里带 " to " 的短式会被误判。
+    try:
+        full = R.parse_wire(spec)
+    except ValueError:
+        full = None
+    if full is not None and full[0] and full[2]:
+        sn, ss, dn, ds = full
         src, err_s = R.resolve_node(tree, sn)
         dst, err_d = R.resolve_node(tree, dn)
         if src is None or dst is None:
@@ -319,14 +360,22 @@ def cmd_unlink(tree, spec, col):
 
 
 def cmd_del(tree, ref, col):
-    """按 name/idname 删节点。"""
+    """按 name/idname 删节点。删掉组边界节点时不拦，但在摘要里给一句提醒。"""
     node, err = R.resolve_node(tree, str(ref).strip())
     if node is None:
         col.error(f"del 失败：{err}", code="node_not_found", where={"ref": str(ref)})
         return
     node_name = node.name  # 先取名字：remove 之后 StructRNA 已释放，不能再访问 node
+    # 删前记下边界节点在不在：只在「本来有、被你删没了」时提醒，空树（没建过边界）不误报
+    borders = (("NodeGroupInput", "Group Input"), ("NodeGroupOutput", "Group Output"))
+    had = {t: any(n.bl_idname == t for n in tree.nodes) for t, _ in borders}
     tree.nodes.remove(node)
     col.warning(f"已删：{node_name}")
+    missing = [label for t, label in borders
+               if had[t] and not any(n.bl_idname == t for n in tree.nodes)]
+    if missing:
+        col.warning(f"提醒：{'、'.join(missing)} 被删，外部输入/输出接不上；"
+                    f"补法：跑一次 action=interface（会自动补回）")
 
 
 # ============ 动作注册表（定义顺序 = 执行顺序）============

@@ -51,6 +51,22 @@ function py(s: string): string {
 	return JSON.stringify(s);
 }
 
+/**
+ * from / to 两个数字 → 后端认的 FRAMES 串。
+ * 永远拼全式 "a-b"（后端对 "20" 和 "1-20" 处理等价，全式绕开省略规则）。
+ */
+function framesToString(from: unknown, to: unknown): string | { err: string } {
+	const rawTo = to === undefined || to === null || to === "" ? NaN : Number(to);
+	if (!Number.isFinite(rawTo)) return { err: "ERROR: 需要 to（结束帧，整数）" };
+	const rawFrom = from === undefined || from === null || from === "" ? 1 : Number(from);
+	if (!Number.isFinite(rawFrom)) return { err: "ERROR: from 必须是整数（起始帧）" };
+	const a = Math.trunc(rawFrom);
+	const b = Math.trunc(rawTo);
+	if (a < 1) return { err: `ERROR: from 必须 ≥ 1，收到 ${a}` };
+	if (b < a) return { err: `ERROR: to(${b}) 不能小于 from(${a})` };
+	return `${a}-${b}`;
+}
+
 /** 拼配置文件：填写区（工具参数）在前，自定义区（code）在后——code 里重定义同名变量会覆盖填写区。 */
 function buildConfig(p: Record<string, unknown>): string {
 	return [
@@ -60,7 +76,6 @@ function buildConfig(p: Record<string, unknown>): string {
 		"GROUP = " + py(String(p.group ?? "")),
 		"OBJECT = " + py(String(p.object ?? "")),
 		"FRAMES = " + py(String(p.frames ?? "")),
-		"SETTINGS = []",
 		"ARRAYS_NPZ = " + py(String(p.out ?? "")),
 		"",
 		"# ================== 自定义区（zone_probe 的 code 参数，原样拼在这） ==================",
@@ -73,32 +88,34 @@ const zoneProbeTool = defineTool({
 	name: "zone_probe",
 	label: "Zone Probe",
 	description:
-		"逐帧探测模拟区/ForEach/Repeat 里的数据：引擎负责开档、从第 1 帧顺序预热到起点、逐帧调你的 probe(ctx)、收集并落盘，恒 --save=no 零污染。\n" +
-		"你只填 group（节点树名）、frames（如 \"1-20\"；\"30-40\" 会自动预热 29 帧）和 code（探针代码，至少定义 probe(ctx)）。\n" +
+		"逐帧探测模拟区里的数据：引擎负责开档、从第 1 帧顺序预热到起点、逐帧调你的 probe(ctx)。\n" +
+		"你只填 group（节点树名）、from/to（帧区间）和 code（探针代码）。\n" +
 		"probe(ctx) 每帧返回一个 dict（键名随意）；大数组自动落盘 npz、输出只回摘要。ctx 可用：frame / centers() / matrices() / verts() / attrs(name) / emit(name, value)。\n" +
-		"code 里还可写 selftest()（开档前跑，用已知答案校准判据，assert 失败立即中止，不给假结论）和 setup(tree, obj)（开档后、推帧前的任意代码：设值/加删节点/重接线都行）。",
+		"本工具只探测：恒 --save=no，要改初始条件请先用 blender_build 改档。",
+
 	parameters: Type.Object({
 		group: Type.String({
-			description: "必填。节点树名（如 M3）",
+			description: "必填。节点树名",
 		}),
-		frames: Type.String({
-			description: '必填。帧区间："1-10" 采 1..10 / "20" 采 1..20 / "30-40" 采 30..40（前面自动预热）',
+		to: Type.Integer({
+			description: "必填。结束帧。引擎会先从第 1 帧顺序预热到这里，再采集。",
 		}),
+		from: Type.Optional(Type.Integer({
+			description: "起始帧（不填=1）。只测单帧时 from 和 to 填同一个数。",
+		})),
 		code: Type.String({
 			description:
-				"必填。探针代码：至少定义 probe(ctx)；可另写 selftest() / setup(tree, obj)。" +
-				"填写区变量（BLEND/GROUP/OBJECT/FRAMES/SETTINGS/ARRAYS_NPZ）已在代码之前定义好，重定义会覆盖它们。",
+				"必填。探针代码：只定义 probe(ctx)（每帧调一次，返回 dict）——本工具不改模拟区。" +
+				"填写区变量（BLEND/GROUP/OBJECT/FRAMES/ARRAYS_NPZ）已在代码之前定义好。",
 		}),
 		blend: Type.Optional(
 			Type.String({
-				description: "可选。档路径；不给=用工作区 workflow_state.json 里记的工作档",
+				description: "档路径；不给= workflow_state.json 里记的工作档",
 			}),
 		),
-		object: Type.Optional(
-			Type.String({
-				description: "可选。物体名；不给=自动找挂了该节点树的第一个物体",
-			}),
-		),
+		object: Type.String({
+			description: "必填，物体名",
+		}),
 		out: Type.Optional(
 			Type.String({
 				description: "可选。大数组落盘路径（.npz）；不给=./evidence/probe_arrays_<时间戳>.npz",
@@ -107,10 +124,10 @@ const zoneProbeTool = defineTool({
 	}),
 	async execute(_toolCallId, params) {
 		const group = String(params.group ?? "").trim();
-		const frames = String(params.frames ?? "").trim();
 		const code = String(params.code ?? "").trim();
 		if (!group) return say("ERROR: 需要 group（节点树名）", true);
-		if (!frames) return say('ERROR: 需要 frames（如 "1-20"）', true);
+		const frames = framesToString(params.from, params.to);
+		if (typeof frames !== "string") return say(frames.err, true);
 		if (!code) {
 			return say(
 				'ERROR: 需要 code —— 探针代码，至少定义 probe(ctx)。' +

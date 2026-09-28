@@ -12,7 +12,7 @@
 import { spawnSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Type } from "@earendil-works/pi-ai";
+import { StringEnum, Type } from "@earendil-works/pi-ai";
 import { defineTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 // ===== 地址：唯一读 py_environment.json 的地方 =====
@@ -38,6 +38,22 @@ function errRes(text: string, extra?: Record<string, unknown>) {
 }
 function okRes(text: string, extra?: Record<string, unknown>) {
 	return { content: [{ type: "text", text }], details: { ok: true, ...extra } };
+}
+
+/**
+ * eval 某一行的报错 → 人话。
+ * KeyError 就是「表达式里的变量没给值」，直接把变量名点出来并告诉去哪儿补；
+ * 其余异常保留 Python 原文（TypeError / ZeroDivisionError 等本就够明确）。
+ */
+function evalRowError(row: any): string {
+	const inp = JSON.stringify(row?.input ?? {});
+	const err = String(row?.error ?? "未知错误").trim();
+	const m = /^KeyError:\s*['"](.+)['"]$/.exec(err);
+	if (m) {
+		const name = m[1];
+		return `输入 ${inp} 算不了：表达式里的 ${name} 没有值（inputs 里补上 ${name}，或换成常量）`;
+	}
+	return `输入 ${inp} 算不了：${err}`;
 }
 
 /**
@@ -76,11 +92,28 @@ function runMath(script: string, payload: Record<string, unknown>, timeout: numb
 	return { data, stderr };
 }
 
+/**
+ * 变量类型表 → 后端要的 {"x":"Float"}。
+ * 后端 _socket_type() 是 ty == "Vector" 的死比较：写 vector 会被静默当成标量、建错接口，
+ * 所以这里映射回规范值，让「Vector 必须大写」这条不再由 AI 记。
+ */
+function typesToCanonical(t: unknown): Record<string, string> | { err: string } {
+	const rows = Array.isArray(t) ? t : [];
+	const out: Record<string, string> = {};
+	for (const row of rows) {
+		const r = (row ?? {}) as Record<string, unknown>;
+		const name = String(r.name ?? "").trim();
+		if (!name) return { err: "ERROR: types 每项需要 name（变量名）" };
+		const v = String(r.type ?? "").trim().toLowerCase();
+		if (v === "float" || v === "scalar") out[name] = "Float";
+		else if (v === "vector") out[name] = "Vector";
+		else return { err: `ERROR: types 里变量 ${name} 的类型只能是 float 或 vector，收到 ${JSON.stringify(r.type)}` };
+	}
+	return out;
+}
+
 function handleMath(params: Record<string, unknown>) {
 	const action = ((params.action as string) ?? "").trim();
-	if (action !== "eval" && action !== "build") {
-		return errRes("ERROR: 必须指定 action: eval(算数值) 或 build(编译建节点)");
-	}
 	const expr = ((params.expr as string) ?? "").trim();
 	if (!expr) return errRes("ERROR: 需要 expr(数学表达式)，如 sin(x) * 2 + y");
 
@@ -95,7 +128,7 @@ function handleMath(params: Record<string, unknown>) {
 	}
 
 	const payload: Record<string, unknown> = {
-		type: ((params.type as string) ?? "").trim() || "math",
+		type: (params.type as string) || "math",
 		expr,
 		inputs: inputsRows,
 	};
@@ -108,16 +141,21 @@ function handleMath(params: Record<string, unknown>) {
 		// 结构性失败（缺输入 / 表达式非法 / 类型检查不过）：有 error 无 results
 		if (d.error) return errRes(`校验/求值失败：${d.error}`);
 		const typeName = d.mode === "vector_math" ? "矢量" : "标量";
+		const info = `输出类型=${d.output_type}，变量=${JSON.stringify(d.types)}`;
+		const okRows: any[] = d.results ?? [];
+		const badRows: any[] = d.errors ?? [];
+		// 有行算不出来时，「编译过了」不能说成「求值成功」——首行按实际成败分别措辞
 		const lines = [
-			`[math eval] ${typeName} 表达式求值成功，输出类型=${d.output_type}，变量=${JSON.stringify(d.types)}`,
+			badRows.length
+				? `[math eval] ${typeName} 表达式编译成功、求值失败：${badRows.length}/${okRows.length + badRows.length} 行算不出结果（${info}）`
+				: `[math eval] ${typeName} 表达式求值成功，${info}`,
 		];
-		for (const row of d.results ?? []) {
+		for (const row of okRows) {
 			lines.push(`  输入 ${JSON.stringify(row.input)} -> 结果 ${JSON.stringify(row.result)}`);
 		}
 		// 部分行求值报错：结果照常展示，但整体标失败，别把半截结果当成功
-		if (d.errors?.length) {
-			lines.push("  部分行报错:");
-			for (const e of d.errors) lines.push(`    ${JSON.stringify(e)}`);
+		if (badRows.length) {
+			for (const e of badRows) lines.push(`  ${evalRowError(e)}`);
 			return errRes(lines.join("\n"), { results: d.results, errors: d.errors });
 		}
 		return okRes(lines.join("\n"), { output_type: d.output_type, types: d.types, results: d.results });
@@ -127,7 +165,10 @@ function handleMath(params: Record<string, unknown>) {
 	payload.group = ((params.group as string) ?? "").trim(); // 空则后端报错（文案会说清怎么填）
 	payload.node_name = ((params.node_name as string) ?? "").trim();
 	if (params.types !== undefined && params.types !== null && params.types !== "") {
-		payload.types = params.types; // 显式类型（如 {"x":"Float"}），优先级高于 inputs 推断
+		// 显式类型（如 {"x":"Float"}），优先级高于 inputs 推断
+		const types = typesToCanonical(params.types);
+		if ("err" in types) return errRes(types.err);
+		payload.types = types;
 	}
 	payload.out_dir = WORK; // 生成脚本 / 结构 JSON 落工作区
 	payload.workdir = WORK; // 去这儿找 workflow_state.json 定工作档（找到就建完存回）
@@ -158,15 +199,21 @@ const blenderMathTool = defineTool({
 	description:
 		"把数学表达式编译成 Blender 数学节点组。\n" +
 		"用法：先 action=eval 用纯 Python 试算确认公式，再 action=build 进 Blender 建出来。\n" +
-		"expr 直接写数学式子（sin(x) * 2 + y、sqrt(abs(x))、dot(a, b) + length(c)），不是 Python 表达式；标量用 type=math，矢量用 type=vector_math。\n" +
+		"expr 直接写数学式子（sin(x) * 2 + y、sqrt(abs(x))、dot(a, b) + length(c)）；标量用 type=math，矢量用 type=vector_math。\n" +
 		"变量只在封装子组里建输入接口、结果只连子组输出，顺序按变量在表达式里出现的先后（length(hi - lo) * precision → hi, lo, precision）。\n" +
-		"数学节点封装在一个子组里，指定的 group 中会放一个 Group 节点，它只会创建节点组，不会替你连线 —— 主组里的输入/输出自己用 blender_build 连。",
+		"数学节点封装在一个子组里，指定的 group 中会放一个 Group 节点，它只会创建节点组，输入/输出用 blender_build 连。",
 	parameters: Type.Object({
-		action: Type.String({
-			description: "eval(先算数值验证公式) 或 build(编译并进 Blender 建出节点组)",
+		action: Type.Union([
+			Type.Literal("eval"),
+			Type.Literal("build"),
+		], {
+			description: "eval=先算数值验证公式；build=编译并进 Blender 建出节点组",
 		}),
-		type: Type.Optional(Type.String({
-			description: "表达式类型: math(标量) 或 vector_math(矢量)。默认 math。",
+		type: Type.Optional(Type.Union([
+			Type.Literal("math"),
+			Type.Literal("vector_math"),
+		], {
+			description: "表达式类型：math=标量（默认）；vector_math=矢量",
 		})),
 		expr: Type.String({
 			description: "数学表达式，自然写法如 sin(x) * 2 + y、dot(a, b) + length(c)。"
@@ -175,16 +222,19 @@ const blenderMathTool = defineTool({
 		inputs: Type.Optional(Type.Array(Type.Any(), {
 			description: '输入值数组，如 [{"x": 0.5, "y": 1.0}]。eval 必填；build 用于类型推断（或改用 types 显式指定）。',
 		})),
-		types: Type.Optional(Type.Record(Type.String(), Type.String(), {
-			description: 'action=build 可选：显式指定变量类型，如 {"x":"Float","v":"Vector"}。优先级高于 inputs 推断，给了它 build 就不用抄 inputs。',
+		types: Type.Optional(Type.Array(Type.Object({
+			name: Type.String({ description: "变量名，如 x" }),
+			type: StringEnum(["float", "vector"] as const, { description: "float=标量；vector=矢量" }),
+		}), {
+			description: 'action=build 可选：显式指定变量类型，如 [{"name":"x","type":"float"},{"name":"v","type":"vector"}]。优先级高于 inputs 推断，给了它 build 就不用抄 inputs。写了 vector 的变量会建成矢量接口。',
 		})),
 		group: Type.Optional(Type.String({
-			description: "action=build 必填：要在哪个节点组里建数学节点（不存在会自动新建）。不指定则 build 报错。",
+			description: "action=build 必填：要在哪个节点组里建数学节点（不存在会自动新建）。不指定则报错。",
 		})),
 		node_name: Type.Optional(Type.String({
 			description: "action=build 必填（eval 不用填）：主组里那个数学节点的 name，自己起个短代号，如 delta / rot_axis / size_ratio。"
-				+ "禁止含逗号、→、->、换行；≤ 63 字节（中文 1 字 = 3 字节）。"
-				+ "同一主组里重名时 Blender 会自动改成 xxx.001，实际名以返回值为准。",
+				+ "长度按 UTF-8 字节算（中文 1 字 = 3 字节），Blender 上限 63 字节，建议压到 20 个字符以内。"
+				+ "同一主组里重名时 Blender 会自动改名，实际名以返回值为准。",
 		})),
 	}),
 	async execute(_toolCallId, params) {
