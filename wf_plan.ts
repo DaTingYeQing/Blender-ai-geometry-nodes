@@ -143,7 +143,7 @@ const wfPlanTool = defineTool({
 						`工作档已自动创建并锁定: ${blendPath}\n` +
 						`节点树组织规范(名字由你 AI 自己定）主线节点树挂在这个物体的几何节点修改器上\n` +
 						`模块: ${counts.join(" + ")}\n` +
-						`workflow_state.json 已落盘。进入执行阶段: 按模块逐个实现, 全部构建都落在工作档 ${blendPath} 上; 每完成一个模块打勾推进(cur+1, status="done")`,
+						`workflow_state.json 落盘。执行阶段: 按模块逐个实现, 文件在 ${blendPath} 上; 打勾推进模块(cur+1, status="done")`,
 				},
 			],
 			details: { project, modules: modules.length, path: statePath, blend: blendPath },
