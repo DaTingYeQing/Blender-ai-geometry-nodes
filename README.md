@@ -41,6 +41,8 @@ There are still some design details that aren't handled well — not bugs, exact
 
 ## Setup
 
+* Please download the latest version from the Releases page.
+
 1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
 >Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
 
