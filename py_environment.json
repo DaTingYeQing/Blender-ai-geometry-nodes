@@ -7,7 +7,7 @@
 
     "_role": "External Python (the one running outside Blender): executes all glue scripts that do not touch bpy; third-party geometry libraries are installed here",
 
-    "_exe_note": "This is your own external Python path，(on Windows, this means it must end with python.exe)."
+    "_exe_note": "This is your own external Python path (on Windows, this means it must end with python.exe).",
 
     "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
 
@@ -21,7 +21,7 @@
 
     "_role": "Inner environment: every script that needs bpy must be run through it (--background, no GUI)",
 
-    "_exe_note": "This is your own Blender 4.5 path,The path must point to the Blender executable (on Windows, this means it must end with blender.exe)."
+    "_exe_note": "This is your own Blender 4.5 path. The path must point to the Blender executable (on Windows, this means it must end with blender.exe).",
 
     "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\blender-4.5.0-windows-x64-----\\blender.exe",
 
