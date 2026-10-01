@@ -33,6 +33,8 @@ Tell the AI what you need (in as much detail as possible). The AI will break you
 ## Limitations
 
 Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build from the official site). Different Blender versions may add or update geometry nodes, so some node information changes, which mainly affects the usability of these skills.
+https://download.blender.org/release/Blender4.5/blender-4.5.0-windows-x64.zip
+
 
 There are still some design details that aren't handled well — not bugs, exactly, but small, fiddly things that weren't accounted for one by one, because there are simply too many cases involved. Some of these details you won't discover — you have no way of knowing the AI would do that — until you've run it a good many times.
 
