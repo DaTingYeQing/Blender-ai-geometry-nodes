@@ -118,4 +118,7 @@ A fixed channel for sending scripts into Blender. When the tools above cannot he
 
 The environment configuration file.
 
+### hook_skill.ts
+
+Updated the skill prompts and added a new hook skill that automatically tells the AI which skills to load during wf_plan.
 
