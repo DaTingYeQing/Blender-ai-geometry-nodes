@@ -110,12 +110,13 @@ def cmd_interface(tree, spec, col):
                        + "、".join(T.INTERFACE_SOCKET_TYPES))
         return
     try:
-        tree.interface.new_socket(name=name, in_out=in_out, socket_type=stype)
+        iface_item = tree.interface.new_socket(name=name, in_out=in_out, socket_type=stype)
     except Exception as e:
         col.error(f"interface 失败 [{name}]: {e}", code="interface_new_failed",
                   where={"name": name, "socket_type": raw_type},
                   hint="Blender 拒了这个 socket 类型，核对应是上列 15 种之一")
         return
+    push_interface_to_modifiers(tree, iface_item)
     for gtype in ("NodeGroupInput", "NodeGroupOutput"):
         if not any(n.bl_idname == gtype for n in tree.nodes):
             tree.nodes.new(gtype)
@@ -174,6 +175,45 @@ def cmd_add_item(tree, spec, col):
 
 # ============ 取值：set ============
 
+# ---- 组接口默认值 → 同步进引用该组的修改器 ----
+#
+# 背景：几何节点修改器的每个【未连线】输入值，实际存在 modifier 自己的 IDProperty
+# （名字就是 socket identifier，如 Socket_2）里，它会遮蔽 interface 的 default_value。
+# 所以只改 interface 默认值时渲染不动、新接口还会报 "Missing property for input socket"。
+# 这里在改完接口默认值（以及新建接口）后，把同一个值写进所有引用该组的 modifier。
+
+def _idprop_value(v):
+    """interface 默认值 → 可写进 modifier IDProperty 的普通类型。"""
+    if isinstance(v, (bool, int, float, str)):
+        return v
+    try:
+        return [float(x) for x in v]
+    except Exception:
+        return None
+
+
+def push_interface_to_modifiers(tree, item):
+    """把某个组接口的 default_value 同步到所有引用该组的几何节点修改器上。返回同步个数。"""
+    import bpy
+    ident = getattr(item, "identifier", "")
+    if not ident or ident == "__extend__":
+        return 0
+    val = _idprop_value(getattr(item, "default_value", None))
+    if val is None:
+        return 0
+    n = 0
+    for obj in bpy.data.objects:
+        for mod in getattr(obj, "modifiers", []):
+            if mod.type != "NODES" or getattr(mod, "node_group", None) != tree:
+                continue
+            try:
+                mod[ident] = val
+                n += 1
+            except Exception:
+                pass
+    return n
+
+
 def cmd_set(tree, spec, col):
     """设一个值：socket=接口默认值（含组边界）、prop=节点属性，两者二选一（node 用 name）。"""
     ref = spec.get("node", "")
@@ -193,7 +233,8 @@ def cmd_set(tree, spec, col):
         col.error("set 失败：要填 socket（接口名）或 prop（属性名）之一",
                   code="bad_set_spec", where={"node": node.name},
                   hint='例：{"node":"Math","socket":"Value_001","value":2}；'
-                       '{"node":"Math","prop":"operation","value":"MULTIPLY"}')
+                       '{"node":"Math","prop":"operation","value":"MULTIPLY"}；'
+                           '{"node":"Int","prop":"integer","value":3}（Integer 节点的值就存在这个属性上）')
         return
 
     # ---- prop 支：只改节点属性（含 enum，如 operation / data_type）----
@@ -201,7 +242,10 @@ def cmd_set(tree, spec, col):
         if not hasattr(node, prop_ref):
             col.error(f"set 失败：{node.name} 没有属性 {prop_ref}",
                       code="prop_not_found", where={"node": node.name, "prop": prop_ref},
-                      hint="prop 是节点属性名（node_full 的 runtime_properties）；设接口默认值请改用 socket")
+                      hint="prop 是节点【自身属性】名：功能属性如 operation / data_type / mode / count_mode / integer"
+                           "（Integer 节点的值存这儿，不是 socket）；通用属性如 name（改名）/ label / mute / location。"
+                           "可用范围 = bl_rna.properties 里非只读的属性（node_full 的 runtime_properties 只列功能属性）；"
+                           "设接口默认值请改用 socket")
             return
         try:
             setattr(node, prop_ref, value)
@@ -229,6 +273,10 @@ def cmd_set(tree, spec, col):
                 col.error(f"set 失败 [{node.name}.{socket_ref}] interface：{e}",
                           code="set_interface_failed",
                           where={"node": node.name, "socket": socket_ref})
+                return
+            n = push_interface_to_modifiers(tree, it)
+            if n:
+                col.warning(f"已同步 {it.name} → {n} 个修改器（接口默认值已写进 modifier，渲染立即生效）")
             return
         col.error(f"set 失败：{node.name} 没有对应 interface 项 {socket_ref}（可用：{list_ifaces(tree, in_out)}）",
                   code="interface_not_found",

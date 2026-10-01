@@ -296,12 +296,17 @@ const blenderBuildTool = defineTool({
 					+ "node 是 Group Input / Group Output 时，这里写组接口名，改的是组接口默认值。",
 			})),
 			prop: Type.Optional(Type.String({
-				description: "改节点属性时填：属性名（如 operation / data_type），与 socket 二选一；枚举写大写 id。",
+				description: "改节点【自身的属性】，等价于 setattr(node, prop, value)，与 socket 二选一。\n"
+					+ "功能属性：operation / data_type / mode / count_mode / use_clamp（枚举写大写 id，如 WRAP / OFFSET / TOTAL）；"
+					+ "integer（Integer 节点的值就存在这个属性上，不是 socket）。\n"
+					+ "通用属性：name（给节点改名）、label、mute（mute=true 会真把该节点旁路）、location / width / color / parent（这些只动编辑器、不影响几何）。\n"
+					+ "可用范围 = 该节点 bl_rna.properties 里所有非只读属性（node_full 的 runtime_properties 只列功能属性，不含 name / mute / location 这类）。\n"
+					+ "值类型按属性给：数字 / 布尔 / 数组 / 字符串，类型不符会被 Blender 拒掉。",
 			})),
 			value: Type.Any({ description: "要设的值：数字 / 布尔 / 数组 / 字符串，按该接口或属性的类型给" }),
 		}), {
 			description: "action=set：改一个值，每条一个对象。"
-				+ "socket 与 prop 二选一：设接口默认值用 socket，改节点属性用 prop；都填会报错。",
+				+ "socket 与 prop 二选一（都填 / 都不填都报错）：socket = 接口默认值（含组边界接口，见 socket 说明）；prop = 节点自身属性（见 prop 说明）。",
 		})),
 		ifs: Type.Optional(Type.Array(Type.Object({
 			direction: Type.String({ description: "input 或 output" }),
