@@ -12,8 +12,7 @@ AI-generated Blender Geometry Nodes.
 > - The code was shaped by repeated trial and error on real cases and incremental refactoring. I cannot guarantee it covers every edge case.
 > - If you hit a problem, feel free to open an issue with the error message and I'll look into it. But I'm not a full-time developer, so fixes may take some time.
 > - If you need a production-grade library that keeps evolving, this probably isn't it. But if you want to see how far this AI-driven geometry nodes workflow can go, this project has already gone as far as its author could take it. Feel free to use it as a reference and adapt it.
-
-> Describing how this was built isn't about disclaiming responsibility — it's so you can judge whether it suits your use case.
+> - Describing how this was built isn't about disclaiming responsibility — it's so you can judge whether it suits your use case.
 
 
 
@@ -43,10 +42,9 @@ There are still some design details that aren't handled well — not bugs, exact
 
 * Please download the latest version from the Releases page.
 
-1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
->Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
+1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.`Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.`
 
->Save install.ps1 to your Desktop, then run the following in PowerShell to install pi:
+Save install.ps1 to your Desktop, then run the following in PowerShell to install pi:
 ```powershell    
 
 powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\install.ps1"
