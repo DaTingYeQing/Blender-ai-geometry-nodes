@@ -46,7 +46,7 @@ There are still some design details that aren't handled well — not bugs, exact
 1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
 >Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
 
->Save install.ps1 to your Desktop, then run the following in PowerShell:
+>Save install.ps1 to your Desktop, then run the following in PowerShell to install pi:
 ```powershell    
 
 powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\install.ps1"
