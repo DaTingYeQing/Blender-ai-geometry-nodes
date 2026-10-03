@@ -59,7 +59,7 @@ powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\install.ps1"
 
 >-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----(Replace this entire block, from the dashes to the dashes.)
 
-3. Please  place all `.ts` files flat into the **extensions** folder, and place the four folders（_shared,execution,math,node_information) flat into the **skills** folder.
+3. Please  place all `.ts` files flat into the `extensions` folder, and place the four folders（`shared`,`execution`,`math`,`node_information`) flat into the `skills` folder.
 
 4. Put the file py_environment and APPEND_SYSTEM.md in the directory ~\.pi\agent
 
