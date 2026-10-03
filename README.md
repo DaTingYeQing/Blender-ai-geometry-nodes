@@ -12,8 +12,7 @@ AI-generated Blender Geometry Nodes.
 > - The code was shaped by repeated trial and error on real cases and incremental refactoring. I cannot guarantee it covers every edge case.
 > - If you hit a problem, feel free to open an issue with the error message and I'll look into it. But I'm not a full-time developer, so fixes may take some time.
 > - If you need a production-grade library that keeps evolving, this probably isn't it. But if you want to see how far this AI-driven geometry nodes workflow can go, this project has already gone as far as its author could take it. Feel free to use it as a reference and adapt it.
-
-> Describing how this was built isn't about disclaiming responsibility — it's so you can judge whether it suits your use case.
+> - Describing how this was built isn't about disclaiming responsibility — it's so you can judge whether it suits your use case.
 
 
 
@@ -34,31 +33,39 @@ Tell the AI what you need (in as much detail as possible). The AI will break you
 
 Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build from the official site). Different Blender versions may add or update geometry nodes, so some node information changes, which mainly affects the usability of these skills.
 
+Download from here:
+https://download.blender.org/release/Blender4.5/blender-4.5.0-windows-x64.zip
+
+
 There are still some design details that aren't handled well — not bugs, exactly, but small, fiddly things that weren't accounted for one by one, because there are simply too many cases involved. Some of these details you won't discover — you have no way of knowing the AI would do that — until you've run it a good many times.
 
 
 ## Setup
 
+0.Please download the latest version from the Releases page.
+
 1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
 >Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
+
+Save install.ps1 to your Desktop, then run the following in PowerShell to install pi:
+```powershell    
+
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\install.ps1"
+```
+
 
 2. In the `py_environment` file, three paths are marked that need to be changed.
 > "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
 
 >-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----(Replace this entire block, from the dashes to the dashes.)
 
-3. Please  place all `.ts` files flat into the **extensions** folder, and place the four folders（_shared,execution,math,node_information) flat into the **skills** folder.
+3. Please place all `.ts` files flat into the `extensions` folder,
+4. please place the four folders（`shared`,`execution`,`math`,`node_information`) flat into the `skills` folder.
 
-4. Put the file py_environment and APPEND_SYSTEM.md in the directory ~\.pi\agent
+5. Put the file `py_environment` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent
 
-5. Make sure Python and its dependency packages are installed (see below).
-
-6. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
-
-
-
-## Python environment
-
+6. Make sure Python and its dependency packages are installed (see below and send to ai).
+```
 Python **3.13.14**
 
 | Package   | Version |
@@ -68,6 +75,11 @@ Python **3.13.14**
 | numpy     | 2.5.3   |
 | scipy     | 1.18.1  |
 | manifold3d| 3.5.3   |
+
+```
+7. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
+
+
 
 ## Workflow
 
