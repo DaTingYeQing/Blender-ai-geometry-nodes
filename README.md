@@ -64,14 +64,8 @@ powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\install.ps1"
 
 5. Put the file `py_environment` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent
 
-6. Make sure Python and its dependency packages are installed (see below).
-
-7. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
-
-
-
-## Python environment
-
+6. Make sure Python and its dependency packages are installed (see below and send to ai).
+```
 Python **3.13.14**
 
 | Package   | Version |
@@ -81,6 +75,11 @@ Python **3.13.14**
 | numpy     | 2.5.3   |
 | scipy     | 1.18.1  |
 | manifold3d| 3.5.3   |
+
+```
+7. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
+
+
 
 ## Workflow
 
