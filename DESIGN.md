@@ -187,7 +187,7 @@ That's the **`bpy` tool**.
 
 It lets the AI **focus on the algorithm rather than the nodes** in the early stage. Instead of first figuring out "how should these nodes be wired," it clarifies the mathematical relationships first. This tool did give the AI a real boost as well.
 
-### `zone probe`: a semi-custom form for Simulation Zones
+### `zone probe`: a semi-custom form for Simulation Zones（Now i delete it----2026.10.7）
 
 Next came **`zone probe`**, a tool built to handle **Simulation Zones**.
 
