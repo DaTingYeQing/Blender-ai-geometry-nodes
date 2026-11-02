@@ -158,8 +158,17 @@ function Get-NodeVersion {
     $ErrorActionPreference = 'Continue'
     try {
         $raw = & node -v 2>$null
-        if ($LASTEXITCODE -ne 0 -or -not $raw) { return $null }
-        return [version]($raw.Trim().TrimStart('v'))
+        if ($LASTEXITCODE -eq 0 -and $raw) {
+            return [version]($raw.Trim().TrimStart('v'))
+        }
+        $nodeExe = Join-Path $env:ProgramFiles 'nodejs\node.exe'
+        if (Test-Path -LiteralPath $nodeExe) {
+            $raw = & $nodeExe -v 2>$null
+            if ($LASTEXITCODE -eq 0 -and $raw) {
+                return [version]($raw.Trim().TrimStart('v'))
+            }
+        }
+        return $null
     }
     catch {
         return $null
@@ -199,10 +208,16 @@ function Install-Node {
         throw "没有找到 Node.js 和 winget。请先安装 Node.js $MinNode 或更新: https://nodejs.org / Neither Node.js nor winget was found. Install Node.js $MinNode or newer first: https://nodejs.org"
     }
     & winget install --id OpenJS.NodeJS -e --accept-package-agreements --accept-source-agreements --disable-interactivity
-    if ($LASTEXITCODE -ne 0) {
-        throw "winget 安装 Node.js 失败，退出码 $LASTEXITCODE / winget failed to install Node.js, exit code $LASTEXITCODE"
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        Write-WarnLine "winget 返回退出码 $exitCode，可能是已安装。刷新 PATH 后重新检测。 / winget exit code $exitCode, possibly already installed. Refreshing PATH and re-checking."
     }
     Refresh-Path
+    $v = Get-NodeVersion
+    if (-not $v -or $v -lt $MinNode) {
+        throw "Node.js 安装失败（winget 退出码 $exitCode），当前版本 $v。可从 https://nodejs.org 手动安装。 / Node.js install failed (winget exit code $exitCode), current version $v. Install manually from https://nodejs.org"
+    }
+    Write-Ok "Node.js $v"
 }
 
 # Upgrade Node.js after the user presses Y. / 用户按 Y 之后升级 Node.js。
@@ -215,11 +230,14 @@ function Update-Node {
     & winget upgrade --id OpenJS.NodeJS -e --accept-package-agreements --accept-source-agreements --disable-interactivity
     if ($LASTEXITCODE -ne 0) {
         & winget install --id OpenJS.NodeJS -e --accept-package-agreements --accept-source-agreements --disable-interactivity
-        if ($LASTEXITCODE -ne 0) {
-            throw "winget 更新 Node.js 失败，退出码 $LASTEXITCODE / winget failed to update Node.js, exit code $LASTEXITCODE"
-        }
     }
+    $exitCode = $LASTEXITCODE
     Refresh-Path
+    $v = Get-NodeVersion
+    if (-not $v -or $v -lt $MinNode) {
+        throw "Node.js 更新失败（winget 退出码 $exitCode），当前版本 $v。可从 https://nodejs.org 手动更新。 / Node.js update failed (winget exit code $exitCode), current version $v. Update manually from https://nodejs.org"
+    }
+    Write-Ok "Node.js $v"
 }
 
 # Run a Python version probe. Returns [version] or $null. / 探测 Python 版本，成功返回 [version]，失败返回 $null。
@@ -261,10 +279,16 @@ function Install-Python {
         throw "没有找到 Python 3.13 和 winget。请先安装 Python 3.13: https://www.python.org / Neither Python 3.13 nor winget was found. Install Python 3.13 first: https://www.python.org"
     }
     & winget install --id Python.Python.3.13 -e --accept-package-agreements --accept-source-agreements --disable-interactivity
-    if ($LASTEXITCODE -ne 0) {
-        throw "winget 安装 Python 3.13 失败，退出码 $LASTEXITCODE / winget failed to install Python 3.13, exit code $LASTEXITCODE"
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        Write-WarnLine "winget 返回退出码 $exitCode，可能是已安装。刷新 PATH 后重新检测。 / winget exit code $exitCode, possibly already installed. Refreshing PATH and re-checking."
     }
     Refresh-Path
+    $py = Find-Python
+    if (-not $py) {
+        throw "Python 3.13 安装失败（winget 退出码 $exitCode）。可从 https://www.python.org 手动安装。 / Python 3.13 install failed (winget exit code $exitCode). Install manually from https://www.python.org"
+    }
+    Write-Ok "Python $($py.Version) ($(($py.Cmd) -join ' '))"
 }
 
 # Ask before installing Python 3.13 alongside an existing non-3.13 Python. Y continues, N exits. / 已有 Python 但不是 3.13 时先询问。按 Y 安装 3.13 并继续，按 N 退出。

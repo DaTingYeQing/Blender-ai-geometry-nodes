@@ -48,7 +48,6 @@ There are still some design details that aren't handled well — not bugs, exact
 
 2. In the repository directory, open PowerShell and run install.ps1 — it installs pi, creates a Python 3.13 venv with the pinned packages, downloads Blender 4.5.0, copies the skills/extensions into ~\.pi\agent, and fills in py_environment.json:
 ```powershell    
-
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
