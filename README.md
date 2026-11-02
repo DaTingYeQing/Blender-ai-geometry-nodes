@@ -42,30 +42,46 @@ There are still some design details that aren't handled well — not bugs, exact
 
 ## Setup
 
-0.Please download the latest version from the Releases page.
+### Automatic install
 
-1. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
->Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
+1. Download the latest version from the Releases page (or clone this repository).
 
-Save install.ps1 to your Desktop, then run the following in PowerShell to install pi:
+2. In the repository directory, open PowerShell and run install.ps1 — it installs pi, creates a Python 3.13 venv with the pinned packages, downloads Blender 4.5.0, copies the skills/extensions into ~\.pi\agent, and fills in py_environment.json:
 ```powershell    
 
-powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Desktop\install.ps1"
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 
-2. In the `py_environment` file, three paths are marked that need to be changed.
+The script asks for the Blender directory, the venv directory, and the workspace path; the python and blender paths in py_environment.json are filled in automatically.
+
+### Manual install
+
+1. Download the latest version from the Releases page (or clone this repository).
+
+2. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
+>Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
+
+3. Install pi, Python 3.13.14 and the packages below, and download + extract Blender 4.5.0 (the `blender-4.5.0-windows-x64.zip` build).
+
+4. Place all `.ts` files flat into the `extensions` folder.
+
+5. Place the four folders (`_shared`, `execution`, `math`, `node_information`) flat into the `skills` folder.
+
+6. Put `py_environment.json` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent.
+
+7. Fill in the three marked paths in `py_environment.json` (see [Python environment](#python-environment)).
+
+### Python environment
+
+In `py_environment.json`, three paths are marked that need to be changed:
+
 > "exe": "-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----\\python.exe",
 
->-----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----(Replace this entire block, from the dashes to the dashes.)
+> -----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----(Replace this entire block, from the dashes to the dashes.)
 
-3. Please place all `.ts` files flat into the `extensions` folder,
-4. please place the four folders（`shared`,`execution`,`math`,`node_information`) flat into the `skills` folder.
+If you installed the packages directly into Python itself, use that Python's path. If you set up a dedicated venv instead (Python on C:, packages in an environment folder on D:), use that environment folder's Python path.
 
-5. Put the file `py_environment` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent
-
-6. Make sure Python and its dependency packages are installed (see below and send to ai).
-```
 Python **3.13.14**
 
 | Package   | Version |
@@ -75,9 +91,6 @@ Python **3.13.14**
 | numpy     | 2.5.3   |
 | scipy     | 1.18.1  |
 | manifold3d| 3.5.3   |
-
-```
-7. If you installed these packages directly into Python itself, use that Python's path. If you set up a dedicated environment for the packages instead (Python on C:, packages in an environment folder on D:), use that D: environment folder's path.
 
 
 
