@@ -33,10 +33,6 @@ Tell the AI what you need (in as much detail as possible). The AI will break you
 
 Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build from the official site). Different Blender versions may add or update geometry nodes, so some node information changes, which mainly affects the usability of these skills.
 
-Download from here:
-https://download.blender.org/release/Blender4.5/blender-4.5.0-windows-x64.zip
-
-
 There are still some design details that aren't handled well — not bugs, exactly, but small, fiddly things that weren't accounted for one by one, because there are simply too many cases involved. Some of these details you won't discover — you have no way of knowing the AI would do that — until you've run it a good many times.
 
 
@@ -58,18 +54,20 @@ The script asks for the Blender directory, the venv directory, and the workspace
 
 1. Download the latest version from the Releases page (or clone this repository).
 
-2. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
+2.Download blender from here: https://download.blender.org/release/Blender4.5/blender-4.5.0-windows-x64.zip 
+
+3. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
 >Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
 
-3. Install pi, Python 3.13.14 and the packages below, and download + extract Blender 4.5.0 (the `blender-4.5.0-windows-x64.zip` build).
+4. Install pi, Python 3.13.14 and the packages below, and download + extract Blender 4.5.0 (the `blender-4.5.0-windows-x64.zip` build).
 
-4. Place all `.ts` files flat into the `extensions` folder.
+5. Place all `.ts` files flat into the `extensions` folder.
 
-5. Place the four folders (`_shared`, `execution`, `math`, `node_information`) flat into the `skills` folder.
+6. Place the four folders (`_shared`, `execution`, `math`, `node_information`) flat into the `skills` folder.
 
-6. Put `py_environment.json` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent.
+7. Put `py_environment.json` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent.
 
-7. Fill in the three marked paths in `py_environment.json` (see [Python environment](#python-environment)).
+8. Fill in the three marked paths in `py_environment.json` (see [Python environment](#python-environment)).
 
 ### Python environment
 
