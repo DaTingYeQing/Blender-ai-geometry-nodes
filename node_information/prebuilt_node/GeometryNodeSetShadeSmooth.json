@@ -1,4 +1,4 @@
-{"idname":"GeometryNodeSetShadeSmooth","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Control the smoothness of mesh normals around each face by changing the \\","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+{"idname":"GeometryNodeSetShadeSmooth","found":true,"blender":"4.5.0","identity":{"category":"几何节点","nclass":"NODE_CLASS_GEOMETRY","description":"Control the smoothness of mesh normals around each face by changing the \"shade smooth\" attribute","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
       {"name":"Geometry","identifier":"Geometry","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
       {"name":"Selection","identifier":"Selection","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":true,"is_multi_input":false},
       {"name":"Shade Smooth","identifier":"Shade Smooth","type":"NodeSocketBool","enabled":true,"default":true,"hide_value":false,"is_multi_input":false}

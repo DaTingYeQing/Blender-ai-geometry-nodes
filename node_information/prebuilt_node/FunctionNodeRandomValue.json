@@ -1,0 +1,81 @@
+{"idname":"FunctionNodeRandomValue","found":true,"blender":"4.5.0","identity":{"category":"函数/数学节点","nclass":"NODE_CLASS_CONVERTER","description":"","created_in_tree":"GeometryNodeTree"},"runtime_sockets":{"inputs":[
+      {"name":"Min","identifier":"Min","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Max","identifier":"Max","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Min","identifier":"Min_001","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Max","identifier":"Max_001","type":"NodeSocketFloat","enabled":true,"default":1.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Min","identifier":"Min_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Max","identifier":"Max_002","type":"NodeSocketInt","enabled":false,"default":100,"hide_value":false,"is_multi_input":false},
+      {"name":"Probability","identifier":"Probability","type":"NodeSocketFloatFactor","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+      {"name":"ID","identifier":"ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+      {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+    ],"outputs":[
+      {"name":"Value","identifier":"Value","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":true,"default":0.0,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+      {"name":"Value","identifier":"Value_003","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+    ]},"runtime_properties":{"data_type":{"type":"ENUM","readonly":false,"default":"FLOAT","subtype":"NONE","enum_items":[
+        {"id":"FLOAT","name":"Float","description":"Floating-point value"},
+        {"id":"INT","name":"Integer","description":"32-bit integer"},
+        {"id":"FLOAT_VECTOR","name":"Vector","description":"3D vector with floating-point values"},
+        {"id":"FLOAT_COLOR","name":"Color","description":"RGBA color with 32-bit floating-point values"},
+        {"id":"BYTE_COLOR","name":"Byte Color","description":"RGBA color with 8-bit positive integer values"},
+        {"id":"STRING","name":"String","description":"Text string"},
+        {"id":"BOOLEAN","name":"Boolean","description":"True or false"},
+        {"id":"FLOAT2","name":"2D Vector","description":"2D vector with floating-point values"},
+        {"id":"INT8","name":"8-Bit Integer","description":"Smaller integer with a range from -128 to 127"},
+        {"id":"INT16_2D","name":"2D 16-Bit Integer Vector","description":"16-bit signed integer vector"},
+        {"id":"INT32_2D","name":"2D Integer Vector","description":"32-bit signed integer vector"},
+        {"id":"QUATERNION","name":"Quaternion","description":"Floating point quaternion rotation"},
+        {"id":"FLOAT4X4","name":"4x4 Matrix","description":"Floating point matrix"}
+      ]}},"dynamic":[
+    {"property":"data_type","variants":[
+        {"value":"INT","inputs":[
+            {"name":"Min","identifier":"Min","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Min","identifier":"Min_001","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max_001","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Min","identifier":"Min_002","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max_002","type":"NodeSocketInt","enabled":true,"default":100,"hide_value":false,"is_multi_input":false},
+            {"name":"Probability","identifier":"Probability","type":"NodeSocketFloatFactor","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"ID","identifier":"ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+            {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_003","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"FLOAT_VECTOR","inputs":[
+            {"name":"Min","identifier":"Min","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Min","identifier":"Min_001","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max_001","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Min","identifier":"Min_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max_002","type":"NodeSocketInt","enabled":false,"default":100,"hide_value":false,"is_multi_input":false},
+            {"name":"Probability","identifier":"Probability","type":"NodeSocketFloatFactor","enabled":false,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"ID","identifier":"ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+            {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketVector","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_003","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
+          ]},
+        {"value":"BOOLEAN","inputs":[
+            {"name":"Min","identifier":"Min","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Min","identifier":"Min_001","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max_001","type":"NodeSocketFloat","enabled":false,"default":1.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Min","identifier":"Min_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Max","identifier":"Max_002","type":"NodeSocketInt","enabled":false,"default":100,"hide_value":false,"is_multi_input":false},
+            {"name":"Probability","identifier":"Probability","type":"NodeSocketFloatFactor","enabled":true,"default":0.5,"hide_value":false,"is_multi_input":false},
+            {"name":"ID","identifier":"ID","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":true,"is_multi_input":false},
+            {"name":"Seed","identifier":"Seed","type":"NodeSocketInt","enabled":true,"default":0,"hide_value":false,"is_multi_input":false}
+          ],"outputs":[
+            {"name":"Value","identifier":"Value","type":"NodeSocketVector","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_001","type":"NodeSocketFloat","enabled":false,"default":0.0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_002","type":"NodeSocketInt","enabled":false,"default":0,"hide_value":false,"is_multi_input":false},
+            {"name":"Value","identifier":"Value_003","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
+          ]}
+      ]}
+  ]}

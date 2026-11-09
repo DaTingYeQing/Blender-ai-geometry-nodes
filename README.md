@@ -33,10 +33,6 @@ Tell the AI what you need (in as much detail as possible). The AI will break you
 
 Only works with **Blender 4.5.0** (the `blender-4.5.0-windows-x64.zip` build from the official site). Different Blender versions may add or update geometry nodes, so some node information changes, which mainly affects the usability of these skills.
 
-Download from here:
-https://download.blender.org/release/Blender4.5/blender-4.5.0-windows-x64.zip
-
-
 There are still some design details that aren't handled well — not bugs, exactly, but small, fiddly things that weren't accounted for one by one, because there are simply too many cases involved. Some of these details you won't discover — you have no way of knowing the AI would do that — until you've run it a good many times.
 
 
@@ -56,22 +52,25 @@ The script asks for the Blender directory, the venv directory, and the workspace
 
 ### Manual install
 
+<details>
+<summary>Show manual install steps</summary>
+
 1. Download the latest version from the Releases page (or clone this repository).
 
-2. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
+2.Download blender from here: https://download.blender.org/release/Blender4.5/blender-4.5.0-windows-x64.zip 
+
+3. This isn't a standalone tool: it requires pi agent, and was purpose-built for that environment.
 >Or rather, it's only the frontend that's adapted for pi agent — the backend code is self-contained and runs on its own.
 
-3. Install pi, Python 3.13.14 and the packages below, and download + extract Blender 4.5.0 (the `blender-4.5.0-windows-x64.zip` build).
+4. Install pi, Python 3.13.14 and the packages below, and download + extract Blender 4.5.0 (the `blender-4.5.0-windows-x64.zip` build).
 
-4. Place all `.ts` files flat into the `extensions` folder.
+5. Place all `.ts` files flat into the `extensions` folder.
 
-5. Place the four folders (`_shared`, `execution`, `math`, `node_information`) flat into the `skills` folder.
+6. Place the four folders (`_shared`, `execution`, `math`, `node_information`) flat into the `skills` folder.
 
-6. Put `py_environment.json` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent.
+7. Put `py_environment.json` and `APPEND_SYSTEM.md` in the directory ~\.pi\agent.
 
-7. Fill in the three marked paths in `py_environment.json` (see [Python environment](#python-environment)).
-
-### Python environment
+8. Fill in the three marked paths in `py_environment.json` (see [Python environment](#python-environment)).
 
 In `py_environment.json`, three paths are marked that need to be changed:
 
@@ -80,7 +79,10 @@ In `py_environment.json`, three paths are marked that need to be changed:
 > -----Fill in the full path. Backslashes must be doubled. Example: C:\\Users\\you\\Python313\\python.exe-----(Replace this entire block, from the dashes to the dashes.)
 
 If you installed the packages directly into Python itself, use that Python's path. If you set up a dedicated venv instead (Python on C:, packages in an environment folder on D:), use that environment folder's Python path.
+</details>
 
+
+### Python environment
 Python **3.13.14**
 
 | Package   | Version |
@@ -103,8 +105,16 @@ Just tell the AI: *"Load the math or node_information skill, and help me build s
 
 After one skill finishes its task, the AI will load the next skill by itself; it does not load all of them at once (occasionally it does, but that is rare). Also, sometimes after finishing one skill the AI may fail to load the next one (this happened in my testing, but it is also rare).
 
-## Tool descriptions
->（These are nothing more than thin wrappers around the tool calls; all the real backend logic lives in the Python files.）
+## Add-on
+
+[Blender-ai-geometry-nodes-trace](https://github.com/DaTingYeQing/Blender-ai-geometry-nodes-trace) — experimental; optional and does not affect normal operation.
+
+> Note: the repository is not public yet; it is still under testing.
+
+<details>
+<summary>Show Tool descriptions</summary>
+
+* These are nothing more than thin wrappers around the tool calls; all the real backend logic lives in the Python files.
 
 ### blender_math.ts
 
@@ -142,4 +152,4 @@ The environment configuration file.
 ### hook_skill.ts
 
 Updated the skill prompts and added a new hook skill that automatically tells the AI which skills to load during wf_plan.
-
+</details>

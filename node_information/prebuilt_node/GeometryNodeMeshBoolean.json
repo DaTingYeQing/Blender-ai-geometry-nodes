@@ -37,8 +37,8 @@
       ]},
     {"property":"solver","variants":[
         {"value":"EXACT","inputs":[
-            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
-            {"name":"Mesh","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Mesh 2","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
             {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false},
             {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
           ],"outputs":[
@@ -46,8 +46,8 @@
             {"name":"Intersecting Edges","identifier":"Intersecting Edges","type":"NodeSocketBool","enabled":true,"default":false,"hide_value":false,"is_multi_input":false}
           ]},
         {"value":"MANIFOLD","inputs":[
-            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":false,"default":null,"hide_value":false,"is_multi_input":false},
-            {"name":"Mesh","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
+            {"name":"Mesh 1","identifier":"Mesh 1","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":false},
+            {"name":"Mesh 2","identifier":"Mesh 2","type":"NodeSocketGeometry","enabled":true,"default":null,"hide_value":false,"is_multi_input":true},
             {"name":"Self Intersection","identifier":"Self Intersection","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false},
             {"name":"Hole Tolerant","identifier":"Hole Tolerant","type":"NodeSocketBool","enabled":false,"default":false,"hide_value":false,"is_multi_input":false}
           ],"outputs":[

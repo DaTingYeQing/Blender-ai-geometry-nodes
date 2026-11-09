@@ -1,5 +1,4 @@
 ---
-
 name: "blender-exec"
 description: "Blender 4.5 几何节点执行+调试阶段：建节点树、连 socket、跑脚本验证、调试修正、打勾推进。math模式出完计划后加载本 skill。"
 ---
@@ -31,5 +30,4 @@ description: "Blender 4.5 几何节点执行+调试阶段：建节点树、连 s
 - **blenderdata** ——想对比"改了某个上游/几何节点值前后，数据变没变、变哪"时。
 - **bpy** ——想知道"几何节点对网格的影响，或需要 Python 侧数值分析而 Blender 内工具覆盖不到时。
 - **blenderrun**——往blender里面写代码的工具
-- **zoneprobe**——节点树里有模拟区时方便你在时间流动的情况下探测想要的数据
 
