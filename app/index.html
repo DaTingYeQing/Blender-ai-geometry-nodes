@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pi Flow · 项目级 Agent 节点编排</title>
+    <link rel="stylesheet" href="/app/styles/tokens.css" />
+    <link rel="stylesheet" href="/app/styles/layout.css" />
+    <link rel="stylesheet" href="/app/styles/ui.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="wordmark">
+          <b>PI·FLOW</b>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <span id="saveState" class="save-state" data-i18n="已保存">已保存</span>
+        <div id="langSwitch" class="ui-segmented lang-switch" role="radiogroup"
+          aria-label="界面语言" data-i18n-aria="界面语言">
+          <i class="ui-thumb" aria-hidden="true"></i>
+          <button type="button" class="ui-seg is-active" role="radio" aria-checked="true" tabindex="0"
+            data-value="zh">ZH</button>
+          <button type="button" class="ui-seg" role="radio" aria-checked="false" tabindex="-1"
+            data-value="en">EN</button>
+        </div>
+        <div class="lamps" role="group" aria-label="窗口控制" data-i18n-aria="窗口控制">
+          <button type="button" class="lamp lamp--g" data-window-action="minimize" title="最小化"
+            aria-label="最小化" data-i18n-title="最小化" data-i18n-aria="最小化"></button>
+          <button type="button" class="lamp lamp--y" data-window-action="toggle-maximize" title="最大化 / 还原"
+            aria-label="最大化或还原" data-i18n-title="最大化 / 还原" data-i18n-aria="最大化或还原"></button>
+          <button type="button" class="lamp lamp--r" data-window-action="close" title="关闭"
+            aria-label="关闭" data-i18n-title="关闭" data-i18n-aria="关闭"></button>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside id="agentsPanel" class="palette"></aside>
+      <section id="canvasWrap" class="canvas-wrap"></section>
+
+      <aside id="inspector" class="inspector"></aside>
+    </main>
+
+    <footer class="statusbar">
+      <div class="grp">
+        <span id="zoomReadout">ZOOM 100%</span>
+      </div>
+      <div id="pipelineReadout">PIPELINE / 00 SLOTS · 00 LINKS</div>
+      <div class="grp">
+        <span id="clockReadout">--:--:--</span>
+      </div>
+    </footer>
+
+    <div id="toast" class="ui-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script type="module" src="/app/js/main.mjs"></script>
+  </body>
+</html>

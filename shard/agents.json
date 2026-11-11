@@ -1,0 +1,49 @@
+{
+  "_comment": "sync.mjs 的唯一输入。settings.json（provider/model/tools/extensions）由 sync 生成；SKILL.md 文本由人手动放到项目 .pi/skills/，sync 不碰。projects[].path 相对本目录（shard/），不写则按 shard/ 解析；isolate=true 会生成 .pi/pi-flow.json，Pi Flow 启动该 agent 时用 --no-extensions 并只显式加载项目扩展。改完跑 node sync.mjs sync [项目]。",
+  "home": "C:/Users/zjn13/Desktop/pi-flow-prototype/shard",
+  "previousHomes": ["C:/Users/zjn13/Desktop/PI_work/Shard"],
+
+  "defaults": {
+    "defaultProvider": "deepseek",
+    "defaultModel": "deepseek-flash",
+    "defaultTools": ["read", "bash", "edit", "write"]
+  },
+
+  "tools": {
+    "bpy": "extensions/bpy.ts",
+    "blender": "extensions/blender.ts",
+    "blender_build": "extensions/blender_build.ts",
+    "blender_data": "extensions/blender_data.ts",
+    "blender_math": "extensions/blender_math.ts",
+    "blender_screen": "extensions/blender_screen.ts",
+    "node_query": "extensions/node_query.ts",
+    "covtrace": "extensions/covtrace.ts",
+    "wf_plan": "extensions/wf_plan.ts",
+    "hook_skill": "extensions/hook_skill.ts",
+    "call": "extensions/call.ts"
+  },
+
+  "profiles": {
+    "full": [
+      "bpy", "blender", "blender_build", "blender_data", "blender_math",
+      "blender_screen", "node_query", "covtrace", "wf_plan", "hook_skill","call"
+    ],
+    "scout": ["bpy", "blender", "blender_data", "blender_screen", "node_query","call"],
+    "execute": ["blender", "call","blender_build", "blender_math", "blender_screen", "node_query"],
+    "covtrace": ["blender", "blender_screen", "call", "covtrace", "node_query"],
+    "modeling": ["call"],
+    "translate": ["call", "node_query", "blender", "wf_plan"],
+    "Single": [ "bpy", "blender", "blender_build", "blender_data", "blender_math",
+      "blender_screen", "node_query", "wf_plan", "hook_skill"],
+    "none": []
+  },
+
+  "projects": {
+    "GEO_Single": { "profile": "Single", "path": "../agents/GEO_Single", "isolate": true, "displayName": "单人", "register": false },
+    "GEO_Scout": { "profile": "scout", "path": "../agents/GEO_Scout", "isolate": true, "displayName": "侦察者" },
+    "GEO_Execute": { "profile": "execute", "path": "../agents/GEO_Execute", "isolate": true, "displayName": "执行者" },
+    "GEO_Covtrace": { "profile": "covtrace", "path": "../agents/GEO_Covtrace", "isolate": true, "displayName": "探索者" },
+    "Geo_Modeling": { "profile": "modeling", "path": "../agents/Geo_Modeling", "isolate": true, "displayName": "规划者" },
+    "GEO_Translate": { "profile": "translate", "path": "../agents/GEO_Translate", "isolate": true, "displayName": "翻译者" }
+  }
+}

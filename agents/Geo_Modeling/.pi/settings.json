@@ -1,0 +1,13 @@
+{
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-flash",
+  "defaultTools": [
+    "read",
+    "bash",
+    "edit",
+    "write"
+  ],
+  "extensions": [
+    "../../../shard/extensions/call.ts"
+  ]
+}

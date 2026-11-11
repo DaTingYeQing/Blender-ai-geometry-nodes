@@ -1,0 +1,120 @@
+/* 检查器：只保留布局与排版，交互件外观来自 ui.css。 */
+.inspector {
+  color: var(--ui-ink);
+  font-size: 12px;
+}
+
+/* ── 头部 ───────────────────────────────────── */
+.inspector .insp-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.inspector .insp-kicker {
+  margin: 0;
+  color: var(--ui-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.inspector h2 {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ui-ink);
+  margin: 10px 0 6px;
+}
+
+.inspector h2 .arrow {
+  color: var(--ui-ink-3);
+  font-weight: 400;
+}
+
+/* Agent / 项目信息：ui-well 提供凹槽外观，这里只排布局。 */
+.inspector .insp-info {
+  padding: 0 14px;
+}
+
+.inspector .info-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 11px;
+}
+
+.inspector .info-row + .info-row {
+  border-top: 1px solid rgba(160, 140, 105, 0.35);
+}
+
+.inspector .info-row span {
+  color: var(--ui-ink-2);
+}
+
+.inspector .info-row b {
+  color: var(--ui-ink);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 分区 ───────────────────────────────────── */
+.inspector .insp-section {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 18px;
+}
+
+.inspector .insp-section h3 {
+  display: block;
+  margin: 0 0 9px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ui-ink-2);
+}
+
+.inspector .insp-section h3.with-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inspector .insp-section h3.with-count > span {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ui-ink-3);
+}
+
+#sessionSelect {
+  margin-top: 8px;
+}
+
+/* ── 交接提示词开关 ─────────────────────────── */
+.inspector .toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.inspector .toggle-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.inspector .toggle-text h3 {
+  margin: 0 0 4px;
+}
+
+.inspector .radio-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+

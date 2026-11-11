@@ -1,0 +1,60 @@
+{
+  "name": "默认预设",
+  "nodes": [
+    {
+      "key": "execute",
+      "agent": "GEO_Execute",
+      "title": "执行者",
+      "x": 248,
+      "y": 178,
+      "task": "",
+      "handoffEnabled": true
+    },
+    {
+      "key": "scout",
+      "agent": "GEO_Scout",
+      "title": "侦察者",
+      "x": 247,
+      "y": -28,
+      "task": "",
+      "handoffEnabled": true
+    },
+    {
+      "key": "plan",
+      "agent": "Geo_Modeling",
+      "title": "规划者",
+      "x": -353,
+      "y": -27,
+      "task": "我要在blender指定一个平面，然后我想在blender里面对他实现折纸的效果\n指定一个和他平行的轴可以在这个平面上360°转动作为轴\n然后可以选择角度来按照这个轴转动多少度\n度数限制应该是正负180°，也就是不会穿模",
+      "handoffEnabled": false
+    },
+    {
+      "key": "covtrace",
+      "agent": "GEO_Covtrace",
+      "title": "探索者",
+      "x": 248,
+      "y": 420,
+      "task": "",
+      "handoffEnabled": true
+    },
+    {
+      "key": "translate",
+      "agent": "GEO_Translate",
+      "title": "翻译者",
+      "x": -356,
+      "y": 231,
+      "task": "",
+      "handoffEnabled": true
+    }
+  ],
+  "edges": [
+    { "from": "execute", "to": "covtrace" },
+    { "from": "covtrace", "to": "execute" },
+    { "from": "execute", "to": "scout" },
+    { "from": "scout", "to": "execute" },
+    { "from": "plan", "to": "translate" },
+    { "from": "translate", "to": "execute" },
+    { "from": "plan", "to": "scout" },
+    { "from": "plan", "to": "covtrace" }
+  ]
+}

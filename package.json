@@ -1,0 +1,62 @@
+{
+  "name": "pi-flow",
+  "productName": "Pi Flow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "项目级 Pi Agent 节点编排",
+  "type": "module",
+  "main": "electron/main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "dev": "node electron/standalone.mjs",
+    "preview:setup": "electron electron/setup-preview.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "fetch:bundles": "node scripts/fetch-bundles.mjs",
+    "check:bundles": "node scripts/fetch-bundles.mjs --check",
+    "pack": "node scripts/fetch-bundles.mjs --check && electron-builder --win && node scripts/clean-release.mjs"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "dev.piflow.desktop",
+    "productName": "Pi Flow",
+    "electronLanguages": ["zh-CN", "en-US"],
+    "compression": "normal",
+    "files": ["electron/**/*", "app/**/*", "modules/**/*", "package.json"],
+    "extraResources": [
+      { "from": "shard", "to": "shard", "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"] },
+      {
+        "from": "agents",
+        "to": "agents",
+        "filter": ["**/*", "!**/.pi/flow/**", "!**/extensions.legacy/**", "!**/__pycache__/**", "!**/*.pyc"]
+      },
+      { "from": "scripts", "to": "scripts" },
+      { "from": "resources/bundles", "to": "bundles" },
+      { "from": "presets", "to": "presets" },
+      { "from": "resources/blender", "to": "blender" }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon/pi-flow-icon.ico",
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "include": "build/installer.nsh",
+      "installerLanguages": [
+        "en_US"
+      ],
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Pi Flow",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

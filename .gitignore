@@ -1,3 +1,18 @@
+node_modules/
+release/
+data/
+.screenshots/
+*.log
 __pycache__/
 *.pyc
-.qoder
+**/extensions.legacy/
+agents/**/.pi/flow/
+workspace/*
+!workspace/.gitkeep
+.qoder/
+resources/blender/*.zip
+# 离线安装包不入库，只提交版本和哈希清单
+resources/bundles/*
+!resources/bundles/manifest.json
+!resources/bundles/wheels-constraints.txt
+icon/

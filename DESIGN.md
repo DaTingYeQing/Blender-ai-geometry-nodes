@@ -14,7 +14,7 @@ These two things often conflict. A graphical interface that feels simple to a pe
 
 ## 2. Why CLI Instead of MCP
 
-I considered MCP at first, but ultimately dropped it. Two reasons:
+I considered MCP at first, but ultimately dropped it. A few reasons:
 
 | Concern | MCP | CLI running in the background |
 |---|---|---|
@@ -100,7 +100,7 @@ Blender's interface is designed for a human with a mouse. It isn't friendly to a
 
 Too clumsy. Slow to write, and never complete. But the deeper problem was — **how do you know what the AI wants?** You don't know which value it's trying to verify this time, or which state it wants to compare. Hard-coding what to fetch ahead of time is just guessing.
 
-That was the biggest problem of the whole endeavor. There was a point where I thought it was impossible: **building a tool that tells me what I want without my having to say it.**
+That was the biggest problem of the whole endeavor. There was a point where I thought it was impossible: **building a tool that knows what I want without my having to say it.**
 
 ### The dumb way that worked: diff before and after
 
@@ -187,7 +187,7 @@ That's the **`bpy` tool**.
 
 It lets the AI **focus on the algorithm rather than the nodes** in the early stage. Instead of first figuring out "how should these nodes be wired," it clarifies the mathematical relationships first. This tool did give the AI a real boost as well.
 
-### `zone probe`: a semi-custom form for Simulation Zones（Now i delete it----2026.10.7）
+### `zone probe`: a semi-custom form for Simulation Zones (now deleted — 2026.10.7)
 
 Next came **`zone probe`**, a tool built to handle **Simulation Zones**.
 
@@ -244,6 +244,23 @@ So my judgment is:
 
 If you understand Geometry Nodes well, **you can perhaps abstract it into tasks that help the AI**; conversely, however strong the AI is, it lacks the person who points it in the right direction.
 
+## What Came Next
+
+* Later I wanted the AI to know how a node is actually implemented internally. I still felt that a knowledge base was too heavy a thing, and not something I could build on my own, so I chose to let the AI go read the code that actually runs behind a feature itself — and that's how the covtrace tool came about.
+> Blender's source code is instrumented, so it can detect which code paths actually run at runtime.
+
+* Recently I asked the AI to recommend a bunch of approaches: verysleep, AST, ctag, clangd (I can never remember whether it's clang or clangd — either way, it's not the compiler). I eventually got something built, but it all failed, because there is simply far too much code — it really can drown you. And if you don't give the AI a clear direction, it won't work efficiently. So the solution I came up with was to figure out how to filter things down (Blender contains a huge amount of code with no real business logic). That filtering isn't finished either; the current logic is this:
+
+> Suppose there are three nodes A-B-C. If the AI wants to know how node B is implemented internally, put A's geometry output on the group output, then put B's geometry output on the group output, and run it twice. Take all the resulting edges, subtract them from each other, and keep the overlapping part of the functions as the boundary — maybe, roughly, probably, that should be approximately right.
+
+> In fact, building this tool was the most vibe-coded of all my tools. With the others I could still intervene in the trade-offs and the intermediate logic, or ask the AI to explain the principles and the cost to me. But with compilation I had no way to intervene at all — I could only state the granularity of the result I wanted and watch the AI hammer away at it.
+
+* Then I turned all of this into a piece of software. I have been simplifying the configuration step by step, but it was still too much hassle; now you don't have to deal with any paths at all, and everything needed is integrated. At the same time the number of tools kept growing, so it seemed reasonable to switch to a node workflow where AI works alongside AI, sharing the load — and skills naturally disappeared.
+> At first I didn't really like sub-agents, because that stuff is a black box within a black box, but now I've picked it back up. Still, the workflow has to be rigorously defined; node orchestration is at least controllable and can be defined by you.
+
+* I tightened up some of the weaker parts from before: the workflow, and the math skill I mentioned earlier. These things can now be quantified — though that only becomes possible with the nodes you orchestrate. I used to think I had quantified them, but throwing all the tools at the AI doesn't mean **quantification**.
+
+* The next updates are about the node orchestration flow: first make Team mode usable (I'm not even sure whether it will work), then tighten up the covtrace tool by adding a filtering mechanism. And once all of that converges, a memory plugin will be needed to help the AI — not to remember more, but to compress, to fight for its **attention**, and to see whether that makes it stronger. That's quite hard too; as things stand, it's an open problem for the whole AI industry.
 
 ## 9. Finally
 

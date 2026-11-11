@@ -1,0 +1,106 @@
+/* 流程启动器：只保留布局，颜色 / 凸起 / 凹陷 / 按压全部来自 ui.css。 */
+.flow-modal {
+  width: 640px;
+  padding: 26px 32px;
+}
+
+.flow-modal .ui-modal__actions {
+  margin-top: 22px;
+}
+
+#modeSwitch {
+  margin-bottom: 18px;
+}
+
+/* 流程列表：整条是凹陷槽，选中的凸起滑块在项之间滑动。 */
+.flow-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2px 9px;
+  color: var(--ui-ink-2);
+  font-size: 12px;
+}
+
+.flow-list-head i {
+  color: var(--ui-ink-3);
+  font-size: 10px;
+  font-style: normal;
+}
+
+.flow-list {
+  position: relative;
+  max-height: 262px;
+  margin: 0 0 18px;
+  padding: 6px 6px 12px;
+  overflow: auto;
+}
+
+.flow-list .ui-thumb {
+  border-radius: 7px;
+}
+
+.flow-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.flow-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 96px 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--ui-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.flow-item:hover:not(.is-active) {
+  background: rgba(255, 250, 235, 0.4);
+}
+
+.flow-name {
+  color: var(--ui-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.flow-meta {
+  color: var(--ui-ink-3);
+  font-size: 11px;
+}
+
+.flow-delete {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+}
+
+.flow-modal .flow-delete:active:not(:disabled) {
+  transform: translateY(calc(-50% + 1px));
+}
+
+/* 新建表单 */
+.flow-modal .ui-field {
+  margin-bottom: 0;
+}
+
+.flow-modal .ui-field__row {
+  gap: 10px;
+}
+
+.flow-modal .ui-modal__actions .ui-btn {
+  min-width: 92px;
+}
+
+#singlePanel {
+  margin-bottom: 6px;
+}
+

@@ -1,0 +1,21 @@
+/* 产物预览：弹窗骨架来自 ui-modal，这里只定义宽度和正文凹槽。 */
+.preview-modal {
+  width: min(720px, calc(100vw - 40px));
+}
+
+.preview-body {
+  margin: 0;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: var(--ui-well);
+  color: var(--ui-ink);
+  box-shadow: var(--ui-well-inset);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

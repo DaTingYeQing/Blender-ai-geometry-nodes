@@ -1,0 +1,11 @@
+{
+  "_note": "setup-runtime.ps1 和 scripts/fetch-bundles.mjs 共用这份版本清单；改完运行 npm run fetch:bundles。",
+  "python": "3.13",
+  "packages": [
+    "numpy==2.5.3",
+    "scipy==1.18.1",
+    "pyvista==0.49.0",
+    "trimesh==5.1.0",
+    "manifold3d==3.5.3"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-flash",
+  "defaultTools": [
+    "read",
+    "bash",
+    "edit",
+    "write"
+  ],
+  "extensions": [
+    "../../../shard/extensions/blender.ts",
+    "../../../shard/extensions/call.ts",
+    "../../../shard/extensions/blender_build.ts",
+    "../../../shard/extensions/blender_math.ts",
+    "../../../shard/extensions/blender_screen.ts",
+    "../../../shard/extensions/node_query.ts"
+  ]
+}

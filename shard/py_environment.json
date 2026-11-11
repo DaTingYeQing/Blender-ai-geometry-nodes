@@ -1,0 +1,38 @@
+{
+  "_comment": "Blender 节点 skill 的环境唯一出口。其他地方一律引用这里，不要再各自写死路径。",
+  "_updated": "2026-11-11",
+
+  "python": {
+    "_role": "外部 python（跑在 Blender 外面的那个）：所有不碰 bpy 的胶水脚本都由它执行；需要加第三方几何库",
+    "_note": "安装时由 setup-runtime.ps1 写入实际路径，不要在模板里写死盘符。",
+    "exe": "",
+    "version": "3.13.14",
+    "site_packages_hint": "numpy / scipy / trimesh / pyvista / manifold3d / matplotlib / PIL"
+  },
+
+  "blender": {
+    "_role": "内层环境：所有需要 bpy 的脚本，都必须由它带着跑（--background，不弹界面）",
+    "_note": "安装时由 setup-runtime.ps1 写入实际路径。这里配的是 blender.exe，不是它文件夹里的 python.exe。",
+    "exe": "",
+    "version": "4.5.0",
+    "python_version": "3.11.11"
+  },
+
+  "workspace": {
+    "_role": "工作区：.blend / 批次文件 / payload / 生成脚本等运行产物的落盘处（Python 侧经 envcard.WORKSPACE 取；TS 侧直接读本文件）",
+    "root": "../workspace"
+  },
+
+  "covtrace": {
+    "_role": "调用边差分：插桩 Blender + CovTrace 引擎。只给 covtrace_run 工具用",
+    "_layout": "地址相对地址簿所在目录。运行目录下的 blender-src 复刻编译机布局：llvm-mini/bin、blender/blender.exe、blender-4.5.0-mini-source/covtrace-kit",
+    "root": "../runtime/blender-src/blender-4.5.0-mini-source/covtrace-kit/CovTrace",
+    "engine": "../runtime/blender-src/blender-4.5.0-mini-source/covtrace-kit/CovTrace/engine.py",
+    "_note": "source_dir / blender_exe / llvm_bin / graphviz_bin 留空时按目录布局自动发现；填了则覆盖。pdb_source_dir 是编译机源码路径，只有重建过 PDB 才需要改。",
+    "source_dir": "../runtime/blender-src/blender-4.5.0-mini-source",
+    "blender_exe": "../runtime/blender-src/blender/blender.exe",
+    "llvm_bin": "../runtime/blender-src/llvm-mini/bin",
+    "graphviz_bin": "",
+    "pdb_source_dir": ""
+  }
+}
