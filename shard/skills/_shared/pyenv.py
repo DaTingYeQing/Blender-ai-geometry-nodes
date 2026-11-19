@@ -65,7 +65,7 @@ def blender_exe():
 
 
 def python_exe():
-    """外部 python：python.exe 完整路径（跑所有不碰 bpy 的胶水脚本）。"""
+    """目标 python：python.exe 完整路径（Blender 内置 python，跑所有不碰 bpy 的胶水脚本）。"""
     return _env()["python"]["exe"]
 
 
@@ -129,7 +129,7 @@ with open(ENV_JSON, "r", encoding="utf-8") as _f:
     _E = _json.load(_f)
 
 BLENDER_EXE = _E["blender"]["exe"]            # 内层：带 bpy 跑
-PYTHON_EXE  = _E["python"]["exe"]             # 外部：跑不碰 bpy 的胶水脚本
+PYTHON_EXE  = _E["python"]["exe"]             # 目标：Blender 内置 python，跑不碰 bpy 的胶水脚本
 _WS         = _os.environ.get("PI_WORKSPACE_ROOT") or _E.get("workspace", {}).get("root", "")  # 项目工作区由 TS 传入
 if _WS and not _os.path.isabs(_WS):
     _WS = _os.path.normpath(_os.path.join(_os.path.dirname(ENV_JSON), _WS))
@@ -174,7 +174,7 @@ def _show():
         print("  %-12s %s   [%s] %s" % (label, path or "(空)", ok, note))
 
     line("blender.exe", blender_exe(), "内层：带 bpy 跑")
-    line("python.exe", python_exe(), "外部：跑胶水脚本")
+    line("python.exe", python_exe(), "目标：Blender 内置 python，跑胶水脚本")
     line("工作区", workspace(), "产物落盘处")
     print()
 

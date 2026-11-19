@@ -1,5 +1,5 @@
 /**
- * bpy 扩展 —— 往外部 python环境执行 Python 代码，拿几何摘要 / 任意网格分析
+ * bpy 扩展 —— 执行 Python 代码，拿几何摘要 / 任意网格分析
  *
  * 薄前端：收参数 → 起 bpy_run.py（它自己把代码交给对的 python、把 meshkit 路径摆好）→ 原样返回。
  * 地址一律现读上一级的 py_environment.json；本文件不含任何绝对路径，可直接进 Git。
@@ -154,7 +154,8 @@ const bpyTool = defineTool({
 		"from_blend：从 .blend 按「物体 + 修改器 + 节点」一步取摘要（无头开 Blender，10-30s）；实例几何引擎会自动 Realize Instances，不修改器 apply 。" +
 		"【summary 与 fields 两个空必填】：summary 填 mesh / pointcloud，fields 填你要哪几项（可多个）。返回只含你要的项。\n" +
 		"node_list：同上但只列节点清单、不烘几何 —— 不知道树里有哪些节点、哪个带几何输出时先用它探。\n" +
-		"code：写任意 Python —— 跑在外部 python里，能 import meshkit / numpy / trimesh / pyvista，没有 bpy；要在 Blender 内跑代码用 blender_run。\n" +
+		"code：写任意 Python —— 跑在 Blender 内置的 python 里（单独进程），能 import meshkit / numpy / trimesh / pyvista；" +
+		"注意 import bpy 依然不可用（bpy 模块只活在 blender.exe 进程里），要在 Blender 内跑代码用 blender_run。\n" +
 		"摘要内容：网格 32 项。；" +
 		"点云 10 项。",
 	parameters: Type.Object({
@@ -196,7 +197,7 @@ const bpyTool = defineTool({
 			description: "mode=from_blend：取第几帧。不填=场景当前帧。模拟区有状态，引擎会从第 1 帧推到这",
 		})),
 		expr: Type.Optional(Type.String({
-			description: "mode=code：Python 代码，多行/中文均可（外部 python，无 bpy）。其它 mode 不用填",
+			description: "mode=code：Python 代码，多行/中文均可（Blender 内置 python，无 bpy）。其它 mode 不用填",
 		})),
 	}),
 	async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

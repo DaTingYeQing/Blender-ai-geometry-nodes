@@ -29,8 +29,17 @@ function T([string]$Zh, [string]$En) {
 $ErrorActionPreference = 'Continue'
 $root = $PSScriptRoot
 $resultFile = Join-Path $root 'setup-result.json'
-$logFile = Join-Path $root 'uninstall.log'
+# 日志放在数据目录外：最后整个数据目录会被删掉，日志必须活下来才能排查。
+$logFile = Join-Path $env:TEMP 'PiFlow-uninstall.log'
 $selfName = $MyInvocation.MyCommand.Name
+$script:Failures = 0
+
+try {
+    [System.IO.File]::WriteAllText($logFile, '', [System.Text.Encoding]::UTF8)
+}
+catch {
+    # 日志写不进去不影响清理。
+}
 
 function Write-Log([string]$Message) {
     $prefix = if ($DryRun) { '[dry-run] ' } else { '' }
@@ -68,14 +77,17 @@ function Invoke-CleanupProcess {
                 try { $process.Kill() } catch { }
             }
             Write-Log (T "  $What 超时，已终止" "  $What timed out; terminated")
+            $script:Failures++
             return -1
         }
         $process.WaitForExit()
         Write-Log (T "  $What 退出码 $($process.ExitCode)" "  $What exited with code $($process.ExitCode)")
+        if ($process.ExitCode -ne 0) { $script:Failures++ }
         return $process.ExitCode
     }
     catch {
         Write-Log (T "  $What 执行失败：$($_.Exception.Message)" "  $What failed: $($_.Exception.Message)")
+        $script:Failures++
         return -2
     }
     finally {
@@ -86,7 +98,8 @@ function Invoke-CleanupProcess {
 function Uninstall-WingetPackage([string]$Id) {
     $winget = Get-Command winget -ErrorAction SilentlyContinue
     if (-not $winget) {
-        Write-Log (T "  没有 winget，跳过 $Id" "  winget not found; skipping $Id")
+        Write-Log (T "  没有 winget，$Id 未卸载" "  winget not found; $Id was not uninstalled")
+        $script:Failures++
         return
     }
     Write-Log (T "  winget 卸载 $Id" "  winget uninstall $Id")
@@ -134,7 +147,8 @@ if ($managed) {
         }
     }
 
-    # 2. Python：优先用当初的安装包卸载，找不到再试 winget。
+    # 2. Python：本版安装器已不装系统 Python，但 v2.0.0 的清单里可能还有记录，
+    #    照旧回收，避免从旧版升级上来的机器留下一个 Python。
     if ($managed.pythonInstalled) {
         $method = [string]$managed.pythonMethod
         $installer = [string]$managed.pythonInstaller
@@ -142,13 +156,13 @@ if ($managed) {
             $downloads = [System.IO.Path]::GetFullPath((Join-Path $root 'runtime\downloads'))
             $fullInstaller = [System.IO.Path]::GetFullPath($installer)
             if ($fullInstaller.StartsWith($downloads, [System.StringComparison]::OrdinalIgnoreCase)) {
-                Write-Log (T "卸载 Python 3.13（$installer）" "Uninstalling Python 3.13 ($installer)")
+                Write-Log (T "卸载旧版安装的 Python 3.13（$installer）" "Uninstalling Python 3.13 from the previous install ($installer)")
                 if (-not $DryRun) {
                     $null = Invoke-CleanupProcess $installer @('/uninstall', '/quiet') 900 (T 'Python 卸载' 'Python uninstall')
                 }
             }
             else {
-                Write-Log (T "  Python 安装包不在 downloads 目录，改用 winget" "  Python installer is outside downloads; using winget")
+                Write-Log (T "  旧版 Python 安装包已随安装目录删除，改用 winget" "  The old Python installer is gone with the install dir; using winget")
                 Uninstall-WingetPackage 'Python.Python.3.13'
             }
         }
@@ -173,14 +187,29 @@ if ($managed) {
             $file = Join-Path $agentBinDir $fileName
             if (Test-Path -LiteralPath $file) {
                 Write-Log (T "删除 $file" "Removing $file")
-                if (-not $DryRun) { Remove-Item -LiteralPath $file -Force -ErrorAction SilentlyContinue }
+                if (-not $DryRun) {
+                    try {
+                        Remove-Item -LiteralPath $file -Force -ErrorAction Stop
+                    }
+                    catch {
+                        Write-Log (T "  未能删除 ${file}：$($_.Exception.Message)" "  Could not remove ${file}: $($_.Exception.Message)")
+                        $script:Failures++
+                    }
+                }
             }
         }
         # 空目录才删除，避免动到用户其他内容。
         foreach ($dir in @($agentBinDir, (Split-Path -Parent $agentBinDir))) {
             if (-not $dir -or -not (Test-Path -LiteralPath $dir)) { continue }
             if (Get-ChildItem -LiteralPath $dir -Force -ErrorAction SilentlyContinue) { continue }
-            if (-not $DryRun) { Remove-Item -LiteralPath $dir -Force -ErrorAction SilentlyContinue }
+            if (-not $DryRun) {
+                try {
+                    Remove-Item -LiteralPath $dir -Force -ErrorAction Stop
+                }
+                catch {
+                    $script:Failures++
+                }
+            }
         }
     }
 
@@ -194,15 +223,21 @@ if ($managed) {
 Write-Log (T "删除 Pi Flow 数据目录内容：$root" "Removing Pi Flow data directory contents: $root")
 if (-not $DryRun) {
     foreach ($item in (Get-ChildItem -LiteralPath $root -Force -ErrorAction SilentlyContinue)) {
-        if ($item.Name -eq $selfName -or $item.Name -eq 'uninstall.log') { continue }
+        if ($item.Name -eq $selfName) { continue }
         try {
             Remove-Item -LiteralPath $item.FullName -Recurse -Force -ErrorAction Stop
         }
         catch {
             Write-Log (T "  未能删除 $($item.FullName)：$($_.Exception.Message)" "  Could not remove $($item.FullName): $($_.Exception.Message)")
+            $script:Failures++
         }
     }
 }
 
+if ($script:Failures -gt 0) {
+    Write-Log (T "Pi Flow 卸载清理完成，有 $($script:Failures) 项未完成" "Pi Flow uninstall cleanup finished with $($script:Failures) unresolved item(s)")
+    Write-Log (T "详见日志：$logFile" "See log: $logFile")
+    exit 1
+}
 Write-Log (T "Pi Flow 卸载清理完成" "Pi Flow uninstall cleanup finished")
 exit 0

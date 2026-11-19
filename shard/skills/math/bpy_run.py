@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
-"""bpy_run.py —— 把一段 Python 代码交给「外部 python」执行（那个环境自带 meshkit）。
+"""bpy_run.py —— 把一段 Python 代码交给「目标 python」执行（那个环境自带 meshkit）。
 
-    「外部 python」= 跑在 Blender 外面的那个 python，地址从同目录的 envcard 取，
+    「目标 python」= 地址卡片里 python.exe 指向的那个解释器 —— 单环境方案下
+    就是 Blender 目录里的内置 python（4.5\\python\\bin\\python.exe）。
     本文件里不出现任何路径、也不出现环境的名字。
 
 调用方只管把代码丢进来，剩下的后勤全由本脚本自理：
 
-  * 自动把内容交给外部 python 去跑 —— 调用方用哪个 python 启动它都无所谓
+  * 自动把内容交给目标 python 去跑 —— 调用方用哪个 python 启动它都无所谓
   * 自动把 meshkit 所在目录摆进 sys.path —— 调用方不用设 cwd / PYTHONPATH
   * 顺带兜住超时、把报错讲清楚
 
 为什么需要它
-    外部 python 里装着 trimesh / numpy / pyvista / manifold3d / scipy，
-    而别的 python 一个都没有（实测 `import trimesh` 直接 ModuleNotFoundError）。
-    AI 用 bpy 工具做网格分析，代码必须落在外部 python 上。本脚本负责保证这件事。
+    目标 python 里装着 trimesh / numpy / pyvista / manifold3d / scipy
+    （随 Blender zip 内置），随便抓一个系统 python 都没有。
+    AI 用 bpy 工具做网格分析，代码必须落在目标 python 上。本脚本负责保证这件事。
+    注意：虽然目标就是 Blender 自带的 python，但 import bpy 依然不可用 ——
+    bpy 模块只活在 blender.exe 进程里，要碰 bpy 走 blender_run。
 
 怎么用
     python bpy_run.py -e "<Python 代码>"     跑一段代码
@@ -27,7 +30,7 @@
 退出码
     0   成功
     1   代码自己报错（栈已打印在 stderr）
-    2   用法错 / 环境没配好（比如 -e 后面空着、找不到外部 python）
+    2   用法错 / 环境没配好（比如 -e 后面空着、找不到目标 python）
     124 超时被强制结束（POSIX timeout 的约定值）
 
 编码

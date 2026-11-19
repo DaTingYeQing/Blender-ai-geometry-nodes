@@ -1,61 +1,165 @@
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pi Flow · 项目级 Agent 节点编排</title>
-    <link rel="stylesheet" href="/app/styles/tokens.css" />
-    <link rel="stylesheet" href="/app/styles/layout.css" />
-    <link rel="stylesheet" href="/app/styles/ui.css" />
-  </head>
-  <body>
-    <header class="topbar">
-      <div class="brand">
-        <div class="wordmark">
-          <b>PI·FLOW</b>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flow</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/modal.css">
+<link rel="stylesheet" href="css/canvas.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- 顶栏 -->
+    <div class="topbar">
+      <div class="logo"><img src="cube-icon.svg" alt="logo">Flow</div>
+      <div class="spacer"></div>
+      <div class="dots">
+        <span class="dot-green" data-win="minimize" title="最小化" data-i18n-title="最小化"></span>
+        <span class="dot-yellow" data-win="maximize" title="最大化 / 还原" data-i18n-title="最大化 / 还原"></span>
+        <span class="dot-red" data-win="close" title="关闭" data-i18n-title="关闭"></span>
+      </div>
+    </div>
+
+    <!-- 点击 logo 弹出的面板（语言 / 工作区） -->
+    <div class="modal-overlay" id="logoPanel">
+      <div class="modal modal-logo">
+        <button class="m-close" title="关闭" data-i18n-title="关闭">✕</button>
+        <div class="v-line"></div>
+        <div class="m-left">
+          <div class="nav-item active" data-panel="lang" data-i18n="语言">语言</div>
+          <div class="nav-item" data-panel="workspace" data-i18n="工作区">工作区</div>
+        </div>
+        <div class="m-right column-top">
+          <div class="panel" id="panel-lang">
+            <div class="lang-toggle" id="langToggle">
+              <div class="lang-knob"></div>
+              <span class="lang-opt" data-lang="zh">中文</span>
+              <span class="lang-opt active" data-lang="en">English</span>
+            </div>
+          </div>
+          <div class="panel panel-workspace" id="panel-workspace" hidden>
+            <div class="lang-toggle mode-toggle" id="modeToggle">
+              <div class="lang-knob"></div>
+              <span class="lang-opt active" data-mode="team" data-i18n="团队模式">团队模式</span>
+              <span class="lang-opt" data-mode="solo" data-i18n="单人模式">单人模式</span>
+            </div>
+            <!-- 团队模式：方框容器，可上下滚动，点击选中、确定进入（条目由 JS 渲染） -->
+            <div class="team-box" id="teamBox"></div>
+            <!-- 单人模式：说明文字 -->
+            <div class="solo-info" id="soloInfo" hidden>
+              <p class="solo-text" data-i18n="单人模式下直接启动 Pi 终端，会话管理由 Pi 自己负责">单人模式下直接启动 Pi 终端，会话管理由 Pi 自己负责</p>
+            </div>
+            <p class="ws-hint" data-i18n="请及时清理工作区文件，推荐一次任务完成清理一次，否则可能会影响到下次任务的进行">请及时清理工作区文件，推荐一次任务完成清理一次，否则可能会影响到下次任务的进行</p>
+            <div class="dlg-actions ws-actions">
+              <button class="folder-btn" id="wsFolder" type="button" title="打开工作区文件夹" aria-label="打开工作区文件夹" data-i18n-title="打开工作区文件夹" data-i18n-aria="打开工作区文件夹">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+              </button>
+              <button class="plus-btn" id="wsPlus" type="button" title="添加" data-i18n-title="添加">＋</button>
+              <button class="trash-btn" id="wsTrash" type="button" title="删除" aria-label="删除" data-i18n-title="删除" data-i18n-aria="删除">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 6h18"/>
+                  <path d="M8 6V4h8v2"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6"/>
+                  <path d="M14 11v6"/>
+                </svg>
+              </button>
+              <span class="ws-spacer"></span>
+              <button class="dlg-btn" type="button" data-action="cancel" data-i18n="取消">取消</button>
+              <button class="dlg-btn primary" type="button" data-action="confirm" data-i18n="确定">确定</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 点击加号弹出的面板（注册agent） -->
+    <div class="modal-overlay" id="addPanel">
+      <div class="modal modal-register">
+        <button class="m-close" title="关闭" data-i18n-title="关闭">✕</button>
+        <div class="m-right form-panel">
+          <div class="dlg-title" data-i18n="注册agent">注册agent</div>
+          <div class="dlg-row">
+            <input class="dlg-input" type="text" placeholder="项目文件夹的绝对路径" data-i18n-placeholder="项目文件夹的绝对路径">
+            <button class="dlg-btn" type="button" data-i18n="选择">选择</button>
+          </div>
+          <div class="dlg-actions">
+            <button class="dlg-btn" type="button" data-action="cancel" data-i18n="取消">取消</button>
+            <button class="dlg-btn primary" type="button" data-action="confirm" data-i18n="确定">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="body" id="body">
+
+      <!-- 左侧栏：团队列表 -->
+      <div class="sidebar" id="sidebar">
+        <div class="side-content">
+          <div class="item label row">
+            <span data-i18n="团队">团队</span>
+            <span class="add-btn" title="新建团队" data-i18n-title="新建团队">＋</span>
+          </div>
+          <div class="side-divider"></div>
+          <div id="teamList"></div>
         </div>
       </div>
 
-      <div class="topbar-right">
-        <span id="saveState" class="save-state" data-i18n="已保存">已保存</span>
-        <div id="langSwitch" class="ui-segmented lang-switch" role="radiogroup"
-          aria-label="界面语言" data-i18n-aria="界面语言">
-          <i class="ui-thumb" aria-hidden="true"></i>
-          <button type="button" class="ui-seg is-active" role="radio" aria-checked="true" tabindex="0"
-            data-value="zh">ZH</button>
-          <button type="button" class="ui-seg" role="radio" aria-checked="false" tabindex="-1"
-            data-value="en">EN</button>
+      <!-- 分割栏 -->
+      <div class="splitter" id="splitter"></div>
+
+      <!-- 右侧主区域：大标题 + 无限画布 -->
+      <div class="main" id="main">
+        <!-- 手动保存：只在工作区显示；成功后变成绿色 done -->
+        <button class="save-btn" id="saveBtn" type="button" hidden><span class="save-bracket">&lt;</span><span class="save-text">save</span><span class="save-bracket">&gt;</span></button>
+        <div class="hero-wrap">
+          <h1 class="clickable" id="logoClick"><span class="logo-inner" id="logoInner">CLICK <span class="orange">&lt;</span><img src="cube-icon.svg" alt=""><span class="orange">&gt;</span></span></h1>
         </div>
-        <div class="lamps" role="group" aria-label="窗口控制" data-i18n-aria="窗口控制">
-          <button type="button" class="lamp lamp--g" data-window-action="minimize" title="最小化"
-            aria-label="最小化" data-i18n-title="最小化" data-i18n-aria="最小化"></button>
-          <button type="button" class="lamp lamp--y" data-window-action="toggle-maximize" title="最大化 / 还原"
-            aria-label="最大化或还原" data-i18n-title="最大化 / 还原" data-i18n-aria="最大化或还原"></button>
-          <button type="button" class="lamp lamp--r" data-window-action="close" title="关闭"
-            aria-label="关闭" data-i18n-title="关闭" data-i18n-aria="关闭"></button>
+        <div class="ws-content">
+          <div class="ws-canvas" id="wsCanvas">
+            <div class="canvas-dots"></div>
+            <div class="canvas-world" id="canvasWorld"></div>
+          </div>
         </div>
       </div>
-    </header>
 
-    <main class="workspace">
-      <aside id="agentsPanel" class="palette"></aside>
-      <section id="canvasWrap" class="canvas-wrap"></section>
+      <!-- 产物查看器：点产物文件后从右侧滑出，宽度可拖，最大不压到左侧栏 -->
+      <div class="ap-splitter" id="artifactSplitter" hidden></div>
+      <aside class="artifact-pane" id="artifactPane" hidden>
+        <div class="ap-head">
+          <span class="ap-name" id="artifactName"></span>
+          <button class="ap-close" id="artifactClose" type="button" aria-label="关闭" data-i18n-aria="关闭">✕</button>
+        </div>
+        <div class="ap-scroll">
+          <div class="ap-content" id="artifactContent"></div>
+        </div>
+      </aside>
 
-      <aside id="inspector" class="inspector"></aside>
-    </main>
+    </div>
+  </div>
 
-    <footer class="statusbar">
-      <div class="grp">
-        <span id="zoomReadout">ZOOM 100%</span>
-      </div>
-      <div id="pipelineReadout">PIPELINE / 00 SLOTS · 00 LINKS</div>
-      <div class="grp">
-        <span id="clockReadout">--:--:--</span>
-      </div>
-    </footer>
+  <!-- 拖卡片时出现在侧栏底部的删除区。
+       形状是立方体 logo 的整圈轮廓（六边形描边），尺寸和拖出来那颗一致。
+       放在 .app 之外、独立成层：它必须压在画布内容之上，而侧栏是主区域的
+       前一个兄弟，留在侧栏里会被后画的卡片盖住。位置由 JS 在拖起来那一刻按
+       侧栏的实际矩形算（见 trash.js 的 place）。 -->
+  <div class="trash-zone" id="trashZone" aria-hidden="true">
+    <div class="trash-inner">
+      <svg viewBox="0 0 512 512" aria-hidden="true">
+        <polygon class="trash-shape"
+                 points="256,89.45 430.33,107.88 392.52,262.99 476.16,306.93 256,422.55 35.84,306.93 130.19,257.38 130.19,155.52"
+                 stroke-width="12" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
 
-    <div id="toast" class="ui-toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
-    <script type="module" src="/app/js/main.mjs"></script>
-  </body>
+<script type="module" src="js/main.js"></script>
+</body>
 </html>

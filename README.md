@@ -20,12 +20,11 @@
 
 * Tell the AI what you need (in as much detail as possible). The AI will break your request down into math problems, verify them, then look up node information, and finally build the geometry nodes inside Blender.
 
-* [Design Notes](DESIGN.md) — how these tools were designed, and what didn't work
-
 * Only works with **Blender 4.5.0** 
 >Different Blender versions may add or update geometry nodes, so some node information changes, which mainly affects the usability of these skills.
 
 * There are still some design details that aren't handled well — not bugs, exactly, but small, fiddly things that weren't accounted for one by one, because there are simply too many cases involved. Some of these details you won't discover — you have no way of knowing the AI would do that — until you've run it a good many times.
+
 
 # Setup
 * Just download the installer from release.

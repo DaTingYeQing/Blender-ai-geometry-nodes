@@ -1,11 +1,12 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { t } from "../../../app/js/core/i18n.mjs";
+import { t } from "../../../shared/messages.mjs";
 
 const MAX_LOGS = 400;
 const MAX_TRANSCRIPT_ENTRIES = 400;
 const MAX_TRANSCRIPT_CHARS = 200_000;
 const MAX_TRANSCRIPTS = 40;
+export const MAX_RUNS = 200;
 
 function timeLabel() {
   return new Date().toLocaleTimeString("zh-CN", { hour12: false });
@@ -26,7 +27,13 @@ function buildPrompt({ task, handoffEnabled, inputDir }) {
 ${inputDir}`;
 }
 
-export function createRuntimeServer({ store, agents, artifacts, pi }) {
+export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools }) {
+  if (!tools || typeof tools.resolve !== "function") {
+    throw new Error("runtime 需要工具网关（tools.resolve）");
+  }
+  if (!flow || typeof flow.get !== "function") {
+    throw new Error("runtime 需要流程模块（flow.get）");
+  }
   const { ApiError, db, now, rid, saveState } = store;
   const liveRuns = new Map();
   const transcripts = new Map();
@@ -90,17 +97,89 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
     makeLogger(run)(t("应用重启，上次运行已中断"));
     recovered = true;
   }
+  if (pruneRuns() > 0) recovered = true;
 
   function flowDirs(flowId) {
-    const flow = (db.state.flows || []).find((item) => item.id === flowId);
-    if (!flow) return [];
+    const current = flow.get(flowId);
+    if (!current) return [];
     const dirs = new Set();
-    for (const item of flow.nodes || []) {
+    for (const item of current.nodes || []) {
       const nodeAgent = agents.get(item.agentId);
       if (!nodeAgent?.projectPath) continue;
       dirs.add(path.join(nodeAgent.projectPath, ".pi", "flow", String(flowId)));
     }
     return [...dirs];
+  }
+
+  function runningRun(flowId, nodeId) {
+    return (
+      Object.values(db.state.runs).find(
+        (run) => run.status === "running" && run.flowId === flowId && run.nodeId === nodeId,
+      ) || null
+    );
+  }
+
+  /* runId 在整个 state 里必须唯一：runs、liveRuns、转录都按它索引。
+   * 所以序号全局递增，并在第一次分配时就"预订"下来 —— 两个节点并发启动
+   * 不会读到同一个最大值（run-001、run-002… 只保证唯一，不再按流程重排）。 */
+  let runSeq = null;
+  let runSeqInit = null;
+
+  async function scanRunSeq() {
+    let max = 0;
+    const dirs = [];
+    for (const agent of agents.list()) {
+      const root = path.join(agent.projectPath, ".pi", "flow");
+      try {
+        for (const name of await fsp.readdir(root)) dirs.push(path.join(root, name));
+      } catch {
+        // 还没有流程目录
+      }
+    }
+    for (const dir of dirs) {
+      try {
+        for (const name of await fsp.readdir(path.join(dir, "runs"))) {
+          const match = /^run-(\d+)$/.exec(name);
+          if (match) max = Math.max(max, Number(match[1]));
+        }
+      } catch {
+        // 该流程还没跑过
+      }
+    }
+    for (const run of Object.values(db.state.runs)) {
+      const match = /^run-(\d+)$/.exec(run.id);
+      if (match) max = Math.max(max, Number(match[1]));
+    }
+    return max;
+  }
+
+  async function reserveRunSeq() {
+    if (runSeq === null) {
+      const scanned = await (runSeqInit ??= scanRunSeq());
+      // 等待期间可能有另一个调用先完成初始化，以它为准。
+      if (runSeq === null) runSeq = scanned;
+    }
+    runSeq += 1;
+    return runSeq;
+  }
+
+  /** 只清理已结束的旧 run；正在运行的和最新记录保留。返回删除数量。 */
+  function pruneRuns() {
+    const entries = Object.entries(db.state.runs);
+    if (entries.length <= MAX_RUNS) return 0;
+    const finished = entries
+      .filter(([, run]) => run.status !== "running")
+      .sort((a, b) => String(a[1].finishedAt || "").localeCompare(String(b[1].finishedAt || "")));
+    let excess = entries.length - MAX_RUNS;
+    let removed = 0;
+    for (const [id] of finished) {
+      if (excess <= 0) break;
+      delete db.state.runs[id];
+      transcripts.delete(id);
+      excess -= 1;
+      removed += 1;
+    }
+    return removed;
   }
 
   async function writeRunRecord(agent, runDir, run) {
@@ -114,6 +193,7 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
             agent: agent.name,
             projectPath: agent.projectPath,
             sessionId: run.sessionId,
+            sessionFile: run.sessionFile,
             inputs: run.inputs,
             artifacts: run.artifacts,
             startedAt: run.startedAt,
@@ -139,18 +219,23 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
 
     const agent = agents.get(node.agentId);
     if (!agent) throw new ApiError(404, t("Agent 不存在"));
+    if (runningRun(flowId, node.id)) throw new ApiError(409, t("节点正在运行"));
 
-    const runId = rid("run");
+    const seq = await reserveRunSeq();
+    const runId = `run-${String(seq).padStart(3, "0")}`;
     const prepared = await artifacts.prepare({ agent, flowId, runId, inputFiles });
     const { runDir, inputDir, outDir, inputs } = prepared;
+    if (runningRun(flowId, node.id)) throw new ApiError(409, t("节点正在运行"));
     const session = agents.beginSession(agent.id, node);
 
     const run = {
       id: runId,
+      flowId: String(flowId),
       nodeId: node.id,
       nodeTitle: node.title,
       agentId: agent.id,
       sessionId: session.reused ? session.piSessionId : null,
+      sessionFile: session.reused ? session.piSessionFile || null : null,
       sessionMode: node.sessionMode,
       status: "running",
       startedAt: now(),
@@ -161,6 +246,14 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
       error: null,
     };
     db.state.runs[runId] = run;
+    pruneRuns();
+
+    function bindSession(piSessionId, piSessionFile) {
+      if (!piSessionId && !piSessionFile) return;
+      agents.bindSession(agent.id, session.internalId, piSessionId, piSessionFile);
+      if (piSessionId) run.sessionId = piSessionId;
+      if (piSessionFile) run.sessionFile = piSessionFile;
+    }
 
     const log = makeLogger(run);
     log(t("pi 启动：cwd={path}", { path: agent.projectPath }));
@@ -173,7 +266,7 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
     await saveState();
 
     const prompt = buildPrompt({ task, handoffEnabled: node.handoffEnabled !== false, inputDir });
-    const resources = pi.resolveProjectExtensions(agent.projectPath);
+    const resources = tools.resolve(agent.projectPath);
     if (resources.noExtensions) {
       log(t("扩展隔离：--no-extensions，只加载 {n} 个项目扩展", { n: resources.extensions.length }));
     }
@@ -194,10 +287,9 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
       timeoutMs: Number(process.env.PI_RUN_TIMEOUT_MS || 15 * 60_000),
       onLog: log,
       onActivity: (activity) => recordActivity(runId, activity),
-      onSessionId: (piSessionId) => {
-        agents.bindSession(agent.id, session.internalId, piSessionId);
-        run.sessionId = piSessionId;
-      },
+      onSessionInfo: (info) => bindSession(info?.sessionId, info?.sessionFile),
+      // 兼容只上报 sessionId 的旧实现 / 测试替身。
+      onSessionId: (piSessionId) => bindSession(piSessionId, null),
     });
     liveRuns.set(runId, controller);
 
@@ -243,9 +335,18 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
     return run;
   }
 
+  /* 正在运行的节点：关窗前由主进程通过 /api/runs/active 来问，
+   * 数据归 run 记录所有，不让窗口层去读内部状态。 */
+  function active() {
+    const runs = Object.values(db.state.runs)
+      .filter((run) => run.status === "running")
+      .map((run) => ({ id: run.id, flowId: run.flowId, nodeId: run.nodeId, nodeTitle: run.nodeTitle }));
+    return { count: runs.length, runs };
+  }
+
   return {
     recovered,
-    api: { start, get, abort },
+    api: { start, get, abort, active },
     routes: [
       {
         method: "POST",
@@ -256,6 +357,11 @@ export function createRuntimeServer({ store, agents, artifacts, pi }) {
           }
           return start({ node: body.node, flowId: body.flowId, inputFiles: body.inputFiles });
         },
+      },
+      {
+        method: "GET",
+        path: "/api/runs/active",
+        handler: () => active(),
       },
       {
         method: "GET",

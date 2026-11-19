@@ -78,11 +78,27 @@ export function workspaceOf(env: Env): string {
 
 /** 起 Python 时的统一环境：把共享地址簿、项目工作区、项目根显式传下去。 */
 export function pyEnv(env: Env): Record<string, string | undefined> {
-	return {
+	const out: Record<string, string | undefined> = {
 		...process.env,
 		PYTHONIOENCODING: "utf-8",
 		PI_ENV_JSON: ENV_JSON,
 		PI_WORKSPACE_ROOT: workspaceOf(env),
 		PI_PROJECT_DIR: env?.__projectDir ?? "",
 	};
+
+	// 直接 spawn Blender 内置的 python.exe 不会经过 blender.exe 的初始化，
+	// 把 blender.crt 前置到 PATH，子进程才能找到 vcruntime140.dll 等运行库。
+	const blenderExe = resolveEnvPath(env?.blender?.exe, env?.__envDir);
+	if (blenderExe) {
+		const crtDir = path.join(path.dirname(blenderExe), "blender.crt");
+		if (fs.existsSync(crtDir)) {
+			for (const key of Object.keys(out)) {
+				if (key.toUpperCase() === "PATH") delete out[key];
+			}
+			out.PATH = [crtDir, process.env.PATH || process.env.Path || ""]
+				.filter(Boolean)
+				.join(path.delimiter);
+		}
+	}
+	return out;
 }

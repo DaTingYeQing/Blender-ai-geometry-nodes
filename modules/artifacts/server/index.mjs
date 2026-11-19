@@ -1,6 +1,6 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { t } from "../../../app/js/core/i18n.mjs";
+import { t } from "../../../shared/messages.mjs";
 
 function flowRoot(agent) {
   return path.join(agent.projectPath, ".pi", "flow");

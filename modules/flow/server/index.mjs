@@ -1,4 +1,19 @@
-import { t } from "../../../app/js/core/i18n.mjs";
+import { t } from "../../../shared/messages.mjs";
+
+/** 流程节点上只清掉纯运行日志类字段；
+ *  lastRunId 要保留 —— 重进工作区后靠它把上次的产物列表找回来。 */
+const LEGACY_NODE_FIELDS = ["status", "logs", "artifacts", "lastSessionId"];
+
+function stripLegacyNodeFields(node) {
+  if (!node || typeof node !== "object") return false;
+  let changed = false;
+  for (const key of LEGACY_NODE_FIELDS) {
+    if (!Object.hasOwn(node, key)) continue;
+    delete node[key];
+    changed = true;
+  }
+  return changed;
+}
 
 export function createFlowServer({ store, onDelete }) {
   const { ApiError, db, now, rid, saveState } = store;
@@ -23,11 +38,7 @@ export function createFlowServer({ store, onDelete }) {
     flow.nodes ||= [];
     flow.edges ||= [];
     for (const node of flow.nodes) {
-      if (node.status !== "running") continue;
-      node.status = "error";
-      node.logs ||= [];
-      node.logs.push(t("应用重启，上次运行已中断"));
-      recovered = true;
+      if (stripLegacyNodeFields(node)) recovered = true;
     }
   }
 
@@ -62,10 +73,47 @@ export function createFlowServer({ store, onDelete }) {
   function save(id, body) {
     const flow = get(id);
     if (!flow) throw new ApiError(404, t("流程不存在"));
-    flow.nodes = Array.isArray(body.nodes) ? body.nodes : [];
-    flow.edges = Array.isArray(body.edges) ? body.edges : [];
+    /* 整份保存：名字可以不传，传了就更新（重命名和画布保存共用一个端点）。 */
+    const name = String(body?.name ?? "").trim();
+    if (name) flow.name = name;
+    flow.nodes = (Array.isArray(body.nodes) ? body.nodes : []).map((node) => {
+      stripLegacyNodeFields(node);
+      return node;
+    });
+    /* 线只保留两端都还在的节点：节点没了，线不能连在一个不存在的地方。 */
+    const nodeIds = new Set(flow.nodes.map((node) => node.id));
+    flow.edges = (Array.isArray(body.edges) ? body.edges : [])
+      .filter((edge) => nodeIds.has(edge.from) && nodeIds.has(edge.to));
     flow.updatedAt = now();
     return flow;
+  }
+
+  /* 用户删掉某个 Agent 后，它在所有流程里的节点都该一起消失：
+   * 先删该 Agent 名下的节点，再删两端不全的连线。只按传进来的 agentId 清，
+   * 不按"当前 Agent 列表"反推 —— 项目目录临时不可用时 Agent 只是没注册，
+   * 流程里的节点不能因此被永久删掉。
+   * 返回是否真的改过，调用方据此决定要不要落盘。 */
+  function prune(agentId) {
+    let changed = false;
+    for (const flow of db.state.flows) {
+      let flowChanged = false;
+      const nodes = flow.nodes.filter((node) => node.agentId !== agentId);
+      if (nodes.length !== flow.nodes.length) {
+        flow.nodes = nodes;
+        flowChanged = true;
+      }
+      const nodeIds = new Set(nodes.map((node) => node.id));
+      const edges = flow.edges.filter((edge) => nodeIds.has(edge.from) && nodeIds.has(edge.to));
+      if (edges.length !== flow.edges.length) {
+        flow.edges = edges;
+        flowChanged = true;
+      }
+      if (flowChanged) {
+        flow.updatedAt = now();
+        changed = true;
+      }
+    }
+    return changed;
   }
 
   async function remove(id) {
@@ -78,7 +126,7 @@ export function createFlowServer({ store, onDelete }) {
 
   return {
     recovered,
-    api: { list, get, create, save, remove },
+    api: { list, get, create, save, remove, prune },
     routes: [
       {
         method: "GET",
@@ -92,6 +140,17 @@ export function createFlowServer({ store, onDelete }) {
           const flow = create(body);
           await saveState();
           return { flow };
+        },
+      },
+      {
+        method: "POST",
+        path: "/api/flows/prune",
+        handler: async ({ body }) => {
+          const agentId = String(body?.agentId || "").trim();
+          if (!agentId) throw new ApiError(400, t("缺少 Agent"));
+          const changed = prune(agentId);
+          if (changed) await saveState();
+          return { ok: true, changed };
         },
       },
       {

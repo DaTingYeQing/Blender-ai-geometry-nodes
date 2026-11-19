@@ -9,14 +9,6 @@ function Invoke-NetworkCard {
         $script:Setup.PreferCn = $true
         Write-Ok "访问 GitHub 失败，改用国内镜像"
     }
-
-    $script:Setup.PreferOfficialPip = Test-PyPiReachable
-    if ($script:Setup.PreferOfficialPip) {
-        Write-Ok "PyPI 官方源可用，pip 优先官方源"
-    }
-    else {
-        Write-Ok "PyPI 官方源不可用，pip 优先国内镜像"
-    }
     return $true
 }
 

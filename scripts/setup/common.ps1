@@ -1,34 +1,9 @@
-﻿# 安装引擎的公共能力：日志、进程超时、下载、探测和内置资源定位。
+﻿# 安装引擎的公共能力：日志、进程超时、探测和内置资源定位。
 # 所有函数通过 $script:Setup 读取路径和开关，不直接依赖入口参数。
 
 $MinNode = [version]'22.19.0'
 $NpmPackage = '@earendil-works/pi-coding-agent'
 $CnNpmRegistry = 'https://registry.npmmirror.com'
-$GhMirrors = @(
-    'https://ghfast.top/',
-    'https://gh-proxy.com/',
-    'https://ghproxy.net/',
-    'https://mirror.ghproxy.com/'
-)
-
-$MinPython = [version]'3.13.0'
-# 固定安装的补丁版本；升级 Python 补丁时只改这里。
-$PythonInstallerVersion = '3.13.17'
-$PythonInstallerMinBytes = 15000000
-$PythonSignature = 'Python Software Foundation'
-$DefaultPackages = @(
-    'numpy==2.5.3',
-    'scipy==1.18.1',
-    'pyvista==0.49.0',
-    'trimesh==5.1.0',
-    'manifold3d==3.5.3'
-)
-$OfficialPipIndexes = @('https://pypi.org/simple')
-$CnPipIndexes = @(
-    'https://pypi.tuna.tsinghua.edu.cn/simple',
-    'https://mirrors.aliyun.com/pypi/simple',
-    'https://mirrors.cloud.tencent.com/pypi/simple'
-)
 
 function Resolve-FullPath([string]$Path) {
     if (-not $Path) { return $Path }
@@ -67,14 +42,6 @@ function Get-BundledFile([string[]]$Patterns) {
         if ($found) { return $found.FullName }
     }
     return $null
-}
-
-function Get-BundledWheelhouse {
-    $dir = Join-Path $script:Setup.BundleDir 'wheels'
-    if (-not (Test-Path -LiteralPath $dir)) { return $null }
-    $wheels = @(Get-ChildItem -LiteralPath $dir -Filter '*.whl' -File -ErrorAction SilentlyContinue)
-    if ($wheels.Count -eq 0) { return $null }
-    return $dir
 }
 
 # 带硬超时的外部命令执行：网络卡住时杀掉整个进程树，避免安装脚本无限等待。
@@ -162,23 +129,6 @@ function Invoke-Winget {
     return (Invoke-ProcessWithTimeout -FilePath $winget.Source -ArgumentList $allArgs -TimeoutSeconds $TimeoutSeconds -What $What)
 }
 
-function Test-InstallerSignature {
-    param([string]$Path, [string]$SignerPattern)
-    $previous = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        $signature = Get-AuthenticodeSignature -LiteralPath $Path
-        if ($signature.Status -ne 'Valid') { return $false }
-        return ($signature.SignerCertificate.Subject -match $SignerPattern)
-    }
-    catch {
-        return $false
-    }
-    finally {
-        $ErrorActionPreference = $previous
-    }
-}
-
 function Refresh-Path {
     $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
     $user = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -190,28 +140,6 @@ function Test-GithubReachable {
     if (-not $curl) { return $true }
     & curl.exe -fsI --connect-timeout 5 --max-time 8 -o NUL "https://github.com" | Out-Null
     return $LASTEXITCODE -eq 0
-}
-
-function Test-PyPiReachable {
-    $curl = Get-Command curl.exe -ErrorAction SilentlyContinue
-    if (-not $curl) { return $true }
-    & curl.exe -fsI --connect-timeout 5 --max-time 8 -o NUL "https://pypi.org/simple/" | Out-Null
-    return $LASTEXITCODE -eq 0
-}
-
-function Get-SourceOrder([string]$GithubUrl) {
-    $mirrored = foreach ($prefix in $GhMirrors) { $prefix + $GithubUrl }
-    if ($script:Setup.PreferCn) {
-        return @($mirrored) + $GithubUrl
-    }
-    return @($GithubUrl) + @($mirrored)
-}
-
-function Get-PipIndexOrder {
-    if ($script:Setup.PreferOfficialPip) {
-        return @($OfficialPipIndexes) + $CnPipIndexes
-    }
-    return @($CnPipIndexes) + @($OfficialPipIndexes)
 }
 
 function Get-NodeExe {
@@ -245,61 +173,6 @@ function Get-NodeVersion {
     finally {
         $ErrorActionPreference = $previous
     }
-}
-
-function Get-PythonVersion([string[]]$Cmd) {
-    $previous = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        $rest = @($Cmd | Select-Object -Skip 1)
-        $out = & $Cmd[0] @rest --version 2>$null | Out-String
-        if ($LASTEXITCODE -ne 0) { return $null }
-        $m = [regex]::Match($out, '(\d+)\.(\d+)\.(\d+)')
-        if (-not $m.Success) { return $null }
-        return [version]$m.Value
-    }
-    catch {
-        return $null
-    }
-    finally {
-        $ErrorActionPreference = $previous
-    }
-}
-
-function Find-Python {
-    $candidates = New-Object System.Collections.Generic.List[object]
-    $dirs = @(
-        (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python313'),
-        (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python313-arm64')
-    )
-    if ($env:ProgramFiles) {
-        $dirs += @(
-            (Join-Path $env:ProgramFiles 'Python313'),
-            (Join-Path $env:ProgramFiles 'Python313-arm64')
-        )
-    }
-    if (${env:ProgramFiles(x86)}) {
-        $dirs += (Join-Path ${env:ProgramFiles(x86)} 'Python313')
-    }
-    foreach ($dir in $dirs) {
-        $exe = Join-Path $dir 'python.exe'
-        if (Test-Path -LiteralPath $exe) { [void]$candidates.Add(@($exe)) }
-    }
-    [void]$candidates.Add(@('py', '-3.13'))
-    [void]$candidates.Add(@('py', '-3'))
-    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-    # WindowsApps 下的 python.exe 是应用商店别名，执行时可能拉起商店，跳过。
-    if ($pythonCmd -and $pythonCmd.Source -and $pythonCmd.Source -notmatch '\\WindowsApps\\') {
-        [void]$candidates.Add(@($pythonCmd.Source))
-    }
-
-    foreach ($candidate in $candidates) {
-        $v = Get-PythonVersion $candidate
-        if ($v -and $v.Major -eq 3 -and $v.Minor -eq 13) {
-            return @{ Cmd = $candidate; Version = $v }
-        }
-    }
-    return $null
 }
 
 function Get-GitBash {
@@ -385,96 +258,6 @@ function Get-PiCliPath {
     }
 }
 
-function Find-InReleasePages([string]$Repo, [string]$FileRegex) {
-    $tmp = Join-Path $script:Setup.WorkDir 'releases.html'
-    foreach ($source in (Get-SourceOrder "https://github.com/$Repo/releases")) {
-        if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Force }
-        & curl.exe -fsSL --connect-timeout 12 --max-time 45 -A "pi-flow-setup" -o $tmp $source
-        if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $tmp)) { continue }
-        $html = Get-Content -LiteralPath $tmp -Raw
-        $match = [regex]::Match($html, "releases/download/([^""'\s>]+)/($FileRegex)")
-        if ($match.Success) {
-            $tag = $match.Groups[1].Value
-            $file = $match.Groups[2].Value
-            return "https://github.com/$Repo/releases/download/$tag/$file"
-        }
-    }
-    return $null
-}
-
-function Get-LatestVersion([string]$Repo) {
-    $headerFile = Join-Path $script:Setup.WorkDir 'latest-headers.txt'
-    foreach ($source in (Get-SourceOrder "https://github.com/$Repo/releases/latest")) {
-        if (Test-Path -LiteralPath $headerFile) { Remove-Item -LiteralPath $headerFile -Force }
-        & curl.exe -sI -L --max-redirs 5 --connect-timeout 12 --max-time 30 -A "pi-flow-setup" -o $headerFile $source
-        if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $headerFile)) { continue }
-        $headers = Get-Content -LiteralPath $headerFile -Raw
-        $tagMatch = [regex]::Match($headers, '/releases/tag/v?([0-9]+\.[0-9]+\.[0-9]+)')
-        if ($tagMatch.Success) { return $tagMatch.Groups[1].Value }
-    }
-    return $null
-}
-
-function Resolve-ToolUrl([string]$Repo, [string]$TagPrefix, [string[]]$FileTemplates) {
-    foreach ($template in $FileTemplates) {
-        $regex = [regex]::Escape($template).Replace('\{version\}', '[0-9]+\.[0-9]+\.[0-9]+')
-        $found = Find-InReleasePages $Repo $regex
-        if ($found) { return $found }
-    }
-
-    $template = $FileTemplates[0]
-    if ($template -notmatch '\{version\}') {
-        $versionMatch = [regex]::Match($template, '([0-9]+\.[0-9]+\.[0-9]+)')
-        if (-not $versionMatch.Success) { return $null }
-        $tag = "$TagPrefix$($versionMatch.Groups[1].Value)"
-        return "https://github.com/$Repo/releases/download/$tag/$template"
-    }
-
-    $version = Get-LatestVersion $Repo
-    if (-not $version) { return $null }
-    $file = $template.Replace('{version}', $version)
-    return "https://github.com/$Repo/releases/download/$TagPrefix$version/$file"
-}
-
-function Invoke-Download([string]$Name, [string[]]$Urls, [string]$Dest, [long]$MinBytes = 1000) {
-    $hasCurl = [bool](Get-Command curl.exe -ErrorAction SilentlyContinue)
-    Ensure-Directory (Split-Path -Parent $Dest)
-    foreach ($url in $Urls) {
-        for ($attempt = 1; $attempt -le 3; $attempt++) {
-            $size = 0
-            if (Test-Path -LiteralPath $Dest) { $size = (Get-Item -LiteralPath $Dest).Length }
-            # 小于阈值说明上次没下完，保留并用 -C - 续传，避免重复下载几百 MB。
-            $resume = ($size -gt 0) -and ($size -lt $MinBytes)
-            Write-Host "    下载 $Name（$attempt/3）：$url"
-            $ok = $false
-            if ($hasCurl) {
-                # 45 秒内平均速度低于 1KB/s 视为卡死，主动中断后重试，避免干等半小时。
-                if ($resume) {
-                    & curl.exe -fLsS -C - --connect-timeout 10 --speed-limit 1024 --speed-time 45 --max-time 1800 -o $Dest $url
-                }
-                else {
-                    & curl.exe -fLsS --connect-timeout 10 --speed-limit 1024 --speed-time 45 --max-time 1800 -o $Dest $url
-                }
-                $ok = ($LASTEXITCODE -eq 0)
-                # 33 = 服务器不支持断点续传，丢掉残包，下次从头下。
-                if ($LASTEXITCODE -eq 33 -and (Test-Path -LiteralPath $Dest)) {
-                    Remove-Item -LiteralPath $Dest -Force
-                }
-            }
-            else {
-                Invoke-WebRequest -Uri $url -OutFile $Dest -UseBasicParsing -TimeoutSec 1800
-                $ok = $true
-            }
-            if ($ok -and (Test-Path -LiteralPath $Dest) -and ((Get-Item -LiteralPath $Dest).Length -ge $MinBytes)) {
-                Write-Ok "$Name 下载完成"
-                return
-            }
-            Start-Sleep -Seconds 1
-        }
-    }
-    throw "下载 $Name 失败（已尝试所有源）"
-}
-
 function Get-TarExe {
     # PATH 里可能先命中 Git 自带的 GNU tar，它会把 C:\ 当成远程主机，必须用 Windows 自带的。
     foreach ($name in @('tar.exe', 'bsdtar.exe')) {
@@ -515,6 +298,42 @@ function Get-BlenderExe {
     if (Test-Path -LiteralPath $direct) { return $direct }
     $found = Get-ChildItem -LiteralPath $legacyRoot -Directory -ErrorAction SilentlyContinue |
         ForEach-Object { Join-Path $_.FullName 'blender.exe' } |
+        Where-Object { Test-Path -LiteralPath $_ } |
+        Select-Object -First 1
+    return $found
+}
+
+# 统一成 x.y.z 再比较：Blender 的 ProductVersion 是 "4.5"，压缩包名里是 "4.5.0"。
+function Normalize-BlenderVersion([string]$Version) {
+    if ($Version -and ($Version -match '^(\d+)\.(\d+)(?:\.(\d+))?')) {
+        $patch = if ($Matches[3]) { [int]$Matches[3] } else { 0 }
+        return "$($Matches[1]).$($Matches[2]).$patch"
+    }
+    return ''
+}
+
+# 记录安装结果时用真实文件版本，避免旧机器被误记成本版期望的版本。
+function Get-BlenderFileVersion([string]$Path) {
+    if (-not $Path -or -not (Test-Path -LiteralPath $Path)) { return '' }
+    try {
+        $version = (Get-Item -LiteralPath $Path).VersionInfo.ProductVersion
+        return (Normalize-BlenderVersion $version)
+    }
+    catch {
+        return ''
+    }
+}
+
+# Blender 内置 python：与 blender.exe 同目录的 4.5\python\bin\python.exe。
+# 安装器不再单独装 Python —— 外层胶水脚本直接用它（几何包已 pip 进 zip 里的 site-packages）。
+function Get-BlenderPythonExe([string]$BlenderExe) {
+    if (-not $BlenderExe) { return $null }
+    $root = Split-Path -Parent $BlenderExe
+    # Blender 把内置 python 放在 <版本目录>\python\bin\python.exe，版本目录名随 Blender 变化。
+    $direct = Join-Path $root 'python\bin\python.exe'
+    if (Test-Path -LiteralPath $direct) { return $direct }
+    $found = Get-ChildItem -LiteralPath $root -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object { Join-Path $_.FullName 'python\bin\python.exe' } |
         Where-Object { Test-Path -LiteralPath $_ } |
         Select-Object -First 1
     return $found

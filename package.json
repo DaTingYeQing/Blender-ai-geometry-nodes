@@ -1,19 +1,21 @@
 {
   "name": "pi-flow",
   "productName": "Pi Flow",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "项目级 Pi Agent 节点编排",
   "type": "module",
-  "main": "electron/main.mjs",
+  "main": "electron-ipc/main.mjs",
   "scripts": {
     "start": "electron .",
-    "dev": "node electron/standalone.mjs",
-    "preview:setup": "electron electron/setup-preview.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "fetch:bundles": "node scripts/fetch-bundles.mjs",
-    "check:bundles": "node scripts/fetch-bundles.mjs --check",
-    "pack": "node scripts/fetch-bundles.mjs --check && electron-builder --win && node scripts/clean-release.mjs"
+    "dev": "node server/main.mjs",
+    "preview:setup": "electron scripts/setup-ui/setup-preview.mjs",
+    "check": "node scripts/dev/check-syntax.mjs",
+    "test": "node scripts/dev/check-syntax.mjs && node scripts/dev/run-tests.mjs",
+    "test:server": "node scripts/dev/run-tests.mjs server",
+    "fetch:bundles": "node scripts/build/fetch-bundles.mjs",
+    "check:bundles": "node scripts/build/fetch-bundles.mjs --check",
+    "pack": "node scripts/build/fetch-bundles.mjs --check && electron-builder --win && node scripts/build/clean-release.mjs"
   },
   "devDependencies": {
     "electron": "^38.0.0",
@@ -24,15 +26,16 @@
     "productName": "Pi Flow",
     "electronLanguages": ["zh-CN", "en-US"],
     "compression": "normal",
-    "files": ["electron/**/*", "app/**/*", "modules/**/*", "package.json"],
+    "files": ["electron-ipc/**/*", "app/**/*", "modules/**/*", "server/**/*", "shared/**/*", "package.json"],
     "extraResources": [
       { "from": "shard", "to": "shard", "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"] },
+      { "from": "shared", "to": "shared", "filter": ["**/*.mjs"] },
       {
         "from": "agents",
         "to": "agents",
         "filter": ["**/*", "!**/.pi/flow/**", "!**/extensions.legacy/**", "!**/__pycache__/**", "!**/*.pyc"]
       },
-      { "from": "scripts", "to": "scripts" },
+      { "from": "scripts", "to": "scripts", "filter": ["**/*", "!dev/**/*", "!build/**/*"] },
       { "from": "resources/bundles", "to": "bundles" },
       { "from": "presets", "to": "presets" },
       { "from": "resources/blender", "to": "blender" }
@@ -46,7 +49,7 @@
       "signAndEditExecutable": true
     },
     "nsis": {
-      "include": "build/installer.nsh",
+      "include": "scripts/installer/installer.nsh",
       "installerLanguages": [
         "en_US"
       ],

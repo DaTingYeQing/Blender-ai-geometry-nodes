@@ -17,12 +17,12 @@ param(
     [string]$WorkspaceDir = '',
     [string]$ConfigPath = '',
     [string]$EnvTemplate = '',
-    [string]$PackagesFile = '',
     [string]$ResultPath = '',
+    [string]$AppVersion = '',
     [string]$BundleDir = '',
     [string]$BlenderArchive = '',
     [switch]$SkipBlender,
-    [switch]$SkipPython,
+    [switch]$ForceBlender,
     [switch]$SkipNode,
     [switch]$SkipPi,
     [switch]$SkipGit,
@@ -55,12 +55,12 @@ Start-SetupEngine -Options @{
     WorkspaceDir    = $WorkspaceDir
     ConfigPath      = $ConfigPath
     EnvTemplate     = $EnvTemplate
-    PackagesFile    = $PackagesFile
     ResultPath      = $ResultPath
+    AppVersion      = $AppVersion
     BundleDir       = $BundleDir
     BlenderArchive  = $BlenderArchive
     SkipBlender     = [bool]$SkipBlender
-    SkipPython      = [bool]$SkipPython
+    ForceBlender    = [bool]$ForceBlender
     SkipNode        = [bool]$SkipNode
     SkipPi          = [bool]$SkipPi
     SkipGit         = [bool]$SkipGit

@@ -13,9 +13,12 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateManifest } from "../shared/agents-manifest.mjs";
 
 const HOME = dirname(fileURLToPath(import.meta.url));
-const MANIFEST = join(HOME, "agents.json");
+const MANIFEST = String(process.env.PI_FLOW_AGENTS_JSON || "").trim()
+	? resolve(process.env.PI_FLOW_AGENTS_JSON)
+	: join(HOME, "agents.json");
 const TOOLS_DIR = join(HOME, "extensions");
 // 安装版把模板复制到 userData 后，用它把项目路径重定向过去。
 const AGENTS_OVERRIDE = String(process.env.PI_FLOW_AGENTS_DIR || "").trim();
@@ -277,7 +280,11 @@ function runInit(filter, force, dryRun) {
 		console.error(`agents.json 已存在。要按现状覆盖请加 --force：${posix(MANIFEST)}`);
 		return 1;
 	}
-	const base = process.env.PI_PROJECTS_BASE ?? "C:/Users/zjn13/Desktop/PI_work";
+	const base = String(process.env.PI_PROJECTS_BASE || "").trim();
+	if (!base) {
+		console.error("请先设置 PI_PROJECTS_BASE（要扫描的项目目录）再运行 init。");
+		return 1;
+	}
 	const tools = {};
 	const projects = {};
 	for (const name of readdirSync(base, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name)) {
@@ -329,7 +336,17 @@ if (!existsSync(MANIFEST)) {
 	console.error(`缺少 ${posix(MANIFEST)}，先跑：node sync.mjs init`);
 	process.exit(1);
 }
-const manifest = readJson(MANIFEST);
+const manifest = (() => {
+	try {
+		const loaded = validateManifest(readJson(MANIFEST), { file: posix(MANIFEST) });
+		for (const warning of loaded.warnings) console.warn(`WARN  ${warning}`);
+		return loaded.manifest;
+	} catch (e) {
+		console.error(`失败: ${e instanceof Error ? e.message : String(e)}`);
+		process.exit(1);
+	}
+})();
+
 try {
 	if (cmd === "sync") process.exit(runSync(manifest, filter, dryRun) >= 0 ? 0 : 1);
 	if (cmd === "check") process.exit(runCheck(manifest, filter));

@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pi Flow 运行环境</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #141416;
+    --topbar: #1a1a1c;
+    --raised: #232326;
+    --raised-hi: #2a2a2e;
+    --border: #2c2c30;
+    --line: #3a3a3f;
+    --text: #d4d4d8;
+    --text-hi: #f4f4f5;
+    --text-dim: #8b8b93;
+    --text-faint: #5f5f66;
+    --orange: #e0663f;
+    --red: #e05a4d;
+    --green: #8dc36a;
+    --curve: cubic-bezier(0.22, 1, 0.36, 1);
+    --spread: 64px;
+    --seat: 0;
+    --railFill: 0%;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
+  *::-webkit-scrollbar { width: 0; height: 0; }
+
+  html, body { height: 100%; }
+  body {
+    display: flex;
+    background: transparent;
+    font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    user-select: none;
+  }
+
+  .window {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #26262a;
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  /* ── 标题栏：与主界面同款 ───────────────── */
+  .titlebar {
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 12px;
+    background: var(--topbar);
+    border-bottom: 1px solid var(--border);
+    -webkit-app-region: drag;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .brand svg { width: 24px; height: 24px; display: block; }
+  .brand .sub { font-weight: 400; color: var(--text-faint); }
+  .title-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    -webkit-app-region: no-drag;
+  }
+
+  /* 语言滑块：缩小版，主界面同款 */
+  .lang-toggle {
+    position: relative;
+    display: flex;
+    width: 92px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+  }
+  .lang-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(50% - 4px);
+    height: calc(100% - 4px);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    transition: transform 0.25s ease;
+  }
+  .lang-toggle.en .lang-knob { transform: translateX(calc(100% + 4px)); }
+  .lang-opt {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: grid;
+    place-items: center;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    transition: color 0.25s;
+  }
+  .lang-opt.active { color: var(--text); }
+  .lang-toggle:focus-visible { outline: 1px solid var(--text-faint); outline-offset: 2px; }
+
+  .win-dots { display: flex; align-items: center; gap: 10px; }
+  .win-dots span {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.15s;
+  }
+  .win-dots span:hover { filter: brightness(1.2); transform: scale(1.08); }
+  .win-dots span:focus-visible { outline: 1px solid var(--text-faint); outline-offset: 2px; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+
+  /* ── 工具栏：安装 / 日志 ─────────────────── */
+  .toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px 0;
+  }
+  .tabs {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .tab {
+    position: relative;
+    width: 84px;
+    height: 28px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.18s, color 0.18s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--raised-hi);
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+  .tab .dot {
+    display: none;
+    position: absolute;
+    top: 7px;
+    right: 9px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--orange);
+  }
+  .tab .dot.show { display: block; }
+  .install-root { flex: 1; min-height: 0; display: flex; margin-top: 10px; }
+  .view { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .view.hidden { display: none; }
+
+  /* ── 安装视图 ────────────────────────────── */
+  .install {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    padding: 4px 24px 14px;
+  }
+  /* 画布点阵：铺满舞台，四周淡出 */
+  .install::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, #313138 1.1px, transparent 1.2px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 62% at 50% 38%, #000 12%, transparent 78%);
+    mask-image: radial-gradient(ellipse 70% 62% at 50% 38%, #000 12%, transparent 78%);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 6px;
+  }
+  .halo {
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    width: 460px;
+    height: 300px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgba(224, 102, 63, 0.1), rgba(224, 102, 63, 0.03) 55%, transparent 76%);
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .s-running .halo { animation: halo 3.2s ease-in-out infinite; }
+  .s-done .halo { opacity: 1; background: radial-gradient(closest-side, rgba(224, 102, 63, 0.16), rgba(224, 102, 63, 0.05) 55%, transparent 76%); }
+  .s-failed .halo { opacity: 0.25; background: radial-gradient(closest-side, rgba(224, 90, 77, 0.08), transparent 72%); }
+
+  .lockup {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 18px;
+  }
+  .br {
+    font-size: 104px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--bracket, var(--orange));
+    transform: translateY(-10px);
+    opacity: 0.9;
+    transition: margin 0.65s var(--curve), color 0.3s ease, opacity 0.3s ease;
+  }
+  .br.left { margin-right: var(--spread); }
+  .br.right { margin-left: var(--spread); }
+  .s-ready .br { opacity: 0.66; }
+  .s-failed .br { --bracket: var(--red); }
+
+  .rig-wrap {
+    width: 210px;
+    height: 168px;
+    display: grid;
+    place-items: center;
+  }
+  .rig-svg {
+    width: 210px;
+    height: 168px;
+    display: block;
+    overflow: visible;
+    transform: translateY(calc((1 - var(--seat)) * -20px));
+    transition: transform 0.65s var(--curve), filter 0.5s ease;
+    filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55));
+  }
+  .s-done .rig-svg {
+    filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 26px rgba(224, 102, 63, 0.2));
+  }
+  .s-failed .rig-svg {
+    filter: grayscale(0.45) brightness(0.8) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.5));
+  }
+  .rig-svg .pin { fill: var(--pin, var(--orange)); transition: fill 0.35s ease; }
+  .s-ready { --pin: #9a4f37; }
+  .s-running { --pin: var(--orange); }
+  .s-done { --pin: var(--orange); }
+  .s-failed { --pin: var(--red); }
+
+  .pin-ping {
+    fill: none;
+    stroke: var(--pin, var(--orange));
+    stroke-width: 2.4;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .s-running .pin-ping { animation: ping 1.7s ease-out infinite; }
+  .s-done .pin-ping { animation: pingOnce 0.7s ease-out 1 both; }
+
+  .tether { opacity: 0.5; transition: opacity 0.35s ease; }
+  .s-running .tether { animation: tether 1.8s ease-in-out infinite; }
+  .s-running .tether.t1 { animation-delay: 0.22s; }
+  .s-running .tether.t2 { animation-delay: 0.44s; }
+  .s-done .tether { opacity: 0.95; }
+  .s-failed .tether { opacity: 0.2; }
+  .cube-body { transform-box: fill-box; transform-origin: 50% 58%; }
+  .s-running .cube-body { animation: breathe 3.2s ease-in-out infinite; }
+
+  @keyframes ping {
+    0% { transform: scale(1); opacity: 0.55; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes pingOnce {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+  @keyframes tether {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.014); }
+  }
+  @keyframes halo {
+    0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(0.97); }
+    50% { opacity: 0.95; transform: translateX(-50%) scale(1.03); }
+  }
+
+  /* 文案区 */
+  .headline { position: relative; margin-top: 6px; text-align: center; }
+  .meta {
+    margin-bottom: 9px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--orange);
+    transition: color 0.3s ease;
+  }
+  .s-ready .meta { color: var(--text-faint); }
+  .s-failed .meta { color: var(--red); }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    color: var(--text-hi);
+  }
+  .sub {
+    margin-top: 7px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-dim);
+  }
+  .s-failed .sub { color: #c98678; }
+
+  /* 步骤轨道 */
+  .rail {
+    position: relative;
+    width: min(600px, 100%);
+    margin-top: 26px;
+  }
+  .rail.empty { visibility: hidden; }
+  .rail-track {
+    position: absolute;
+    top: 6px;
+    left: 8.333%;
+    right: 8.333%;
+    height: 2px;
+    border-radius: 1px;
+    background: #2b2b30;
+    overflow: hidden;
+  }
+  .rail-fill {
+    display: block;
+    height: 100%;
+    width: var(--railFill);
+    border-radius: 1px;
+    background: var(--orange);
+    transition: width 0.5s var(--curve), background-color 0.3s ease;
+  }
+  .s-failed .rail-fill { background: var(--red); }
+  .rail-list {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    list-style: none;
+  }
+  .rail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .rail-dot {
+    width: 14px;
+    height: 14px;
+    display: grid;
+    place-items: center;
+    border: 1.5px solid #4a4a51;
+    border-radius: 50%;
+    background: var(--bg);
+    color: #17171a;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 700;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .rail-cap {
+    max-width: 78px;
+    font-size: 10px;
+    line-height: 1.3;
+    text-align: center;
+    color: var(--text-faint);
+    transition: color 0.3s ease;
+  }
+  .rail-item.done .rail-dot { border-color: var(--orange); background: var(--orange); }
+  .rail-item.done .rail-dot::after { content: "✓"; }
+  .rail-item.done .rail-cap { color: var(--text-dim); }
+  .rail-item.running .rail-dot {
+    border-color: var(--orange);
+    background: rgba(224, 102, 63, 0.16);
+    animation: ring 1.6s ease-out infinite;
+  }
+  .rail-item.running .rail-cap { color: var(--text-hi); }
+  .rail-item.failed .rail-dot { border-color: var(--red); background: var(--red); color: #1a1a1c; }
+  .rail-item.failed .rail-dot::after { content: "×"; font-size: 11px; }
+  .rail-item.failed .rail-cap { color: #c98678; }
+  @keyframes ring {
+    0% { box-shadow: 0 0 0 0 rgba(224, 102, 63, 0.32); }
+    100% { box-shadow: 0 0 0 9px rgba(224, 102, 63, 0); }
+  }
+
+  .banner {
+    display: none;
+    width: min(560px, 100%);
+    max-height: 96px;
+    overflow: auto;
+    margin: 16px auto 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(224, 90, 77, 0.32);
+    border-radius: 8px;
+    background: rgba(224, 90, 77, 0.07);
+    color: #d99a8d;
+    font-size: 11.5px;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+    user-select: text;
+  }
+  .banner.show { display: block; }
+
+  .hint {
+    position: relative;
+    flex: none;
+    margin: 20px auto 0;
+    max-width: 570px;
+    font-size: 10.5px;
+    line-height: 1.65;
+    text-align: center;
+    color: var(--text-faint);
+  }
+
+  /* ── 日志视图 ────────────────────────────── */
+  .log-view { padding: 4px 22px 18px; }
+  .log-body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px 14px;
+    border: 1px solid #242428;
+    border-radius: 9px;
+    background: #101012;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.75;
+    color: #9a9aa2;
+    user-select: text;
+  }
+  .log-line { white-space: pre-wrap; word-break: break-word; }
+  .log-line .pfx { margin-right: 6px; }
+  .pfx.run { color: var(--orange); }
+  .pfx.ok { color: var(--green); }
+  .pfx.err { color: var(--red); }
+  .pfx.info { color: #5f5f66; }
+</style>
+</head>
+<body>
+  <div class="window s-ready" id="win">
+    <header class="titlebar">
+      <div class="brand">
+        <svg class="mini-cube" viewBox="0 0 512 512" aria-hidden="true">
+          <defs>
+            <linearGradient id="mini-board" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#faf6ec"/>
+              <stop offset="0.55" stop-color="#f2ecdd"/>
+              <stop offset="1" stop-color="#e4dcc9"/>
+            </linearGradient>
+            <linearGradient id="mini-pull0" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="256" y2="89.45">
+              <stop offset="0" stop-color="#e0663f"/>
+              <stop offset="0.35" stop-color="#8c4b34" stop-opacity="0.8"/>
+              <stop offset="1" stop-color="#2e2c27" stop-opacity="0.58"/>
+            </linearGradient>
+            <linearGradient id="mini-pull1" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="256" y2="221.59">
+              <stop offset="0" stop-color="#e0663f"/>
+              <stop offset="0.35" stop-color="#8c4b34" stop-opacity="0.8"/>
+              <stop offset="1" stop-color="#2e2c27" stop-opacity="0.58"/>
+            </linearGradient>
+            <linearGradient id="mini-pull2" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="381.81" y2="306.93">
+              <stop offset="0" stop-color="#e0663f"/>
+              <stop offset="0.35" stop-color="#8c4b34" stop-opacity="0.8"/>
+              <stop offset="1" stop-color="#2e2c27" stop-opacity="0.58"/>
+            </linearGradient>
+            <clipPath id="mini-boardClip">
+              <polygon points="35.84,306.93 256,422.55 476.16,306.93 256,191.31"/>
+            </clipPath>
+          </defs>
+          <polygon points="35.84,306.93 256,422.55 476.16,306.93 256,191.31" fill="url(#mini-board)" stroke="rgba(150,141,120,0.45)" stroke-width="1.2" stroke-linejoin="round"/>
+          <polygon points="130.19,306.93 256,373 320.05,373 514.53,306.93 320.05,240.86 256,240.86" fill="rgba(96,78,52,0.45)" clip-path="url(#mini-boardClip)"/>
+          <polygon points="130.19,306.93 256,373 256,221.59" fill="#5a5b58"/>
+          <polygon points="256,373 381.81,306.93 430.33,107.88" fill="#1f2228"/>
+          <polygon points="256,373 430.33,107.88 256,221.59" fill="#1f2228"/>
+          <polygon points="130.19,306.93 256,221.59 130.19,155.52" fill="#5a5b58"/>
+          <polygon points="130.19,155.52 256,221.59 430.33,107.88" fill="#b6b2a7"/>
+          <polygon points="130.19,155.52 430.33,107.88 256,89.45" fill="#bdb8ad"/>
+          <g stroke="rgba(46,44,39,0.55)" stroke-width="2.44" stroke-linecap="round">
+            <line x1="130.19" y1="306.93" x2="130.19" y2="155.52"/>
+            <line x1="130.19" y1="306.93" x2="256" y2="373"/>
+            <line x1="130.19" y1="155.52" x2="256" y2="89.45"/>
+            <line x1="130.19" y1="155.52" x2="256" y2="221.59"/>
+            <line x1="256" y1="373" x2="256" y2="221.59"/>
+            <line x1="256" y1="373" x2="381.81" y2="306.93"/>
+          </g>
+          <g stroke-linecap="round">
+            <line x1="430.33" y1="107.88" x2="256" y2="89.45" stroke="url(#mini-pull0)" stroke-width="5.61"/>
+            <line x1="430.33" y1="107.88" x2="256" y2="221.59" stroke="url(#mini-pull1)" stroke-width="5.61"/>
+            <line x1="430.33" y1="107.88" x2="381.81" y2="306.93" stroke="url(#mini-pull2)" stroke-width="5.61"/>
+          </g>
+          <circle cx="430.33" cy="107.88" r="16.9" fill="#e0663f"/>
+        </svg>
+        <span>Pi Flow</span>
+        <span class="sub" data-i18n="安装向导">安装向导</span>
+      </div>
+      <div class="title-right">
+        <div class="lang-toggle" id="langToggle" role="radiogroup" tabindex="0" aria-label="界面语言" data-i18n-aria="界面语言">
+          <div class="lang-knob"></div>
+          <span class="lang-opt" data-lang="zh">中文</span>
+          <span class="lang-opt active" data-lang="en">EN</span>
+        </div>
+        <div class="win-dots">
+          <span class="dot-green" role="button" tabindex="0" title="最小化" data-i18n-title="最小化" data-win="minimize"></span>
+          <span class="dot-red" role="button" tabindex="0" title="关闭" data-i18n-title="关闭" data-win="close"></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" data-view="install"><span data-i18n="安装">安装</span></button>
+        <button type="button" class="tab" data-view="log"><span data-i18n="日志">日志</span><span id="logDot" class="dot"></span></button>
+      </div>
+    </div>
+
+    <div class="install-root">
+      <section id="installView" class="view install">
+        <div class="stage">
+          <div class="halo"></div>
+
+          <div class="lockup">
+            <span class="br left">&lt;</span>
+            <div class="rig-wrap">
+              <svg class="rig-svg" viewBox="20 56 470 376" aria-hidden="true">
+                <defs>
+                  <linearGradient id="inst-board" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#faf6ec"/>
+                    <stop offset="0.55" stop-color="#f2ecdd"/>
+                    <stop offset="1" stop-color="#e4dcc9"/>
+                  </linearGradient>
+                  <linearGradient id="inst-pull0" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="256" y2="89.45">
+                    <stop offset="0" stop-color="#e0663f" stop-opacity="1"/>
+                    <stop offset="0.35" stop-color="#8c4b34" stop-opacity="0.803"/>
+                    <stop offset="0.7" stop-color="#56392c" stop-opacity="0.675"/>
+                    <stop offset="1" stop-color="#2e2c27" stop-opacity="0.58"/>
+                  </linearGradient>
+                  <linearGradient id="inst-pull1" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="256" y2="221.59">
+                    <stop offset="0" stop-color="#e0663f" stop-opacity="1"/>
+                    <stop offset="0.35" stop-color="#8c4b34" stop-opacity="0.803"/>
+                    <stop offset="0.7" stop-color="#56392c" stop-opacity="0.675"/>
+                    <stop offset="1" stop-color="#2e2c27" stop-opacity="0.58"/>
+                  </linearGradient>
+                  <linearGradient id="inst-pull2" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="381.81" y2="306.93">
+                    <stop offset="0" stop-color="#e0663f" stop-opacity="1"/>
+                    <stop offset="0.35" stop-color="#8c4b34" stop-opacity="0.803"/>
+                    <stop offset="0.7" stop-color="#56392c" stop-opacity="0.675"/>
+                    <stop offset="1" stop-color="#2e2c27" stop-opacity="0.58"/>
+                  </linearGradient>
+                  <clipPath id="inst-boardClip">
+                    <polygon points="35.84,306.93 256,422.55 476.16,306.93 256,191.31"/>
+                  </clipPath>
+                </defs>
+
+                <g class="board">
+                  <polygon points="35.84,306.93 256,422.55 476.16,306.93 256,191.31"
+                           fill="url(#inst-board)" stroke="rgba(150,141,120,0.45)" stroke-width="1.2" stroke-linejoin="round"/>
+                  <polygon points="130.19,306.93 256,373 320.05,373 514.53,306.93 320.05,240.86 256,240.86"
+                           fill="rgba(96,78,52,0.45)" clip-path="url(#inst-boardClip)"/>
+                </g>
+
+                <g class="rig">
+                  <g class="cube-body">
+                    <polygon points="130.19,306.93 256,373 256,221.59" fill="#5a5b58" stroke="#5a5b58" stroke-width="0.9" stroke-linejoin="round"/>
+                    <polygon points="256,373 381.81,306.93 430.33,107.88" fill="#1f2228" stroke="#1f2228" stroke-width="0.9" stroke-linejoin="round"/>
+                    <polygon points="256,373 430.33,107.88 256,221.59" fill="#1f2228" stroke="#1f2228" stroke-width="0.9" stroke-linejoin="round"/>
+                    <polygon points="130.19,306.93 256,221.59 130.19,155.52" fill="#5a5b58" stroke="#5a5b58" stroke-width="0.9" stroke-linejoin="round"/>
+                    <polygon points="130.19,155.52 256,221.59 430.33,107.88" fill="#b6b2a7" stroke="#b6b2a7" stroke-width="0.9" stroke-linejoin="round"/>
+                    <polygon points="130.19,155.52 430.33,107.88 256,89.45" fill="#bdb8ad" stroke="#bdb8ad" stroke-width="0.9" stroke-linejoin="round"/>
+                    <g stroke="rgba(46,44,39,0.55)" stroke-width="2.44" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="130.19" y1="306.93" x2="130.19" y2="155.52"/>
+                      <line x1="130.19" y1="306.93" x2="256" y2="373"/>
+                      <line x1="130.19" y1="155.52" x2="256" y2="89.45"/>
+                      <line x1="130.19" y1="155.52" x2="256" y2="221.59"/>
+                      <line x1="256" y1="373" x2="256" y2="221.59"/>
+                      <line x1="256" y1="373" x2="381.81" y2="306.93"/>
+                    </g>
+                  </g>
+                  <g class="tethers" stroke-linecap="round">
+                    <line class="tether t0" x1="430.33" y1="107.88" x2="256" y2="89.45" stroke="url(#inst-pull0)" stroke-width="5.61"/>
+                    <line class="tether t1" x1="430.33" y1="107.88" x2="256" y2="221.59" stroke="url(#inst-pull1)" stroke-width="5.61"/>
+                    <line class="tether t2" x1="430.33" y1="107.88" x2="381.81" y2="306.93" stroke="url(#inst-pull2)" stroke-width="5.61"/>
+                  </g>
+                  <circle class="pin-ping" cx="430.33" cy="107.88" r="16.9"/>
+                  <circle class="pin" cx="430.33" cy="107.88" r="16.9"/>
+                </g>
+              </svg>
+            </div>
+            <span class="br right">&gt;</span>
+          </div>
+
+          <div class="headline">
+            <p class="meta" id="meta">STEP 00 / 00 · READY</p>
+            <h1 id="title">准备安装运行环境</h1>
+            <p class="sub" id="sub"></p>
+          </div>
+
+          <div class="rail">
+            <div class="rail-track" id="railTrack"><span class="rail-fill" id="railFill"></span></div>
+            <ol class="rail-list" id="railList"></ol>
+          </div>
+
+          <p class="banner" id="banner"></p>
+
+          <p class="hint" data-i18n="Blender 已内置在安装包中，无需联网下载。其余依赖首次安装时需要网络，失败后重新运行会接着上次的进度继续。">Blender 已内置在安装包中，无需联网下载。其余依赖首次安装时需要网络，失败后重新运行会接着上次的进度继续。</p>
+        </div>
+      </section>
+
+      <section id="logView" class="view log-view hidden">
+        <div class="log-body" id="logBody"></div>
+      </section>
+    </div>
+  </div>
+
+<script src="setup-i18n.js"></script>
+<script>
+  const EN = window.SETUP_I18N || {};
+  const win = document.getElementById("win");
+  const metaEl = document.getElementById("meta");
+  const titleEl = document.getElementById("title");
+  const subEl = document.getElementById("sub");
+  const bannerEl = document.getElementById("banner");
+  const railList = document.getElementById("railList");
+  const railTrack = document.getElementById("railTrack");
+  const railFill = document.getElementById("railFill");
+  const railEl = document.querySelector(".rail");
+  const logBody = document.getElementById("logBody");
+  const logDot = document.getElementById("logDot");
+  const installView = document.getElementById("installView");
+  const logView = document.getElementById("logView");
+  const langToggle = document.getElementById("langToggle");
+
+  function readSetupLocale() {
+    try {
+      return localStorage.getItem("pi-flow-setup-locale");
+    } catch {
+      return null;
+    }
+  }
+
+  function saveSetupLocale(value) {
+    try {
+      localStorage.setItem("pi-flow-setup-locale", value);
+    } catch {
+      // 存储不可用时只影响下次打开。
+    }
+  }
+
+  let lang = window.resolveSetupLocale
+    ? window.resolveSetupLocale(readSetupLocale())
+    : "en";
+  let view = "install";
+
+  const t = (text) => (lang === "en" ? EN[text] ?? text : text);
+  const fmt = (tpl, vars) => tpl.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? "");
+  const pad = (n) => String(n).padStart(2, "0");
+
+  /* 进度只按步骤推进：引擎没有细粒度百分比，不编造。 */
+  const snap = { phase: "ready", completed: 0, active: -1, total: 0, titles: [], message: "" };
+  let railItems = [];
+
+  function buildRail() {
+    railList.textContent = "";
+    railItems = [];
+    const total = snap.total;
+    for (let i = 0; i < total; i += 1) {
+      const li = document.createElement("li");
+      li.className = "rail-item";
+      const dot = document.createElement("span");
+      dot.className = "rail-dot";
+      const cap = document.createElement("span");
+      cap.className = "rail-cap";
+      li.append(dot, cap);
+      railList.append(li);
+      railItems.push(li);
+    }
+    const columns = Math.max(total, 1);
+    railList.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    const edge = (50 / columns).toFixed(3) + "%";
+    railTrack.style.left = edge;
+    railTrack.style.right = edge;
+  }
+
+  function setPhase(phase) {
+    snap.phase = phase;
+    win.classList.remove("s-ready", "s-running", "s-done", "s-failed");
+    win.classList.add("s-" + phase);
+  }
+
+  function render() {
+    const total = snap.total;
+    railEl.classList.toggle("empty", total === 0);
+    const working = snap.phase === "running" || snap.phase === "failed";
+    const shown = snap.active >= 0 ? snap.active : snap.completed;
+
+    railItems.forEach((li, index) => {
+      li.className = "rail-item";
+      li.querySelector(".rail-cap").textContent = t(snap.titles[index] || "");
+      if (snap.phase === "done" || index < snap.completed) li.classList.add("done");
+      else if (index === snap.active && snap.phase === "running") li.classList.add("running");
+      else if (index === snap.active && snap.phase === "failed") li.classList.add("failed");
+    });
+
+    let fill = 0;
+    if (snap.phase === "done") fill = 100;
+    else if (working && total > 1) {
+      fill = Math.min(100, ((snap.completed + (snap.phase === "running" ? 0.4 : 0)) / (total - 1)) * 100);
+    }
+    railFill.style.width = fill + "%";
+
+    let installed = 0;
+    if (snap.phase === "done") installed = 1;
+    else if (total > 0) {
+      installed = (snap.completed + (snap.phase === "running" && snap.active >= 0 ? 0.4 : 0)) / total;
+    }
+    win.style.setProperty("--seat", installed.toFixed(3));
+    win.style.setProperty("--spread", (64 - 52 * installed).toFixed(1) + "px");
+
+    if (snap.phase === "ready") {
+      metaEl.textContent = `STEP 00 / ${pad(total)} · READY`;
+      titleEl.textContent = t("准备安装运行环境");
+      subEl.textContent = total ? fmt(t("将依次准备 {n} 项运行依赖"), { n: total }) : "";
+    } else if (snap.phase === "running") {
+      const pct = total ? Math.round((snap.completed / total) * 100) : 0;
+      metaEl.textContent = `STEP ${pad(shown + 1)} / ${pad(total)} · ${pad(pct)}% · RUNNING`;
+      titleEl.textContent = snap.active >= 0 ? t(snap.titles[snap.active] || "") : t("正在安装，请稍候…");
+      subEl.textContent = t("正在安装，请稍候…");
+    } else if (snap.phase === "done") {
+      metaEl.textContent = `STEP ${pad(total)} / ${pad(total)} · READY`;
+      titleEl.textContent = t("运行环境就绪，正在启动…");
+      subEl.textContent = fmt(t("全部 {n} 项已完成"), { n: total });
+    } else {
+      metaEl.textContent = `STEP ${pad(shown + 1)} / ${pad(total)} · FAILED`;
+      titleEl.textContent = t(snap.titles[shown] || "安装中断");
+      subEl.textContent = fmt(t("第 {n} 项中断，日志里有详细原因"), { n: shown + 1 });
+    }
+
+    bannerEl.textContent = snap.phase === "failed" ? snap.message : "";
+    bannerEl.classList.toggle("show", snap.phase === "failed" && Boolean(snap.message));
+  }
+
+  function log(kind, text) {
+    const line = document.createElement("div");
+    line.className = "log-line";
+    const pfx = document.createElement("span");
+    pfx.className = "pfx " + kind;
+    pfx.textContent = kind === "run" ? "→" : kind === "ok" ? "✓" : kind === "err" ? "✕" : "·";
+    line.append(pfx, document.createTextNode(text));
+    logBody.append(line);
+    if (view === "log") logBody.scrollTop = logBody.scrollHeight;
+    else if (kind !== "info") logDot.classList.add("show");
+  }
+
+  function plan(titles) {
+    snap.total = titles.length;
+    snap.titles = titles.slice();
+    snap.completed = 0;
+    snap.active = -1;
+    buildRail();
+    render();
+  }
+
+  function setStep(payload) {
+    const { index, title, status } = payload;
+    if (payload.total) snap.total = payload.total;
+    const position = Math.max(1, Math.min(Number(index) || 1, snap.total || 1));
+    const at = position - 1;
+    if (title) snap.titles[at] = title;
+
+    if (status === "running") {
+      snap.active = at;
+      setPhase("running");
+      log("run", t(title || snap.titles[at] || ""));
+    } else if (status === "done") {
+      snap.completed = Math.max(snap.completed, position);
+      snap.active = -1;
+      log("ok", t(title || snap.titles[at] || ""));
+      setPhase(snap.total && snap.completed >= snap.total ? "done" : "running");
+    } else if (status === "failed") {
+      snap.completed = Math.max(snap.completed, at);
+      snap.active = at;
+      setPhase("failed");
+    }
+    render();
+  }
+
+  function fail(message) {
+    if (snap.active < 0 && snap.completed > 0) snap.active = snap.completed - 1;
+    snap.message = message;
+    setPhase("failed");
+    log("err", t(message));
+    render();
+  }
+
+  function switchView(next) {
+    view = next;
+    installView.classList.toggle("hidden", view !== "install");
+    logView.classList.toggle("hidden", view !== "log");
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.view === view);
+    });
+    if (view === "log") {
+      logDot.classList.remove("show");
+      logBody.scrollTop = logBody.scrollHeight;
+    }
+  }
+
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => switchView(tab.dataset.view));
+  });
+
+  function applyLang() {
+    for (const el of document.querySelectorAll("[data-i18n]")) {
+      el.textContent = t(el.dataset.i18n);
+    }
+    for (const el of document.querySelectorAll("[data-i18n-title]")) {
+      el.title = t(el.dataset.i18nTitle);
+    }
+    for (const el of document.querySelectorAll("[data-i18n-aria]")) {
+      el.setAttribute("aria-label", t(el.dataset.i18nAria));
+    }
+    langToggle.classList.toggle("en", lang === "en");
+    [...langToggle.querySelectorAll(".lang-opt")].forEach((opt) => {
+      opt.classList.toggle("active", opt.dataset.lang === lang);
+    });
+    document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+    document.title = t("Pi Flow 运行环境");
+    window.setup?.setLocale?.(lang);
+    render();
+  }
+
+  function setLang(next) {
+    lang = next === "en" ? "en" : "zh";
+    saveSetupLocale(lang);
+    applyLang();
+  }
+
+  langToggle.addEventListener("click", () => setLang(lang === "zh" ? "en" : "zh"));
+  langToggle.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === "Home") setLang("zh");
+    else if (event.key === "End") setLang("en");
+    else setLang(lang === "zh" ? "en" : "zh");
+  });
+
+  function runWinAction(action) {
+    if (action === "minimize") window.setup?.minimize?.();
+    else if (action === "close") window.setup?.close?.();
+  }
+
+  document.querySelectorAll("[data-win]").forEach((dot) => {
+    dot.addEventListener("click", () => runWinAction(dot.dataset.win));
+    dot.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      runWinAction(dot.dataset.win);
+    });
+  });
+
+  window.setup?.onStep((payload) => {
+    if (!payload) return;
+    if (payload.type === "plan") plan(payload.titles || []);
+    else if (payload.type === "state") setStep(payload);
+  });
+
+  window.setup?.onError((message) => fail(message));
+
+  setLang(lang);
+</script>
+</body>
+</html>

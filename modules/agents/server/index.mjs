@@ -1,6 +1,7 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { t } from "../../../app/js/core/i18n.mjs";
+import { t } from "../../../shared/messages.mjs";
+import { readSessionTranscript } from "./session.mjs";
 
 export function createAgentsServer({ store }) {
   const { ApiError, db, now, rid, saveState } = store;
@@ -67,6 +68,7 @@ export function createAgentsServer({ store }) {
       session = {
         id: rid("sess"),
         piSessionId: null,
+        piSessionFile: null,
         title: `${node.title || agent.name} · ${new Date().toLocaleString("zh-CN")}`,
         messageCount: 0,
         artifactCount: 0,
@@ -81,13 +83,16 @@ export function createAgentsServer({ store }) {
       agent: { id: agent.id, name: agent.name, projectPath: agent.projectPath },
       internalId: session.id,
       piSessionId: session.piSessionId,
+      piSessionFile: session.piSessionFile || null,
       reused,
     };
   }
 
-  function bindSession(agentId, internalId, piSessionId) {
+  function bindSession(agentId, internalId, piSessionId, piSessionFile) {
     const session = get(agentId)?.sessions?.find((item) => item.id === internalId);
-    if (session) session.piSessionId = piSessionId;
+    if (!session) return;
+    if (piSessionId) session.piSessionId = piSessionId;
+    if (piSessionFile) session.piSessionFile = piSessionFile;
   }
 
   function finishSession(agentId, internalId, artifactCount) {
@@ -105,7 +110,49 @@ export function createAgentsServer({ store }) {
     return agent;
   }
 
-  const api = { list, get, create, remove, beginSession, bindSession, finishSession };
+  /* 会话只是 Agent 名下的一条记录，改名 / 删除都只动这条记录，
+   * 不碰 pi 自己写的会话文件。
+   * 路径里的会话 id 同时认内部 id 和 pi 的会话 id，三个入口共用这套解析。 */
+  function matchSession(item, sessionId) {
+    return item.id === sessionId || (item.piSessionId && item.piSessionId === sessionId);
+  }
+
+  function findSession(agentId, sessionId) {
+    const agent = get(agentId);
+    if (!agent) throw new ApiError(404, t("Agent 不存在"));
+    const session = (agent.sessions || []).find((item) => matchSession(item, sessionId));
+    if (!session) throw new ApiError(404, t("会话不存在"));
+    return session;
+  }
+
+  function renameSession(agentId, sessionId, title) {
+    const session = findSession(agentId, sessionId);
+    const next = String(title ?? "").trim();
+    if (!next) throw new ApiError(400, t("会话名称不能为空"));
+    session.title = next;
+    return session;
+  }
+
+  function removeSession(agentId, sessionId) {
+    const agent = get(agentId);
+    if (!agent) throw new ApiError(404, t("Agent 不存在"));
+    const before = (agent.sessions || []).length;
+    agent.sessions = (agent.sessions || []).filter((item) => !matchSession(item, sessionId));
+    if (agent.sessions.length === before) throw new ApiError(404, t("会话不存在"));
+    return { ok: true };
+  }
+
+  const api = {
+    list,
+    get,
+    create,
+    remove,
+    beginSession,
+    bindSession,
+    finishSession,
+    renameSession,
+    removeSession,
+  };
 
   return {
     api,
@@ -122,6 +169,44 @@ export function createAgentsServer({ store }) {
           const agent = await create(body);
           await saveState();
           return { agent };
+        },
+      },
+      {
+        method: "GET",
+        pattern: /^\/api\/agents\/([^/]+)\/sessions\/([^/]+)$/,
+        handler: async ({ params }) => {
+          const agent = get(decodeURIComponent(params[1]));
+          if (!agent) throw new ApiError(404, t("Agent 不存在"));
+          const id = decodeURIComponent(params[2]);
+          const session = (agent.sessions || []).find((item) => matchSession(item, id));
+          // 没有登记记录时仍按传入的 id 尝试读盘（pi 的会话文件可能还在）。
+          const piSessionId = session?.piSessionId || id;
+          return readSessionTranscript(agent.projectPath, piSessionId, session?.piSessionFile);
+        },
+      },
+      {
+        method: "PATCH",
+        pattern: /^\/api\/agents\/([^/]+)\/sessions\/([^/]+)$/,
+        handler: async ({ params, body }) => {
+          const session = renameSession(
+            decodeURIComponent(params[1]),
+            decodeURIComponent(params[2]),
+            body?.title,
+          );
+          await saveState();
+          return { session };
+        },
+      },
+      {
+        method: "DELETE",
+        pattern: /^\/api\/agents\/([^/]+)\/sessions\/([^/]+)$/,
+        handler: async ({ params }) => {
+          const result = removeSession(
+            decodeURIComponent(params[1]),
+            decodeURIComponent(params[2]),
+          );
+          await saveState();
+          return result;
         },
       },
       {

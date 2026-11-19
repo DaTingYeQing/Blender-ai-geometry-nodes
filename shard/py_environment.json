@@ -3,10 +3,10 @@
   "_updated": "2026-11-11",
 
   "python": {
-    "_role": "外部 python（跑在 Blender 外面的那个）：所有不碰 bpy 的胶水脚本都由它执行；需要加第三方几何库",
-    "_note": "安装时由 setup-runtime.ps1 写入实际路径，不要在模板里写死盘符。",
+    "_role": "外层 python：所有不碰 bpy 的胶水脚本都由它执行；几何库（numpy / scipy / trimesh / pyvista / manifold3d / matplotlib / PIL）已 pip 进它的 site-packages",
+    "_note": "单环境方案：不再单独装 Python，这里指向 Blender 目录里的内置 python（4.5\\python\\bin\\python.exe），安装时由 setup-runtime.ps1 写入实际路径，不要在模板里写死盘符。",
     "exe": "",
-    "version": "3.13.14",
+    "version": "3.11.11",
     "site_packages_hint": "numpy / scipy / trimesh / pyvista / manifold3d / matplotlib / PIL"
   },
 

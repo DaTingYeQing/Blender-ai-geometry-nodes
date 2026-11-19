@@ -36,6 +36,20 @@ async function findOutputDir() {
 }
 
 async function handle(record) {
+  if (record.type === "get_state") {
+    send({
+      id: record.id,
+      type: "response",
+      command: "get_state",
+      success: true,
+      data: {
+        sessionId: "pi-test-session",
+        sessionFile: path.join(process.cwd(), ".pi", "flow", "fake-session.jsonl"),
+      },
+    });
+    return;
+  }
+
   if (record.type === "prompt") {
     const outDir = await findOutputDir();
     if (outDir) {
@@ -43,16 +57,23 @@ async function handle(record) {
       await fsp.writeFile(path.join(outDir, "result.txt"), "fake pi artifact", "utf8");
     }
     send({ id: record.id, type: "response", command: "prompt", success: true, data: { disposition: "started" } });
+    if (process.env.FAKE_PI_HOLD === "1") return;
+
+    send({ type: "tool_execution_start", toolCallId: "t1", toolName: "write", args: { path: "result.txt" } });
+    send({ type: "tool_execution_end", toolCallId: "t1", toolName: "write", isError: false, durationMs: 1 });
+    send({ type: "message_update", assistantMessageEvent: { type: "thinking_delta", delta: "先想一下" } });
+    send({ type: "message_update", assistantMessageEvent: { type: "text_delta", delta: "完成" } });
+    send({
+      type: "message_end",
+      message: { role: "assistant", content: [{ type: "text", text: "完成（最终）" }] },
+    });
+    send({ type: "agent_settled", aborted: false });
     return;
   }
 
-  if (record.type === "get_state") {
-    send({ id: record.id, type: "response", command: "get_state", success: true, data: { sessionId: "pi-test-session" } });
-    send({ type: "tool_execution_start", toolName: "write", args: { path: "result.txt" } });
-    send({ type: "tool_execution_end", toolName: "write", isError: false, durationMs: 1 });
-    send({ type: "message_update", assistantMessageEvent: { type: "thinking_delta", delta: "先想一下" } });
-    send({ type: "message_update", assistantMessageEvent: { type: "text_delta", delta: "完成" } });
-    send({ type: "agent_settled", aborted: false });
+  if (record.type === "abort") {
+    send({ id: record.id, type: "response", command: "abort", success: true });
+    send({ type: "agent_settled", aborted: true });
   }
 }
 

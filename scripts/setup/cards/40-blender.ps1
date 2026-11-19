@@ -26,9 +26,31 @@ function Install-Blender([string]$Archive) {
     Write-Ok "Blender 已部署到 $($setup.BlenderSrcBlenderExe)"
 }
 
+# Blender 内置 python 被直接 spawn 时不会经过 blender.exe 的初始化，
+# 找不到 blender.crt 里的 VC++ 运行库。复制到 python.exe 同目录即可独立启动。
+function Install-BlenderCrt([string]$BlenderExe) {
+    $pythonExe = Get-BlenderPythonExe $BlenderExe
+    if (-not $pythonExe) { return }
+    $crtDir = Join-Path (Split-Path -Parent $BlenderExe) 'blender.crt'
+    if (-not (Test-Path -LiteralPath $crtDir)) { return }
+    $pythonBin = Split-Path -Parent $pythonExe
+    try {
+        foreach ($pattern in @('vcruntime140*.dll', 'msvcp140*.dll', 'concrt140.dll')) {
+            Get-ChildItem -LiteralPath $crtDir -Filter $pattern -File -ErrorAction SilentlyContinue |
+                Copy-Item -Destination $pythonBin -Force -ErrorAction Stop
+        }
+        Write-Ok "已补齐 Blender 内置 python 的运行库"
+    }
+    catch {
+        Write-WarnLine "复制 VC++ 运行库失败：$($_.Exception.Message)"
+    }
+}
+
 function Test-BlenderCardStatic {
     $setup = $script:Setup
     if ($setup.SkipBlender) { return $true }
+    # 版本变化：强制替换，但前提是安装包里有可用的压缩包。
+    if ($setup.ForceBlender) { return (Test-BlenderArchive $setup.BlenderArchive) }
     if (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe) { return $true }
     return (Test-BlenderArchive $setup.BlenderArchive)
 }
@@ -38,13 +60,19 @@ function Invoke-BlenderCardStatic {
     if ($setup.SkipBlender) {
         $existing = Get-BlenderExe
         if ($existing) {
+            Install-BlenderCrt $existing
             $setup.BlenderExe = $existing
             return $true
         }
         throw "加了 -SkipBlender，但 Blender 不存在：$($setup.BlenderSrcBlenderExe)"
     }
+    if ($setup.ForceBlender -and (Test-Path -LiteralPath $setup.BlenderSrcBlender)) {
+        Write-Step "替换 Blender（版本变化）"
+        Remove-Item -LiteralPath $setup.BlenderSrcBlender -Recurse -Force
+    }
     if (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe) {
         Write-Ok "Blender 已存在：$($setup.BlenderSrcBlenderExe)"
+        Install-BlenderCrt $setup.BlenderSrcBlenderExe
         $setup.BlenderExe = $setup.BlenderSrcBlenderExe
         return $true
     }
@@ -58,6 +86,7 @@ function Invoke-BlenderCardStatic {
     if (-not (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe)) {
         throw "Blender 部署失败：$($setup.BlenderSrcBlenderExe)"
     }
+    Install-BlenderCrt $setup.BlenderSrcBlenderExe
     $setup.BlenderExe = $setup.BlenderSrcBlenderExe
     return $true
 }

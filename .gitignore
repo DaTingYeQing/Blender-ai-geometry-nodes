@@ -16,3 +16,4 @@ resources/bundles/*
 !resources/bundles/manifest.json
 !resources/bundles/wheels-constraints.txt
 icon/
+experiments

@@ -1,7 +1,7 @@
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { ApiError, ensureDir, isInside, now, rid } from "../electron/server/store.mjs";
+import { ApiError, ensureDir, isInside, now, rid } from "../server/store/index.mjs";
 
 export function makeStore(state) {
   const store = {

@@ -1,4 +1,4 @@
-﻿# Git Bash：优先解压内置 PortableGit（不需要管理员），否则回退 winget。
+﻿# Git Bash：只解压内置 PortableGit，不联网安装。
 
 function Install-PortableGit([string]$Archive) {
     $setup = $script:Setup
@@ -54,44 +54,9 @@ function Invoke-GitCardStatic {
     return $true
 }
 
-function Invoke-GitCardDynamic {
-    $setup = $script:Setup
-    if ($setup.SkipGit) {
-        $setup.GitBash = Get-GitBash
-        return $true
-    }
-    $existing = Get-GitBash
-    if ($existing) {
-        Write-Ok "Git Bash 已存在：$existing"
-        $setup.GitBash = $existing
-        return $true
-    }
-
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Write-WarnLine "没有找到 Git Bash 和 winget。pi 可以启动，但 bash 工具需要 Git for Windows。"
-        return $true
-    }
-
-    Write-Step "安装 Git for Windows（pi 的 bash 工具需要 Git Bash）"
-    $exitCode = Invoke-Winget @('install', '--id', 'Git.Git', '-e') 'winget 安装 Git for Windows'
-    if ($exitCode -ne 0) {
-        Write-WarnLine "Git 静默安装失败（退出码 $exitCode，-1 表示超时）。pi 本体不受影响，bash 工具需要稍后安装 Git for Windows。"
-        return $true
-    }
-    Refresh-Path
-    $found = Get-GitBash
-    if ($found) {
-        Write-Ok "Git Bash 已安装：$found"
-        $setup.GitBash = $found
-        $setup.Managed.GitMethod = 'winget'
-    }
-    return $true
-}
-
 @{
     Id            = 'git'
     Title         = '准备 Git Bash'
     TestStatic    = 'Test-GitCardStatic'
     InvokeStatic  = 'Invoke-GitCardStatic'
-    InvokeDynamic = 'Invoke-GitCardDynamic'
 }

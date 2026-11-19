@@ -1,9 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" rx="225" fill="#ECE3CE"/>
-  <circle cx="512" cy="512" r="252" fill="none" stroke="#2A2822" stroke-width="64"/>
-  <g transform="rotate(-24 512 512)">
-    <ellipse cx="512" cy="512" rx="372" ry="156" fill="none"
-             stroke="#E89A32" stroke-width="50"/>
-  </g>
-  <circle cx="512" cy="512" r="66" fill="#2A2822"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Agent cube icon">
+<title>Agent Cube Icon</title>
+<defs>
+<linearGradient id="board" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#faf6ec"/><stop offset="0.55" stop-color="#f2ecdd"/><stop offset="1" stop-color="#e4dcc9"/></linearGradient>
+<linearGradient id="pull0" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="256.00" y2="89.45"><stop offset="0" stop-color="rgb(224,102,63)" stop-opacity="1.000"/><stop offset="0.35" stop-color="rgb(140,75,52)" stop-opacity="0.803"/><stop offset="0.7" stop-color="rgb(86,57,44)" stop-opacity="0.675"/><stop offset="1" stop-color="rgb(46,44,39)" stop-opacity="0.580"/></linearGradient>
+<linearGradient id="pull1" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="256.00" y2="221.59"><stop offset="0" stop-color="rgb(224,102,63)" stop-opacity="1.000"/><stop offset="0.35" stop-color="rgb(140,75,52)" stop-opacity="0.803"/><stop offset="0.7" stop-color="rgb(86,57,44)" stop-opacity="0.675"/><stop offset="1" stop-color="rgb(46,44,39)" stop-opacity="0.580"/></linearGradient>
+<linearGradient id="pull2" gradientUnits="userSpaceOnUse" x1="430.33" y1="107.88" x2="381.81" y2="306.93"><stop offset="0" stop-color="rgb(224,102,63)" stop-opacity="1.000"/><stop offset="0.35" stop-color="rgb(140,75,52)" stop-opacity="0.803"/><stop offset="0.7" stop-color="rgb(86,57,44)" stop-opacity="0.675"/><stop offset="1" stop-color="rgb(46,44,39)" stop-opacity="0.580"/></linearGradient>
+<clipPath id="boardClip"><polygon points="35.84,306.93 256.00,422.55 476.16,306.93 256.00,191.31"/></clipPath>
+</defs>
+<polygon points="35.84,306.93 256.00,422.55 476.16,306.93 256.00,191.31" fill="url(#board)" stroke="rgba(150,141,120,0.45)" stroke-width="1.2" stroke-linejoin="round"/>
+<polygon points="130.19,306.93 256.00,373.00 320.05,373.00 514.53,306.93 320.05,240.86 256.00,240.86" fill="rgba(96,78,52,0.450)" clip-path="url(#boardClip)"/>
+<polygon points="130.19,306.93 256.00,373.00 256.00,221.59" fill="rgb(90,91,88)" stroke="rgb(90,91,88)" stroke-width="0.9" stroke-linejoin="round"/>
+<polygon points="256.00,373.00 381.81,306.93 430.33,107.88" fill="rgb(31,34,40)" stroke="rgb(31,34,40)" stroke-width="0.9" stroke-linejoin="round"/>
+<polygon points="256.00,373.00 430.33,107.88 256.00,221.59" fill="rgb(31,34,40)" stroke="rgb(31,34,40)" stroke-width="0.9" stroke-linejoin="round"/>
+<polygon points="130.19,306.93 256.00,221.59 130.19,155.52" fill="rgb(90,91,88)" stroke="rgb(90,91,88)" stroke-width="0.9" stroke-linejoin="round"/>
+<polygon points="130.19,155.52 256.00,221.59 430.33,107.88" fill="rgb(182,178,167)" stroke="rgb(182,178,167)" stroke-width="0.9" stroke-linejoin="round"/>
+<polygon points="130.19,155.52 430.33,107.88 256.00,89.45" fill="rgb(189,184,173)" stroke="rgb(189,184,173)" stroke-width="0.9" stroke-linejoin="round"/>
+<g stroke="rgba(46,44,39,0.550)" stroke-width="2.44" stroke-linecap="round" stroke-linejoin="round"><line x1="130.19" y1="306.93" x2="130.19" y2="155.52"/><line x1="130.19" y1="306.93" x2="256.00" y2="373.00"/><line x1="130.19" y1="155.52" x2="256.00" y2="89.45"/><line x1="130.19" y1="155.52" x2="256.00" y2="221.59"/><line x1="256.00" y1="373.00" x2="256.00" y2="221.59"/><line x1="256.00" y1="373.00" x2="381.81" y2="306.93"/></g>
+<g stroke-linecap="round"><line x1="430.33" y1="107.88" x2="256.00" y2="89.45" stroke="url(#pull0)" stroke-width="5.61"/><line x1="430.33" y1="107.88" x2="256.00" y2="221.59" stroke="url(#pull1)" stroke-width="5.61"/><line x1="430.33" y1="107.88" x2="381.81" y2="306.93" stroke="url(#pull2)" stroke-width="5.61"/></g>
+<circle cx="430.33" cy="107.88" r="16.90" fill="rgb(178,53,42)"/>
 </svg>

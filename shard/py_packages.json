@@ -1,9 +1,9 @@
 {
-  "_note": "setup-runtime.ps1 和 scripts/fetch-bundles.mjs 共用这份版本清单；改完运行 npm run fetch:bundles。",
-  "python": "3.13",
+  "_note": "几何依赖已随 Blender zip 内置（编译机 pip 装进 bin/4.5/python，见 blender-4.5.0-trace-win64.zip）。本文件只作版本备忘：重装 Blender 或换编译机时，按这份清单往 Blender 内置 python 里 pip install。setup-runtime.ps1 和 fetch-bundles.mjs 不再读取它。",
+  "python": "3.11",
   "packages": [
-    "numpy==2.5.3",
-    "scipy==1.18.1",
+    "numpy==2.4.6",
+    "scipy==1.17.1",
     "pyvista==0.49.0",
     "trimesh==5.1.0",
     "manifold3d==3.5.3"

@@ -1,50 +1,14 @@
-import fs from "node:fs";
-import path from "node:path";
 import { execSync, spawn } from "node:child_process";
-import { t } from "../../../app/js/core/i18n.mjs";
+import { t } from "../../../shared/messages.mjs";
+import { PI_BIN, buildPiArgs } from "./args.mjs";
+import { DIALOG_METHODS, assistantText, summarizeToolArgs } from "./events.mjs";
 
-/** 优先环境变量，其次全局 npm root，最后兜底 APPDATA 下的常规安装路径。 */
-export function resolvePiBin() {
-  if (process.env.PI_BIN) return process.env.PI_BIN;
+export { PI_BIN, buildPiArgs, resolvePiBin } from "./args.mjs";
 
-  const candidates = [];
-  try {
-    const root = execSync("npm root -g", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-    candidates.push(path.join(root, "@earendil-works/pi-coding-agent/dist/bundle/cli.js"));
-    candidates.push(path.join(root, "@earendil-works/pi-coding-agent/dist/cli.js"));
-  } catch {
-    // npm 不可用时继续走兜底
-  }
-  candidates.push(
-    path.join(process.env.APPDATA || "", "npm/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js"),
-    path.join(process.env.APPDATA || "", "npm/node_modules/@earendil-works/pi-coding-agent/dist/cli.js"),
-  );
-
-  return candidates.find((file) => fs.existsSync(file)) || "pi";
-}
-
-export const PI_BIN = resolvePiBin();
-
-export function buildPiArgs({ sessionId, noExtensions, extensions } = {}) {
-  const args = [PI_BIN, "--mode", "rpc", "--approve"];
-  if (noExtensions) args.push("--no-extensions");
-  for (const extension of extensions ?? []) args.push("--extension", String(extension));
-  if (sessionId) args.push("--session-id", String(sessionId));
-  return args;
-}
-
-const DIALOG_METHODS = new Set(["select", "confirm", "input", "editor"]);
-
-function summarizeArgs(toolName, args) {
-  if (!args || typeof args !== "object") return "";
-  let text = "";
-  if (toolName === "bash" || toolName === "powershell") text = String(args.command || "");
-  else if (args.path) text = String(args.path);
-  else if (args.file_path) text = String(args.file_path);
-  else text = JSON.stringify(args);
-  text = text.replace(/\s+/g, " ").trim();
-  return text.length > 160 ? `${text.slice(0, 160)}…` : text;
-}
+const MAX_STDOUT_RECORD = 8 * 1024 * 1024;
+const MAX_REPLY_CHARS = 20_000;
+const STATE_TIMEOUT_MS = 5_000;
+const ABORT_GRACE_MS = 5_000;
 
 function killTree(child) {
   if (!child || child.killed) return;
@@ -65,20 +29,13 @@ function killTree(child) {
 
 /**
  * 启动一次 pi RPC 会话，逐条解析 stdout 的 JSONL 记录。
- * 返回 { promise, abort }；promise 在 agent_settled（或提前退出）后落地。
  *
- * @param {object} options
- * @param {string} options.cwd        pi 的工作目录（项目根）
- * @param {string} options.prompt     发给 agent 的任务文本
- * @param {string} options.sessionId  pi 会话 id（--session-id，存在则复用）
- * @param {Record<string, string>} [options.env]  额外注入给 pi 子进程的环境变量
- * @param {boolean} [options.noExtensions]  禁用扩展发现，只加载显式传入的扩展
- * @param {string[]} [options.extensions]  显式加载的扩展路径（配合 noExtensions）
- * @param {number} [options.timeoutMs]
- * @param {(line: string) => void} [options.onLog]
- * @param {(text: string) => void} [options.onText]
- * @param {(activity: object) => void} [options.onActivity]  思考、输出和工具调用事件
- * @param {(sessionId: string) => void} [options.onSessionId]
+ * 生命周期：
+ *   1. 先 get_state，拿 sessionId + sessionFile，再发 prompt；
+ *   2. prompt 被接受后等 agent_settled，中途用 message_end 校准最终文本；
+ *   3. abort 先发 RPC abort，超时才杀进程。
+ *
+ * 返回 { promise, abort, sessionInfo }。
  */
 export function startPi({
   cwd,
@@ -92,6 +49,7 @@ export function startPi({
   onText,
   onActivity,
   onSessionId,
+  onSessionInfo,
 }) {
   const args = buildPiArgs({ sessionId, noExtensions, extensions });
 
@@ -101,15 +59,22 @@ export function startPi({
 
   const child = spawn(process.execPath, args, { cwd, env, stdio: ["pipe", "pipe", "pipe"] });
   const log = (line) => onLog?.(line);
+  const startedAt = Date.now();
+
+  let finished = false;
+  let settled = false;
+  let abortRequested = false;
+  let promptSent = false;
+  let replyText = "";
+  let stdoutBuffer = "";
+  let timeoutTimer = null;
+  let stateTimer = null;
+  let abortTimer = null;
+
+  const sessionInfo = { sessionId: null, sessionFile: null };
 
   let settledResolve;
   let settledReject;
-  let finished = false;
-  let stdoutBuffer = "";
-  let replyText = "";
-  let settled = false;
-  const startedAt = Date.now();
-
   const promise = new Promise((resolve, reject) => {
     settledResolve = resolve;
     settledReject = reject;
@@ -118,52 +83,105 @@ export function startPi({
   const finish = (error, payload) => {
     if (finished) return;
     finished = true;
-    clearTimeout(timer);
+    clearTimeout(timeoutTimer);
+    clearTimeout(stateTimer);
+    clearTimeout(abortTimer);
     if (error) settledReject(error instanceof Error ? error : new Error(String(error)));
     else settledResolve(payload);
   };
 
-  const timer = setTimeout(() => {
-    const seconds = Math.round(timeoutMs / 1000);
-    log(t("超时（{s}s），已终止", { s: seconds }));
-    killTree(child);
-    finish(new Error(t("运行超时（{s} 秒）", { s: seconds })));
-  }, timeoutMs);
-
-  const send = (record) => {
+  function send(record) {
     if (child.stdin.destroyed) return;
     try {
       child.stdin.write(`${JSON.stringify(record)}\n`);
     } catch {
       // 进程已退出
     }
-  };
+  }
+
+  function sendPrompt() {
+    if (promptSent || finished) return;
+    promptSent = true;
+    clearTimeout(stateTimer);
+    stateTimer = null;
+    send({ id: "prompt-1", type: "prompt", message: prompt });
+  }
+
+  function resultPayload(disposition) {
+    return {
+      text: replyText,
+      aborted: false,
+      disposition,
+      durationMs: Date.now() - startedAt,
+      sessionId: sessionInfo.sessionId,
+      sessionFile: sessionInfo.sessionFile,
+    };
+  }
+
+  function rememberSession(data) {
+    if (!data) return;
+    if (data.sessionId) sessionInfo.sessionId = String(data.sessionId);
+    if (data.sessionFile) sessionInfo.sessionFile = String(data.sessionFile);
+    if (sessionInfo.sessionId || sessionInfo.sessionFile) {
+      onSessionInfo?.({ ...sessionInfo });
+      if (sessionInfo.sessionId) onSessionId?.(sessionInfo.sessionId);
+    }
+  }
+
+  timeoutTimer = setTimeout(() => {
+    const seconds = Math.round(timeoutMs / 1000);
+    log(t("超时（{s}s），已终止", { s: seconds }));
+    send({ type: "abort", id: "abort-timeout" });
+    setTimeout(() => killTree(child), 2000).unref?.();
+    finish(new Error(t("运行超时（{s} 秒）", { s: seconds })));
+  }, timeoutMs);
+
+  stateTimer = setTimeout(() => {
+    stateTimer = null;
+    log(t("获取会话状态超时，直接发送任务"));
+    sendPrompt();
+  }, STATE_TIMEOUT_MS);
 
   const handleRecord = (record) => {
     switch (record.type) {
       case "response": {
+        if (record.command === "get_state") {
+          if (record.success) rememberSession(record.data);
+          else log(t("获取会话状态失败：{message}", { message: record.error || "" }));
+          sendPrompt();
+          return;
+        }
+
+        if (record.command === "abort") {
+          if (!record.success) log(t("中止失败：{message}", { message: record.error || "" }));
+          finish(new Error(t("运行已中止")));
+          return;
+        }
+
         if (record.command === "prompt") {
           if (!record.success) {
             finish(new Error(record.error || t("prompt 被拒绝")));
             return;
           }
-          const disposition = record.data?.disposition;
-          if (disposition && disposition !== "started") {
-            finish(null, { text: replyText, disposition, durationMs: Date.now() - startedAt });
+          const disposition = record.data?.disposition || "started";
+          if (disposition === "handled") {
+            finish(null, resultPayload(disposition));
             return;
           }
-          // 新会话由 pi 自己生成 id，拿 state 回填给上层记录。
-          send({ id: "state-1", type: "get_state" });
-        }
-        if (record.command === "get_state" && record.success) {
-          const actual = record.data?.sessionId;
-          if (actual) onSessionId?.(actual);
+          if (disposition === "queued") log(t("任务已排队，等待 agent_settled"));
+          else if (disposition !== "started") {
+            log(t("未知 disposition：{value}，继续等待 agent_settled", { value: disposition }));
+          }
+          // 先前的 get_state 没回来时，趁运行中再补一次，保证会话能绑定。
+          if (!sessionInfo.sessionId && !sessionInfo.sessionFile) {
+            send({ id: "state-2", type: "get_state" });
+          }
         }
         return;
       }
 
       case "tool_execution_start": {
-        log(`→ ${record.toolName} ${summarizeArgs(record.toolName, record.args)}`.trim());
+        log(`→ ${record.toolName} ${summarizeToolArgs(record.toolName, record.args)}`.trim());
         onActivity?.({
           kind: "tool_start",
           toolCallId: record.toolCallId,
@@ -190,7 +208,7 @@ export function startPi({
       case "message_update": {
         const event = record.assistantMessageEvent;
         if (event?.type === "text_delta" && event.delta) {
-          if (replyText.length < 20_000) replyText += event.delta;
+          if (replyText.length < MAX_REPLY_CHARS) replyText += event.delta;
           onText?.(replyText);
           onActivity?.({ kind: "text", delta: event.delta });
         } else if (event?.type === "thinking_delta" && event.delta) {
@@ -199,13 +217,56 @@ export function startPi({
         return;
       }
 
+      case "message_end": {
+        const text = assistantText(record.message);
+        if (text) {
+          replyText = text;
+          onText?.(replyText);
+        }
+        return;
+      }
+
+      case "agent_end": {
+        if (record.willRetry) log(t("本轮结束，pi 将自动重试"));
+        return;
+      }
+
       case "agent_settled": {
         settled = true;
-        finish(null, {
-          text: replyText,
-          aborted: Boolean(record.aborted),
-          durationMs: Date.now() - startedAt,
-        });
+        if (record.aborted || abortRequested) {
+          finish(new Error(t("运行已中止")));
+          return;
+        }
+        finish(null, resultPayload("settled"));
+        return;
+      }
+
+      case "compaction_start": {
+        log(t("压缩上下文（{reason}）", { reason: record.reason || "auto" }));
+        return;
+      }
+
+      case "compaction_end": {
+        if (record.errorMessage) log(t("压缩失败：{message}", { message: record.errorMessage }));
+        else log(t("压缩完成"));
+        return;
+      }
+
+      case "auto_retry_start": {
+        log(
+          t("自动重试 {attempt}/{max}（{delay}ms）", {
+            attempt: record.attempt,
+            max: record.maxAttempts,
+            delay: record.delayMs,
+          }),
+        );
+        return;
+      }
+
+      case "auto_retry_end": {
+        if (record.success === false) {
+          log(t("自动重试失败：{message}", { message: record.finalError || "" }));
+        }
         return;
       }
 
@@ -213,8 +274,10 @@ export function startPi({
         if (DIALOG_METHODS.has(record.method)) {
           log(t("扩展请求 {method}（原型中自动取消）", { method: record.method }));
           send({ type: "extension_ui_response", id: record.id, cancelled: true });
-        } else {
-          log(t("扩展请求 {method}（原型中自动忽略）", { method: record.method }));
+        } else if (record.method === "notify") {
+          log(t("扩展通知：{message}", { message: record.message || "" }));
+        } else if (record.method === "setStatus" && record.statusText) {
+          log(`[${record.statusKey || "pi"}] ${record.statusText}`);
         }
         return;
       }
@@ -226,6 +289,12 @@ export function startPi({
 
   child.stdout.on("data", (chunk) => {
     stdoutBuffer += chunk.toString("utf8");
+    if (stdoutBuffer.length > MAX_STDOUT_RECORD) {
+      finish(new Error(t("pi 输出记录过大")));
+      killTree(child);
+      return;
+    }
+
     const lines = stdoutBuffer.split("\n");
     stdoutBuffer = lines.pop() || "";
     for (let line of lines) {
@@ -253,8 +322,12 @@ export function startPi({
 
   child.on("exit", (code, signal) => {
     if (finished) return;
+    if (abortRequested) {
+      finish(new Error(t("运行已中止")));
+      return;
+    }
     if (settled) {
-      finish(null, { text: replyText, aborted: false, durationMs: Date.now() - startedAt });
+      finish(null, resultPayload("settled"));
       return;
     }
     const reason = signal ? t("信号 {signal}", { signal }) : t("退出码 {code}", { code });
@@ -272,14 +345,25 @@ export function startPi({
   };
   promise.then(cleanup, cleanup);
 
-  send({ id: "prompt-1", type: "prompt", message: prompt });
+  // 先取会话状态：sessionFile 比按 cwd 猜路径可靠。
+  send({ id: "state-1", type: "get_state" });
 
   return {
     promise,
     abort: () => {
+      if (finished || abortRequested) return;
+      abortRequested = true;
       log(t("收到中止请求"));
-      killTree(child);
-      finish(new Error(t("运行已中止")));
+      send({ type: "abort", id: "abort-1" });
+      abortTimer = setTimeout(() => {
+        abortTimer = null;
+        log(t("中止超时，强制终止"));
+        killTree(child);
+        finish(new Error(t("运行已中止")));
+      }, ABORT_GRACE_MS);
+    },
+    get sessionInfo() {
+      return { ...sessionInfo };
     },
   };
 }

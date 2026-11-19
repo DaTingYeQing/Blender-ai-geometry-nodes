@@ -1,7 +1,5 @@
 {
   "_comment": "sync.mjs 的唯一输入。settings.json（provider/model/tools/extensions）由 sync 生成；SKILL.md 文本由人手动放到项目 .pi/skills/，sync 不碰。projects[].path 相对本目录（shard/），不写则按 shard/ 解析；isolate=true 会生成 .pi/pi-flow.json，Pi Flow 启动该 agent 时用 --no-extensions 并只显式加载项目扩展。改完跑 node sync.mjs sync [项目]。",
-  "home": "C:/Users/zjn13/Desktop/pi-flow-prototype/shard",
-  "previousHomes": ["C:/Users/zjn13/Desktop/PI_work/Shard"],
 
   "defaults": {
     "defaultProvider": "deepseek",

@@ -23,13 +23,18 @@ export function importSpecifiers(source) {
 
 export async function browserAssetPaths() {
   const appRoot = path.join(projectRoot, "app");
-  const modulesRoot = path.join(projectRoot, "modules");
-  const appFiles = await listFiles(appRoot, [".mjs", ".css"]);
-  const moduleFiles = (await listFiles(modulesRoot, [".mjs", ".css"])).filter((file) => {
-    const parts = path.relative(modulesRoot, file).split(path.sep);
-    return (parts.length === 2 && parts[1] === "index.mjs") || parts[1] === "web";
-  });
+  const exists = await fsp.access(appRoot).then(
+    () => true,
+    () => false,
+  );
+  if (!exists) return [];
+  const appFiles = await listFiles(appRoot, [".mjs", ".js", ".css", ".html"]);
+  const sharedRoot = path.join(projectRoot, "shared");
+  const sharedFiles = await fsp.access(sharedRoot).then(
+    () => listFiles(sharedRoot, [".mjs"]),
+    () => [],
+  );
   const appUrls = appFiles.map((file) => `/app/${path.relative(appRoot, file).split(path.sep).join("/")}`);
-  const moduleUrls = moduleFiles.map((file) => `/${path.relative(projectRoot, file).split(path.sep).join("/")}`);
-  return ["/", ...appUrls, ...moduleUrls];
+  const sharedUrls = sharedFiles.map((file) => `/shared/${path.relative(sharedRoot, file).split(path.sep).join("/")}`);
+  return ["/", ...appUrls, ...sharedUrls];
 }

@@ -1,10 +1,10 @@
-﻿# fd / rg：优先安装包内置 zip，缺失时走 GitHub 镜像下载。
+﻿# fd / rg：只从安装包内置 zip 解出，不联网下载。
 
 function Get-ToolSpecs {
     $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'aarch64' } else { 'x86_64' }
     return @(
-        @{ Name = 'fd'; Repo = 'sharkdp/fd'; Tag = 'v'; Templates = @("fd-v{version}-$arch-pc-windows-msvc.zip"); Bundles = @("fd-v*-$arch-pc-windows-msvc.zip"); Binary = 'fd.exe'; MinBytes = 100000 },
-        @{ Name = 'rg'; Repo = 'BurntSushi/ripgrep'; Tag = ''; Templates = @("ripgrep-{version}-$arch-pc-windows-msvc.zip"); Bundles = @("ripgrep-*-$arch-pc-windows-msvc.zip"); Binary = 'rg.exe'; MinBytes = 100000 }
+        @{ Name = 'fd'; Bundles = @("fd-v*-$arch-pc-windows-msvc.zip"); Binary = 'fd.exe' },
+        @{ Name = 'rg'; Bundles = @("ripgrep-*-$arch-pc-windows-msvc.zip"); Binary = 'rg.exe' }
     )
 }
 
@@ -33,8 +33,13 @@ function Install-ToolFromArchive([string]$Name, [string]$Archive, [string]$Binar
     Ensure-Directory $setup.BinDir
     $target = Join-Path $setup.BinDir $BinaryName
     # 记录归属：原本就存在的文件卸载时不删（可能被用户或其他工具使用）。
+    # 重跑安装时会继承上一次的清单：上次记录为“原本就有”、但文件现在已经不在，
+    # 说明这次是我们重新放进去的，改为 created。
     if (-not $setup.Managed.Tools.ContainsKey($Name)) {
         $setup.Managed.Tools[$Name] = if (Test-Path -LiteralPath $target) { 'existing' } else { 'created' }
+    }
+    elseif ($setup.Managed.Tools[$Name] -ne 'created' -and -not (Test-Path -LiteralPath $target)) {
+        $setup.Managed.Tools[$Name] = 'created'
     }
     Copy-Item -LiteralPath $found.FullName -Destination $target -Force
     Unblock-File -LiteralPath $target
@@ -53,7 +58,7 @@ function Install-ToolFromArchive([string]$Name, [string]$Archive, [string]$Binar
     Write-Ok "$Name 已安装到 $target"
 }
 
-function Ensure-Tools([switch]$Offline) {
+function Ensure-Tools {
     $setup = $script:Setup
     foreach ($tool in (Get-ToolSpecs)) {
         $ready = Test-ToolReady $tool.Name
@@ -61,29 +66,11 @@ function Ensure-Tools([switch]$Offline) {
             Write-Ok "$($tool.Name) 已可用：$ready"
             continue
         }
-
         $bundled = Get-BundledFile $tool.Bundles
-        if ($bundled) {
-            try {
-                Install-ToolFromArchive $tool.Name $bundled $tool.Binary
-                continue
-            }
-            catch {
-                if ($Offline) { throw "内置 $($tool.Name) 安装失败：$($_.Exception.Message)" }
-                Write-WarnLine "内置 $($tool.Name) 安装失败，改用在线下载：$($_.Exception.Message)"
-            }
+        if (-not $bundled) {
+            throw "安装包缺少内置 $($tool.Name) 压缩包"
         }
-        if ($Offline) {
-            throw "没有内置的 $($tool.Name) 安装包"
-        }
-
-        $url = Resolve-ToolUrl $tool.Repo $tool.Tag $tool.Templates
-        if (-not $url) {
-            throw "没有找到 $($tool.Name) 的安装包"
-        }
-        $archive = Join-Path $setup.WorkDir (($url -split '/')[-1])
-        Invoke-Download $tool.Name (Get-SourceOrder $url) $archive $tool.MinBytes
-        Install-ToolFromArchive $tool.Name $archive $tool.Binary
+        Install-ToolFromArchive $tool.Name $bundled $tool.Binary
     }
 }
 
@@ -99,32 +86,13 @@ function Test-ToolsCardStatic {
 
 function Invoke-ToolsCardStatic {
     if ($script:Setup.SkipTools) { return $true }
-    try {
-        Ensure-Tools -Offline
-    }
-    catch {
-        Write-WarnLine "内置 fd/rg 安装失败：$($_.Exception.Message)"
-        return $false
-    }
-    return $true
-}
-
-function Invoke-ToolsCardDynamic {
-    if ($script:Setup.SkipTools) { return $true }
-    try {
-        Ensure-Tools
-    }
-    catch {
-        # fd/rg 不是运行 pi 的硬依赖，失败只警告，保持旧行为。
-        Write-WarnLine "fd/rg 安装失败：$($_.Exception.Message)"
-    }
+    Ensure-Tools
     return $true
 }
 
 @{
-    Id            = 'tools'
-    Title         = '准备 fd / rg'
-    TestStatic    = 'Test-ToolsCardStatic'
-    InvokeStatic  = 'Invoke-ToolsCardStatic'
-    InvokeDynamic = 'Invoke-ToolsCardDynamic'
+    Id           = 'tools'
+    Title        = '准备 fd / rg'
+    TestStatic   = 'Test-ToolsCardStatic'
+    InvokeStatic = 'Invoke-ToolsCardStatic'
 }

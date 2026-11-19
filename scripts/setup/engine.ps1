@@ -27,10 +27,36 @@ function Initialize-SetupContext {
     $workspaceDir = if ($Options.WorkspaceDir) { Resolve-FullPath $Options.WorkspaceDir } else { Join-Path $installRoot 'workspace' }
     $configPath = if ($Options.ConfigPath) { Resolve-FullPath $Options.ConfigPath } else { Join-Path $installRoot 'config\py_environment.json' }
     $envTemplate = if ($Options.EnvTemplate) { Resolve-FullPath $Options.EnvTemplate } else { Join-Path $script:ScriptRoot '..\shard\py_environment.json' }
-    $packagesFile = if ($Options.PackagesFile) { Resolve-FullPath $Options.PackagesFile } else { Join-Path $script:ScriptRoot '..\shard\py_packages.json' }
     $bundleDir = if ($Options.BundleDir) { Resolve-FullPath $Options.BundleDir } else { Join-Path $script:ScriptRoot '..\resources\bundles' }
     $blenderArchive = if ($Options.BlenderArchive) { Resolve-FullPath $Options.BlenderArchive } else { Join-Path $script:ScriptRoot '..\resources\blender\blender-4.5.0-trace-win64.zip' }
+    # CovTrace 工具链和 Blender 压缩包一起分发，固定放在同一目录。
+    $covtraceArchive = Join-Path (Split-Path -Parent $blenderArchive) 'covtrace-toolchain.zip'
     $resultPath = if ($Options.ResultPath) { Resolve-FullPath $Options.ResultPath } else { '' }
+
+    # 分层版本：runtime / config / seed / data 各自一个版本号，升级时逐层对账。
+    # 版本号在 shard\versions.json，换层语义时手动 +1；appVersion 由 Electron 传入。
+    $versionsPath = Join-Path (Split-Path -Parent $envTemplate) 'versions.json'
+    $versions = $null
+    if (Test-Path -LiteralPath $versionsPath) {
+        try {
+            $versionsRaw = [System.IO.File]::ReadAllText($versionsPath, [System.Text.Encoding]::UTF8)
+            $versions = $versionsRaw.TrimStart([char]0xFEFF) | ConvertFrom-Json
+        }
+        catch {
+            $versions = $null
+        }
+    }
+    $runtimeLayout = if ($versions -and $versions.runtimeLayout) { [string]$versions.runtimeLayout } else { '' }
+    $covtraceVersion = if ($versions -and $versions.covtraceVersion) { [string]$versions.covtraceVersion } else { '' }
+    $configVersion = if ($versions -and $versions.configVersion) { [string]$versions.configVersion } else { '' }
+    $seedVersion = if ($versions -and $versions.seedVersion) { [string]$versions.seedVersion } else { '' }
+    $dataSchemaVersion = if ($versions -and $versions.dataSchemaVersion) { [string]$versions.dataSchemaVersion } else { '' }
+    # 组件版本不属于分层版本：Blender 版本从内置压缩包文件名取，换包自动跟着变。
+    $blenderVersion = if ((Split-Path -Leaf $blenderArchive) -match 'blender-([\d.]+)') {
+        Normalize-BlenderVersion $Matches[1]
+    }
+    else { '' }
+    $appVersion = if ($Options.AppVersion) { [string]$Options.AppVersion } else { '' }
 
     # 插桩 Blender + CovTrace 工具链。目录布局复刻编译机的 blender-src，
     # CovTrace 的 directories.py 会据此相对定位 llvm / 源码 / blender.exe。
@@ -43,26 +69,32 @@ function Initialize-SetupContext {
         WorkspaceDir         = $workspaceDir
         ConfigPath           = $configPath
         EnvTemplate          = $envTemplate
-        PackagesFile         = $packagesFile
         BundleDir            = $bundleDir
         BlenderArchive       = $blenderArchive
+        CovtraceArchive      = $covtraceArchive
         ResultPath           = $resultPath
+        AppVersion           = $appVersion
+        BlenderVersion       = $blenderVersion
+        RuntimeLayout        = $runtimeLayout
+        CovtraceVersion      = $covtraceVersion
+        ConfigVersion        = $configVersion
+        SeedVersion          = $seedVersion
+        DataSchemaVersion    = $dataSchemaVersion
 
-        VenvDir              = Join-Path $runtimeDir 'venv'
         BlenderSrcRoot       = $blenderSrcRoot
         BlenderSrcDir        = $blenderSrcDir
-        CovtraceRoot         = Join-Path $blenderSrcDir 'covtrace-kit\CovTrace'
+        CovtraceEngine       = Join-Path $blenderSrcDir 'covtrace-kit\CovTrace\engine.py'
         BlenderSrcBlender    = Join-Path $blenderSrcRoot 'blender'
         BlenderSrcBlenderExe = Join-Path $blenderSrcRoot 'blender\blender.exe'
-        CovtraceLlvmBin       = Join-Path $blenderSrcRoot 'llvm-mini\bin'
+        CovtraceLlvmCov      = Join-Path $blenderSrcRoot 'llvm-mini\bin\llvm-cov.exe'
+        CovtraceVersionFile  = Join-Path $blenderSrcRoot '.covtrace-version'
 
         WorkDir              = Join-Path $env:TEMP ("piflow-setup-" + $PID)
         DownloadDir          = Join-Path $runtimeDir 'downloads'
         BinDir               = Get-AgentBinDir
 
-        Packages             = $DefaultPackages
         SkipBlender          = [bool]$Options.SkipBlender
-        SkipPython           = [bool]$Options.SkipPython
+        ForceBlender         = [bool]$Options.ForceBlender
         SkipNode             = [bool]$Options.SkipNode
         SkipPi               = [bool]$Options.SkipPi
         SkipGit              = [bool]$Options.SkipGit
@@ -72,7 +104,6 @@ function Initialize-SetupContext {
         CheckOnly            = [bool]$Options.CheckOnly
 
         PreferCn             = $false
-        PreferOfficialPip    = $false
         PythonSourceUrls     = $null
 
         StepTitles           = @()
@@ -82,40 +113,52 @@ function Initialize-SetupContext {
 
         Pi                   = $null
         GitBash              = $null
-        VenvPython           = $null
         BlenderExe           = $null
 
         # 卸载清理依据：只回收本次安装真正创建的东西。
+        # Python 三项是旧版（v2.0.0）留下的归属记录，本版不再安装系统 Python，
+        # 但重跑安装时要原样带过去，卸载新版时才能把旧版装的 Python 一起回收。
         Managed              = @{
-            PythonInstalled = $false
-            PythonMethod    = ''
-            PythonInstaller = ''
-            PiInstalled     = $false
-            NodeInstalled   = $false
-            GitMethod       = ''
-            Tools           = @{}
+            PiInstalled      = $false
+            NodeInstalled    = $false
+            GitMethod        = ''
+            PythonInstalled  = $false
+            PythonMethod     = ''
+            PythonInstaller  = ''
+            Tools            = @{}
         }
     }
-    $setup.VenvPy = Join-Path $setup.VenvDir 'Scripts\python.exe'
 
     $script:Setup = $setup
 
-    # 包版本与 scripts/fetch-bundles.mjs 共用同一份清单，避免两处漂移。
-    if (Test-Path -LiteralPath $packagesFile) {
+    # 重跑安装（修复/升级）时，Node/pi 已经存在，卡片不会再标记“本次安装”。
+    # 先继承上一次成功安装的归属清单，避免把“是我装的”抹掉，导致卸载时删不掉。
+    if ($resultPath -and (Test-Path -LiteralPath $resultPath)) {
+        $previous = $null
         try {
-            $rawPackages = [System.IO.File]::ReadAllText($packagesFile, [System.Text.Encoding]::UTF8)
-            $packageConfig = $rawPackages.TrimStart([char]0xFEFF) | ConvertFrom-Json
-            if ($packageConfig.packages) { $setup.Packages = @($packageConfig.packages) }
+            $previousRaw = [System.IO.File]::ReadAllText($resultPath, [System.Text.Encoding]::UTF8)
+            $previous = ($previousRaw.TrimStart([char]0xFEFF) | ConvertFrom-Json).managed
         }
         catch {
-            Write-WarnLine "读取包版本清单失败，使用内置默认值：$($_.Exception.Message)"
+            $previous = $null
+        }
+        if ($previous) {
+            if ($previous.piInstalled) { $setup.Managed.PiInstalled = $true }
+            if ($previous.nodeInstalled) { $setup.Managed.NodeInstalled = $true }
+            if ($previous.gitMethod) { $setup.Managed.GitMethod = [string]$previous.gitMethod }
+            if ($previous.pythonInstalled) { $setup.Managed.PythonInstalled = $true }
+            if ($previous.pythonMethod) { $setup.Managed.PythonMethod = [string]$previous.pythonMethod }
+            if ($previous.pythonInstaller) { $setup.Managed.PythonInstaller = [string]$previous.pythonInstaller }
+            if ($previous.tools) {
+                foreach ($tool in $previous.tools.PSObject.Properties) {
+                    $setup.Managed.Tools[$tool.Name] = [string]$tool.Value
+                }
+            }
         }
     }
 
     Ensure-Directory $setup.WorkDir
-    foreach ($dir in @($setup.BlenderSrcBlender, $setup.CovtraceLlvmBin, $setup.CovtraceRoot)) {
-        Ensure-Directory $dir
-    }
+    Ensure-Directory $setup.BlenderSrcBlender
     return $setup
 }
 
@@ -167,43 +210,75 @@ function Write-SetupData($Data) {
     Write-Output ("PIFLOW_SETUP_RESULT=" + $json)
 }
 
+function Get-ManagedSnapshot {
+    $setup = $script:Setup
+    return [ordered]@{
+        installRoot     = $setup.InstallRoot
+        agentBinDir     = $setup.BinDir
+        piInstalled     = [bool]$setup.Managed.PiInstalled
+        nodeInstalled   = [bool]$setup.Managed.NodeInstalled
+        gitMethod       = [string]$setup.Managed.GitMethod
+        pythonInstalled = [bool]$setup.Managed.PythonInstalled
+        pythonMethod    = [string]$setup.Managed.PythonMethod
+        pythonInstaller = [string]$setup.Managed.PythonInstaller
+        tools           = $setup.Managed.Tools
+    }
+}
+
 function Write-SetupResult {
     param([string]$Error = '')
     $setup = $script:Setup
+    # 清单记录实际装上的 Blender 版本；升级对账才不会把旧机器误判成新版本。
+    $setup.BlenderVersion = if (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe) {
+        Get-BlenderFileVersion $setup.BlenderSrcBlenderExe
+    }
+    else {
+        ''
+    }
+    # 清单记录实际铺好的工具链版本；没铺过就是空，下次启动会重新部署。
+    $setup.CovtraceVersion = Get-CovtraceVersion
     if ($Error) {
-        Write-SetupData ([ordered]@{ ok = $false; error = $Error })
+        # 失败也要保留归属清单：已经装上的 Node/pi 卸载时还得能回收。
+        Write-SetupData ([ordered]@{
+            ok             = $false
+            error          = $Error
+            appVersion        = $setup.AppVersion
+            blenderVersion    = $setup.BlenderVersion
+            runtimeLayout     = $setup.RuntimeLayout
+            covtraceVersion   = $setup.CovtraceVersion
+            configVersion     = $setup.ConfigVersion
+            seedVersion       = $setup.SeedVersion
+            dataSchemaVersion = $setup.DataSchemaVersion
+            managed           = Get-ManagedSnapshot
+        })
         return
     }
 
     $nodeVersion = Get-NodeVersion
     $pi = if ($setup.Pi) { $setup.Pi } else { Get-PiCommand }
     Write-SetupData ([ordered]@{
-        ok           = $true
-        checkOnly    = $false
-        node         = if ($nodeVersion) { $nodeVersion.ToString() } else { $null }
-        nodeExe      = Get-NodeExe
-        pi           = if ($pi) { $pi.Path } else { $null }
-        piVersion    = if ($pi) { $pi.Version } else { $null }
-        piCli        = Get-PiCliPath
-        gitBash      = $setup.GitBash
-        venvPython   = $setup.VenvPython
-        venvReady    = [bool]$setup.VenvPython
-        blenderExe   = $setup.BlenderExe
-        blenderReady = [bool]$setup.BlenderExe
-        workspace    = $setup.WorkspaceDir
-        config       = $setup.ConfigPath
-        configExists = (Test-Path -LiteralPath $setup.ConfigPath)
-        managed      = [ordered]@{
-            installRoot     = $setup.InstallRoot
-            agentBinDir     = $setup.BinDir
-            pythonInstalled = [bool]$setup.Managed.PythonInstalled
-            pythonMethod    = $setup.Managed.PythonMethod
-            pythonInstaller = $setup.Managed.PythonInstaller
-            piInstalled     = [bool]$setup.Managed.PiInstalled
-            nodeInstalled   = [bool]$setup.Managed.NodeInstalled
-            gitMethod       = $setup.Managed.GitMethod
-            tools           = $setup.Managed.Tools
-        }
+        ok             = $true
+        checkOnly      = $false
+        appVersion        = $setup.AppVersion
+        blenderVersion    = $setup.BlenderVersion
+        runtimeLayout     = $setup.RuntimeLayout
+        covtraceVersion   = $setup.CovtraceVersion
+        configVersion     = $setup.ConfigVersion
+        seedVersion       = $setup.SeedVersion
+        dataSchemaVersion = $setup.DataSchemaVersion
+        node           = if ($nodeVersion) { $nodeVersion.ToString() } else { $null }
+        nodeExe        = Get-NodeExe
+        pi             = if ($pi) { $pi.Path } else { $null }
+        piVersion      = if ($pi) { $pi.Version } else { $null }
+        piCli          = Get-PiCliPath
+        gitBash        = $setup.GitBash
+        python         = Get-BlenderPythonExe $setup.BlenderExe
+        blenderExe     = $setup.BlenderExe
+        blenderReady   = [bool]$setup.BlenderExe
+        workspace      = $setup.WorkspaceDir
+        config         = $setup.ConfigPath
+        configExists   = (Test-Path -LiteralPath $setup.ConfigPath)
+        managed        = Get-ManagedSnapshot
     })
 }
 
@@ -224,29 +299,32 @@ function Invoke-CheckOnly {
     $node = Get-NodeVersion
     $pi = Get-PiCommand
     $gitBash = Get-GitBash
-    $py = if (-not $setup.SkipPython) { Find-Python } else { $null }
     $tools = [ordered]@{
         fd = if (-not $setup.SkipTools) { Test-ToolReady 'fd' } else { $null }
         rg = if (-not $setup.SkipTools) { Test-ToolReady 'rg' } else { $null }
     }
     $blenderExe = Get-BlenderExe
+    $blenderVersion = Get-BlenderFileVersion $blenderExe
 
     Write-SetupData ([ordered]@{
-        ok            = $true
-        checkOnly     = $true
-        node          = if ($node) { $node.ToString() } else { $null }
-        nodeExe       = Get-NodeExe
-        pi            = if ($pi) { $pi.Path } else { $null }
-        piVersion     = if ($pi) { $pi.Version } else { $null }
-        piCli         = Get-PiCliPath
-        gitBash       = $gitBash
-        python        = if ($py) { (($py.Cmd) -join ' ') } else { $null }
-        pythonVersion = if ($py) { $py.Version.ToString() } else { $null }
-        venvPython    = $setup.VenvPy
-        venvReady     = (Test-Path -LiteralPath $setup.VenvPy)
-        blenderExe    = $blenderExe
-        blenderReady  = [bool]$blenderExe
-        workspace     = $setup.WorkspaceDir
+        ok                = $true
+        checkOnly         = $true
+        appVersion        = $setup.AppVersion
+        blenderVersion    = if ($blenderVersion) { $blenderVersion } else { $null }
+        runtimeLayout     = $setup.RuntimeLayout
+        covtraceVersion   = Get-CovtraceVersion
+        configVersion     = $setup.ConfigVersion
+        seedVersion       = $setup.SeedVersion
+        dataSchemaVersion = $setup.DataSchemaVersion
+        node           = if ($node) { $node.ToString() } else { $null }
+        nodeExe        = Get-NodeExe
+        pi             = if ($pi) { $pi.Path } else { $null }
+        piVersion      = if ($pi) { $pi.Version } else { $null }
+        piCli          = Get-PiCliPath
+        gitBash        = $gitBash
+        blenderExe     = $blenderExe
+        blenderReady   = [bool]$blenderExe
+        workspace      = $setup.WorkspaceDir
         config        = $setup.ConfigPath
         configExists  = (Test-Path -LiteralPath $setup.ConfigPath)
         tools         = $tools
@@ -262,6 +340,9 @@ function Start-SetupEngine {
         exit 0
     }
 
+    # 先把清理脚本放到 AppData：后面无论哪一步失败，卸载时都还有东西可回收。
+    Install-CleanupScript
+
     $cards = $script:SetupCards
     $setup.StepTitles = @($cards | ForEach-Object { $_.Title })
     $setup.StepTotal = $setup.StepTitles.Count
@@ -273,7 +354,6 @@ function Start-SetupEngine {
             Invoke-SetupCard $card
             Write-StepDone
         }
-        Install-CleanupScript
         Write-SetupResult
         exit 0
     }
@@ -282,6 +362,8 @@ function Start-SetupEngine {
         if ($setup.StepIndex -gt 0) {
             Write-Output ("PIFLOW_STEP=" + $setup.StepIndex + "/" + $setup.StepTotal + "|failed|" + $setup.StepTitle)
         }
+        # 给安装窗口一条人能读懂的原因；完整输出仍然写进 setup.log。
+        Write-Output ("PIFLOW_ERROR=" + (($message -replace '\r?\n', ' ').Trim()))
         Write-Host "ERROR: $message" -ForegroundColor Red
         Write-SetupResult -Error $message
         exit 1
