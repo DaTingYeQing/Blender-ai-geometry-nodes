@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""rotation 卡片：x / y / z 欧拉角（度）。"""
+"""vector 卡片：x / y / z 三个分量。"""
 
-from ..errors import ConfigError
+from ...errors import ConfigError
 from ._common import expand_compound, pack, param_with
 
-KIND = "rotation"
+KIND = "vector"
 
 
 def build(param, spec):

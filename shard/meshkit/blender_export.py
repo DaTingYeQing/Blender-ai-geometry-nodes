@@ -14,21 +14,42 @@ import time
 
 
 def write_ply(verts, faces, path: str) -> None:
-    """ASCII PLY；faces 为空时写出纯顶点文件（点云）。"""
+    """二进制小端 PLY；faces 为空时写出纯顶点文件（点云）。
+
+    文本 PLY 在大网格上既慢又占空间，这里统一写 binary_little_endian：
+    顶点 float32，面 uchar 计数 + int32 索引。
+    """
+    import numpy as np
+
     parent = os.path.dirname(os.path.abspath(path))
     if parent:
         os.makedirs(parent, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as handle:
-        handle.write("ply\nformat ascii 1.0\n")
-        handle.write("element vertex %d\n" % len(verts))
-        handle.write("property float x\nproperty float y\nproperty float z\n")
-        handle.write("element face %d\n" % len(faces))
-        handle.write("property list uchar int vertex_indices\n")
-        handle.write("end_header\n")
-        for v in verts:
-            handle.write("%.9f %.9f %.9f\n" % (v[0], v[1], v[2]))
-        for face in faces:
-            handle.write("%d %s\n" % (len(face), " ".join(str(i) for i in face)))
+
+    points = np.asarray(verts, dtype="<f4").reshape(-1, 3)
+    header = (
+        "ply\n"
+        "format binary_little_endian 1.0\n"
+        "element vertex %d\n"
+        "property float x\nproperty float y\nproperty float z\n"
+        "element face %d\n"
+        "property list uchar int vertex_indices\n"
+        "end_header\n"
+    ) % (len(points), len(faces))
+
+    body = bytearray()
+    for face in faces:
+        indices = np.asarray(face, dtype="<i4").ravel()
+        if indices.size > 255:
+            raise ValueError(
+                "二进制 PLY 单个面上限 255 个顶点，实际 %d" % int(indices.size)
+            )
+        body.append(int(indices.size))
+        body.extend(indices.tobytes())
+
+    with open(path, "wb") as handle:
+        handle.write(header.encode("ascii"))
+        handle.write(points.tobytes())
+        handle.write(bytes(body))
 
 
 def advance_to_frame(target: int) -> None:
@@ -117,7 +138,13 @@ def export_geometry(obj, node_group, target_node, out_path: str) -> dict:
 
         mesh = geometry_set.mesh
         verts = [(v.co[0], v.co[1], v.co[2]) for v in mesh.vertices] if mesh else []
-        faces = [tuple(p.vertices) for p in mesh.polygons] if mesh else []
+        if mesh is not None:
+            # 变长 n-gon 会让 trimesh 的二进制 PLY 读取器长度对不上（PLY is unexpected length），
+            # 统一走三角化，保证每个 face 固定 3 个顶点。
+            mesh.calc_loop_triangles()
+            faces = [tuple(t.vertices) for t in mesh.loop_triangles]
+        else:
+            faces = []
         pointcloud = geometry_set.pointcloud
         points = [(p.co[0], p.co[1], p.co[2]) for p in pointcloud.points] if pointcloud else []
         has_curves = geometry_set.curves is not None
@@ -160,6 +187,7 @@ def export_geometry(obj, node_group, target_node, out_path: str) -> dict:
             "skipped": skipped,
             "n_vertices": len(verts),
             "n_faces": len(faces),
+            "n_edges": len(mesh.edges) if mesh else 0,
         }
     finally:
         if realize_node is not None:

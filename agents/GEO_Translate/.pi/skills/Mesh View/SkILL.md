@@ -57,9 +57,9 @@ def build(n=24, eps=0.003, t=1.0, stage=None):
 - `STAGES` 第 1 项 = 模块一交出的状态，第 2 项 = 模块二……顺序必须和 `build` 里的 `if stage == ...` 一致
 - `stage=None`：完整链，viewer 用
 - `stage="cells"`：跑完模块一、二，返回 `cells`
-- 每段返回 `trimesh.Trimesh`、`ndarray (N,3)`、`trimesh.PointCloud` 或 `list[trimesh.Trimesh]`，`mesh_probe` 按类型选 meshkit 摘要
+- 每段返回 `trimesh.Trimesh`、`ndarray (N,3)`、`trimesh.PointCloud` 或 `list[trimesh.Trimesh]`，viewer 按类型决定怎么画
 
-显示、相机、刷新全部由 viewer 负责，模型代码不感知。`mesh_probe` 会把各段导出到 `<工作区>/<脚本名>/stage1.json`、`stage2.json`……，每份都带当时的参数和 meshkit 数据。`seed_inside / cut_cells / push_apart` 的完整实现见 `agents/GEO_Translate/.pi/skills/SKILL.md` 的三段式示例。
+显示、相机、刷新全部由 viewer 负责，模型代码不感知。调用 `mesh_view`（只给脚本路径）就会打开窗口，窗口是独立进程，关掉才退出。`seed_inside / cut_cells / push_apart` 的完整实现见 `agents/GEO_Translate/.pi/skills/SKILL.md` 的三段式示例。
 
 ## 规则 3：每次全量重建
 

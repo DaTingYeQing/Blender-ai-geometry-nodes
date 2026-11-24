@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""matrix 卡片：平移 3 + 旋转 3 + 缩放 3，共 9 个分量。"""
+"""rotation 卡片：x / y / z 欧拉角（度）。"""
 
-from ..errors import ConfigError
+from ...errors import ConfigError
 from ._common import expand_compound, pack, param_with
 
-KIND = "matrix"
+KIND = "rotation"
 
 
 def build(param, spec):

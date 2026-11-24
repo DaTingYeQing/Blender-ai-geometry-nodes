@@ -1,5 +1,5 @@
 ---
-name: geometry-nodes-translate
+name: geometry-nodes-coding
 description: 当用户给出具体的数学或视觉建模描述，需要写成可运行、一步接一步的 trimesh/numpy 处理链时加载。
 ---
 
@@ -67,10 +67,10 @@ import numpy as np
 import trimesh
 from scipy.spatial import cKDTree, Delaunay
 
-# 每个模块交出的状态，按链路顺序；mesh_probe 靠它逐段导出
+# 每个模块交出的状态，按链路顺序；mesh_view 靠它切换阶段
 STAGES = ("seeds", "cells", "parts")
 
-# viewer / mesh_probe 共用这一张参数表；default 必须能直接 build 成功
+# viewer 靠它生成控件；default 必须能直接 build 成功
 SCHEMA = {
     "n":   {"type": "int",   "min": 8,     "max": 48,    "default": 24},
     "eps": {"type": "float", "min": 0.0,   "max": 0.008, "default": 0.003},
@@ -200,15 +200,14 @@ if __name__ == "__main__":
     trimesh.Scene(build()).show()
 ```
 
-## 四、分段导出
+## 四、分段预览
 
-`STAGES` + `build(stage=...)` 就是探针接口，写完不用再加导出函数。调用 `mesh_probe`：
+`STAGES` + `build(stage=...)` 是分段观察接口，写完不用再加导出函数。调用 `mesh_view`：
 
-- 给 `script` 和 `params`（直接写具体值，如 `{"n":24,"eps":0.003,"t":1.0}`，可以同时给多个变量）
-- 工具按 `STAGES` 从原料累计跑到每一段，导出到 `<工作区>/<脚本名>/stage1.json`、`stage2.json`……
-- `stage=k` 是累计状态：`stage="cells"` = 跑完模块一、二，不是单独跑模块二
-
-每份 JSON 里有当时的参数、返回类型（`mesh` / `pointcloud` / `mesh_list`）和 meshkit 摘要，拟合和排查都以这些边界数据为准。
+- 只给 `script` 一个参数，窗口就打开了
+- 窗口按 `SCHEMA` 自动生成滑块，参数初值用 `default`
+- “stage” 滑块按 `STAGES` 切换：选第 k 段 = 从原料累计跑完模块一~k，不是单独跑模块 k
+- 每段返回 `Trimesh` / `ndarray (N,3)` / `PointCloud` / `list[Trimesh]`，viewer 按类型决定画网格还是点云
 
 ## 五、自检清单
 
@@ -224,4 +223,4 @@ if __name__ == "__main__":
 - [ ] 函数名是动词短语，能读成一句话的谓语
 - [ ] 文件里有 `STAGES`，顺序与链路块一致
 - [ ] `build(**params, stage=None)` 在每段提前返回；`stage` 是累计状态，不是单独跑某段
-- [ ] 每段返回 `Trimesh` / `ndarray (N,3)` / `PointCloud` / `list[Trimesh]`，`mesh_probe` 能识别
+- [ ] 每段返回 `Trimesh` / `ndarray (N,3)` / `PointCloud` / `list[Trimesh]`，`mesh_view` 能识别

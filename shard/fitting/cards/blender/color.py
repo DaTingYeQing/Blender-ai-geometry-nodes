@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """color 卡片：r / g / b 三个通道（默认不含 alpha）。"""
 
-from ..errors import ConfigError
+from ...errors import ConfigError
 from ._common import expand_compound, pack, param_with
 
 KIND = "color"

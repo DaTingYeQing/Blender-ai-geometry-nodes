@@ -14,6 +14,7 @@
     "bpy",
     "blender",
     "blender_build",
+    "blender_fit",
     "blender_math",
     "blender_screen",
     "node_query",

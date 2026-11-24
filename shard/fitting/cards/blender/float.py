@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """float 卡片：单个标量搜索维度。"""
 
-from ..contract import DIST_CATEGORICAL, DIST_FLOAT, Component
-from ..errors import ConfigError
+from ...contract import DIST_CATEGORICAL, DIST_FLOAT, Component
+from ...errors import ConfigError
 from ._common import pack, param_with
 
 KIND = "float"

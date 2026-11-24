@@ -9,7 +9,7 @@
     "node_query",
     "blender",
     "blender_fit",
-    "mesh_probe",
+    "mesh_view",
     "py"
   ],
   "builtinTools": [

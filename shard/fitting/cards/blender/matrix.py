@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""vector 卡片：x / y / z 三个分量。"""
+"""matrix 卡片：平移 3 + 旋转 3 + 缩放 3，共 9 个分量。"""
 
-from ..errors import ConfigError
+from ...errors import ConfigError
 from ._common import expand_compound, pack, param_with
 
-KIND = "vector"
+KIND = "matrix"
 
 
 def build(param, spec):

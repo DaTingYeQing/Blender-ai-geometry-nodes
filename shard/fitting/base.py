@@ -3,7 +3,7 @@
 
 - 一次启动、常驻；进程/超时/日志/临时配置都在这里
 - 读节点 schema（输入/输出）、写入参数、触发求值
-- 每轮求值把原始数据落成 result JSON 文件（run_dir 下）
+- 每轮求值只把网格写到临时文件，不逐轮留档（由引擎在刷新最优时复制）
 
 协议：stdin 逐行 JSON；stdout 中以 "@@FIT@@" 开头的行是响应。
 """
@@ -50,7 +50,6 @@ class BlenderBase:
         input_nodes: Sequence[str] | None = None,
         frame: int | None = None,
         blender_exe: str | None = None,
-        run_dir: str | None = None,
         host_path: str | None = None,
         launch_args: Sequence[str] | None = None,
         startup_timeout: float = 180.0,
@@ -63,7 +62,6 @@ class BlenderBase:
         self.input_nodes = [str(name) for name in (input_nodes or [])]
         self.frame = int(frame) if frame is not None else None
         self.blender_exe = blender_exe
-        self.run_dir = os.path.abspath(run_dir) if run_dir else None
         self.host_path = host_path or os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "host.py"
         )
@@ -81,7 +79,6 @@ class BlenderBase:
         self._ready: dict | None = None
         self._broken = False
         self._config_path: str | None = None
-        self._trial_files = 0
 
     # ------------------------------------------------------------- 生命周期
 
@@ -216,28 +213,21 @@ class BlenderBase:
         self,
         packed,
         mesh_path: str | None = None,
-        tag: str | None = None,
     ) -> dict:
-        """写值、求值、导出网格；run_dir 存在时把本轮原始数据落成 result JSON。
+        """写值、求值、导出网格。
 
-        packed 单节点时是 {identifier: 打包值}；多节点时是
-        [{node, identifier, value}, ...]。
+        默认写到系统临时目录的固定文件，下一轮直接覆盖；
+        需要留档的网格由引擎在刷新最优时自行复制。
         """
         if mesh_path is None:
-            directory = self.run_dir or tempfile.gettempdir()
-            os.makedirs(directory, exist_ok=True)
-            name = tag or ("mesh_%04d" % (self._trial_files + 1))
-            mesh_path = os.path.join(directory, name + ".ply")
+            mesh_path = os.path.join(tempfile.gettempdir(), "fit_current.ply")
         request_params = packed if isinstance(packed, dict) else list(packed)
-        result = self._request(
+        return self._request(
             "eval",
             timeout=self.eval_timeout,
             params=request_params,
             mesh_path=mesh_path,
         )
-        if self.run_dir:
-            self._write_result(packed, result, tag)
-        return result
 
     # ------------------------------------------------------------- 协议实现
 
@@ -349,20 +339,6 @@ class BlenderBase:
             raise
         self._config_path = path
         return path
-
-    def _write_result(self, params, result, tag):
-        self._trial_files += 1
-        name = tag or ("trial_%04d" % self._trial_files)
-        path = os.path.join(self.run_dir, name + ".json")
-        os.makedirs(self.run_dir, exist_ok=True)
-        payload = {
-            "tag": name,
-            "time": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "params": params,
-            "result": result,
-        }
-        with open(path, "w", encoding="utf-8") as handle:
-            json.dump(payload, handle, ensure_ascii=False, indent=2)
 
     def _cleanup_config(self) -> None:
         path, self._config_path = self._config_path, None

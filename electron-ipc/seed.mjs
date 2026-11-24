@@ -45,7 +45,6 @@ async function listFiles(root, filter) {
  * @param {string} options.templateRoot 安装包里的模板目录
  * @param {string} options.targetRoot 用户目录
  * @param {object} options.previous 上次的 .pi-flow-seed.json
- * @param {string} options.seedVersion 本版播种版本
  * @param {(rel: string) => boolean} options.filter 哪些相对路径参与播种（posix 分隔符）
  * @returns {Promise<{marker: object, stats: object}>}
  */
@@ -53,7 +52,6 @@ export async function mergeSeedTree({
   templateRoot,
   targetRoot,
   previous = {},
-  seedVersion = "",
   filter = () => true,
 }) {
   const previousFiles =
@@ -125,5 +123,5 @@ export async function mergeSeedTree({
     // 改过的留在原处，不再归播种层管理
   }
 
-  return { marker: { seedVersion, files: nextFiles }, stats };
+  return { marker: { files: nextFiles }, stats };
 }

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""卡片注册表。
+"""Blender 值类型卡注册表。
 
-一个值类型一个卡片文件；引擎只会 import 本次用到的类型。
+一个值类型一个卡片文件（cards/blender/）；引擎只 import 本次用到的类型。
 配置里出现了没有卡片的类型，直接报错 —— 不会静默跳过。
+工具策略卡（score / target / memory ...）由 core.registry 管理。
 """
 
 import importlib
@@ -19,13 +20,13 @@ from ..contract import (
 from ..errors import ConfigError
 
 _MODULES = {
-    KIND_FLOAT: "fitting.cards.float",
-    KIND_INT: "fitting.cards.int",
-    KIND_BOOL: "fitting.cards.bool",
-    KIND_VECTOR: "fitting.cards.vector",
-    KIND_COLOR: "fitting.cards.color",
-    KIND_ROTATION: "fitting.cards.rotation",
-    KIND_MATRIX: "fitting.cards.matrix",
+    KIND_FLOAT: "fitting.cards.blender.float",
+    KIND_INT: "fitting.cards.blender.int",
+    KIND_BOOL: "fitting.cards.blender.bool",
+    KIND_VECTOR: "fitting.cards.blender.vector",
+    KIND_COLOR: "fitting.cards.blender.color",
+    KIND_ROTATION: "fitting.cards.blender.rotation",
+    KIND_MATRIX: "fitting.cards.blender.matrix",
 }
 
 _loaded = {}

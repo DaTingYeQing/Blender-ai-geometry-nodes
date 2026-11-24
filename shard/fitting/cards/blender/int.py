@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """int 卡片：单个整数搜索维度。"""
 
-from ..contract import DIST_CATEGORICAL, DIST_INT, Component
-from ..errors import ConfigError
+from ...contract import DIST_CATEGORICAL, DIST_INT, Component
+from ...errors import ConfigError
 from ._common import pack, param_with
 
 KIND = "int"

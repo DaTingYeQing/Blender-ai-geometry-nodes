@@ -389,13 +389,11 @@ export async function ensureAgents() {
   if (!(await exists(AGENTS_TEMPLATE_DIR))) {
     throw new Error(t("找不到 agent 模板：{path}", { path: AGENTS_TEMPLATE_DIR }));
   }
-  const versions = (await readJson(path.join(SHARD_DIR, "versions.json"))) || {};
   const previous = (await readJson(path.join(dir, ".pi-flow-seed.json"))) || {};
   const { marker, stats } = await mergeSeedTree({
     templateRoot: AGENTS_TEMPLATE_DIR,
     targetRoot: dir,
     previous,
-    seedVersion: String(versions.seedVersion || ""),
     filter: (rel) => shouldCopyRel(rel, dir),
   });
   await runAgentSync(dir);

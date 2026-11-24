@@ -11,7 +11,7 @@
     "../../../shard/extensions/node_query.ts",
     "../../../shard/extensions/blender.ts",
     "../../../shard/extensions/blender_fit.ts",
-    "../../../shard/extensions/mesh_probe.ts",
+    "../../../shard/extensions/mesh_view.ts",
     "../../../shard/extensions/py.ts"
   ]
 }

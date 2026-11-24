@@ -113,17 +113,34 @@ def _jsonable(value):
     return None
 
 
+ANGLE_SUBTYPE = "ANGLE"
+
+
+def _is_angle(socket) -> bool:
+    """角度插口：Blender 内部存弧度，GUI 上显示度。"""
+    return str(getattr(socket, "subtype", "") or "") == ANGLE_SUBTYPE
+
+
+def _degrees(value):
+    """角度插口的存储值 → 对外统一的“度”。"""
+    return math.degrees(float(value)) if isinstance(value, float) else value
+
+
 def _socket_entry(socket):
+    angle = _is_angle(socket)
     entry = {
         "name": socket.name,
         "label": socket.name,
         "identifier": socket.identifier or socket.name,
         "socket_type": socket.bl_idname,
+        "subtype": str(getattr(socket, "subtype", "") or ""),
         "linked": bool(getattr(socket, "is_linked", False)),
+        "hide_value": bool(getattr(socket, "hide_value", False)),
+        "enabled": bool(getattr(socket, "enabled", True)),
     }
     default = _jsonable(getattr(socket, "default_value", None))
     if default is not None:
-        entry["default"] = default
+        entry["default"] = _degrees(default) if angle else default
     for source, target in (("min_value", "min"), ("max_value", "max")):
         bound = getattr(socket, source, None)
         if (
@@ -131,7 +148,7 @@ def _socket_entry(socket):
             and math.isfinite(float(bound))
             and abs(bound) < 1e30
         ):
-            entry[target] = bound
+            entry[target] = math.degrees(float(bound)) if angle else bound
     return entry
 
 
@@ -197,12 +214,21 @@ def _apply(bpy, target, params):
             raise ValueError(
                 "节点 %r 的输入 %r 已连线，写默认值不会生效" % (node.name, identifier)
             )
+        if not getattr(socket, "enabled", True):
+            raise ValueError(
+                "节点 %r 的输入 %r 当前被条件禁用，写值不会参与求值"
+                % (node.name, identifier)
+            )
         if not hasattr(socket, "default_value"):
             raise TypeError(
                 "节点 %r 的输入 %r（%s）没有 default_value，不能写入"
                 % (node.name, identifier, socket.bl_idname)
             )
-        socket.default_value = packed_to_native(packed)
+        value = packed_to_native(packed)
+        if _is_angle(socket) and isinstance(value, (int, float)) and not isinstance(value, bool):
+            # 对外一律用度，写回 Blender 前转成弧度。
+            value = math.radians(float(value))
+        socket.default_value = value
 
 
 def _evaluate(bpy, target, params, mesh_path):

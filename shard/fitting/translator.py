@@ -8,10 +8,8 @@
    ``sample()`` 用 Optuna 的 trial 采一轮原始值（鸭子类型，不 import optuna）。
 
 2. Optuna → Blender
-   ``pack_values()`` / ``raw_to_packed()`` 把原始值翻成可 JSON 传输的打包值；
+   ``raw_to_packed()`` 把原始值翻成可 JSON 传输的打包值；
    ``packed_to_native()`` 在 Blender 里把打包值翻成可直接赋给 socket 的对象。
-
-反方向（读当前值、调试、坐标轮换）用 ``packed_to_raw()`` / ``native_to_packed()``。
 
 约定：
 - 角度对外一律用"度"；只有 packed_to_native 时转弧度。
@@ -40,10 +38,6 @@ from .contract import (
     KIND_MATRIX,
     KIND_ROTATION,
     KIND_VECTOR,
-    OUTPUT_ATTRIBUTE,
-    OUTPUT_KINDS,
-    OUTPUT_MESH_STAT,
-    OutputSpec,
     ParamSpec,
     SOCKET_TO_KIND,
     SearchSpace,
@@ -111,8 +105,6 @@ def socket_base_type(bl_idname: str) -> str:
 def schema_to_space(
     sockets: Iterable[Mapping[str, Any]],
     options: TranslateOptions | None = None,
-    *,
-    outputs: Iterable[Mapping[str, Any]] | None = None,
 ) -> Tuple[SearchSpace, list[str]]:
     """把 Blender 侧读到的 socket 描述转成搜索空间。
 
@@ -242,51 +234,7 @@ def schema_to_space(
         params.append(_fixed(identifier, label, KIND_FIXED, default))
         warnings.append("%s 的类型 %s 暂不支持，固定为常量" % (label, base or "未知"))
 
-    output_specs, output_warnings = outputs_to_specs(outputs or ())
-    warnings.extend(output_warnings)
-    return SearchSpace(params=tuple(params), outputs=output_specs), warnings
-
-
-def outputs_to_specs(
-    entries: Iterable[Mapping[str, Any]],
-) -> Tuple[Tuple[OutputSpec, ...], list[str]]:
-    """输出描述 → OutputSpec 列表。"""
-    warnings: list[str] = []
-    specs: list[OutputSpec] = []
-    used: set[str] = set()
-
-    for index, entry in enumerate(entries or ()):
-        if not isinstance(entry, Mapping):
-            warnings.append("第 %d 个输出不是字典，已跳过" % index)
-            continue
-        label = _text(_pick(entry, "name", "label"))
-        key = _text(_pick(entry, "key")) or label or "output_%d" % index
-        key = _unique(key, used, warnings)
-        label = label or key
-        kind = _text(_pick(entry, "kind"))
-
-        if kind not in OUTPUT_KINDS:
-            raise TranslationError("输出 %r 的 kind 必须是 %s" % (key, " / ".join(OUTPUT_KINDS)))
-
-        stat = _text(_pick(entry, "stat"))
-        attribute = _text(_pick(entry, "attribute", "attr"))
-        attribute_type = _text(_pick(entry, "attribute_type", "attr_type")) or None
-
-        if kind == OUTPUT_MESH_STAT and not stat:
-            raise TranslationError("输出 %r 是 mesh_stat，但没有给 stat" % key)
-        if kind == OUTPUT_ATTRIBUTE and not attribute:
-            raise TranslationError("输出 %r 是 attribute，但没有给 attribute 名" % key)
-
-        specs.append(OutputSpec(
-            key=key,
-            label=label,
-            kind=kind,
-            stat=stat or None,
-            attribute=attribute or None,
-            attribute_type=attribute_type,
-        ))
-
-    return tuple(specs), warnings
+    return SearchSpace(params=tuple(params)), warnings
 
 
 # ============================================================ 二、Optuna → 原始值
@@ -325,17 +273,7 @@ def sample(trial: Any, space: SearchSpace) -> dict[str, Any]:
     return raw
 
 
-def pack_values(space: SearchSpace, raw: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
-    """整轮原始值 → {socket identifier: 打包值}。"""
-    packed: dict[str, dict[str, Any]] = {}
-    for param in space.params:
-        if param.fixed:
-            continue
-        packed[param.identifier] = raw_to_packed(param, raw)
-    return packed
-
-
-# ============================================================ 三、原始值 ↔ 打包值
+# ============================================================ 三、原始值 → 打包值
 
 
 def raw_to_packed(spec: ParamSpec, raw: Mapping[str, Any]) -> dict[str, Any]:
@@ -390,47 +328,7 @@ def raw_to_packed(spec: ParamSpec, raw: Mapping[str, Any]) -> dict[str, Any]:
     raise TranslationError("参数 %s 的类型 %r 不能打包" % (spec.label, spec.kind))
 
 
-def packed_to_raw(spec: ParamSpec, packed: Mapping[str, Any]) -> dict[str, Any]:
-    """打包值 → 原始值。用于读回、调试和往返测试。"""
-    kind = packed.get("kind")
-    if kind != spec.kind:
-        raise TranslationError("打包值类型 %r 与参数 %s 的类型 %r 不一致"
-                               % (kind, spec.label, spec.kind))
-
-    keys = _suffix_map(spec)
-
-    if spec.kind in (KIND_FLOAT, KIND_INT, KIND_BOOL):
-        return {spec.key: packed["value"]}
-
-    if spec.kind == KIND_VECTOR:
-        return {_component_key(keys, axis, spec): float(value)
-                for axis, value in zip("xyz", packed["value"])}
-
-    if spec.kind == KIND_COLOR:
-        raw = {_component_key(keys, channel, spec): float(value)
-               for channel, value in zip("rgb", packed["rgba"][:3])}
-        if "a" in keys:
-            raw[keys["a"]] = float(packed["rgba"][3])
-        return raw
-
-    if spec.kind == KIND_ROTATION:
-        return {_component_key(keys, axis, spec): float(value)
-                for axis, value in zip("xyz", packed["euler_xyz_deg"])}
-
-    if spec.kind == KIND_MATRIX:
-        raw: dict[str, Any] = {}
-        for suffix, value in zip(("tx", "ty", "tz"), packed["translation"]):
-            raw[_component_key(keys, suffix, spec)] = float(value)
-        for suffix, value in zip(("rx", "ry", "rz"), packed["rotation_xyz_deg"]):
-            raw[_component_key(keys, suffix, spec)] = float(value)
-        for suffix, value in zip(("sx", "sy", "sz"), packed["scale"]):
-            raw[_component_key(keys, suffix, spec)] = float(value)
-        return raw
-
-    raise TranslationError("参数 %s 的类型 %r 不能还原" % (spec.label, spec.kind))
-
-
-# ============================================================ 四、打包值 ↔ Blender 原生
+# ============================================================ 四、打包值 → Blender 原生
 
 
 def packed_to_native(packed: Mapping[str, Any]) -> Any:
@@ -460,39 +358,6 @@ def packed_to_native(packed: Mapping[str, Any]) -> Any:
         return mathutils.Matrix.LocRotScale(translation, rotation, scale)
 
     raise TranslationError("打包值类型 %r 不能转成 Blender 原生值" % (kind,))
-
-
-def native_to_packed(kind: str, native: Any) -> dict[str, Any]:
-    """Blender 原生值 → 打包值。只能在 Blender 里调用。"""
-    if kind in (KIND_FLOAT, KIND_INT, KIND_BOOL):
-        return {"kind": kind, "value": native}
-
-    if kind == KIND_VECTOR:
-        return {"kind": kind, "value": [float(value) for value in native]}
-
-    if kind == KIND_COLOR:
-        rgba = [float(value) for value in native]
-        if len(rgba) == 3:
-            rgba.append(1.0)
-        return {"kind": kind, "rgba": rgba}
-
-    if kind == KIND_ROTATION:
-        euler = native.to_euler("XYZ") if hasattr(native, "to_euler") else native
-        return {"kind": kind, "euler_xyz_deg": [
-            math.degrees(float(angle)) for angle in euler
-        ]}
-
-    if kind == KIND_MATRIX:
-        translation, rotation, scale = native.decompose()
-        euler = rotation.to_euler("XYZ")
-        return {
-            "kind": kind,
-            "translation": [float(value) for value in translation],
-            "rotation_xyz_deg": [math.degrees(float(angle)) for angle in euler],
-            "scale": [float(value) for value in scale],
-        }
-
-    raise TranslationError("类型 %r 不能从 Blender 原生值打包" % (kind,))
 
 
 # ============================================================ 五、校验

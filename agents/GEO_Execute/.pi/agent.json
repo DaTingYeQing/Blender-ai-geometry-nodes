@@ -11,8 +11,7 @@
     "blender_fit",
     "blender_math",
     "blender_screen",
-    "node_query",
-    "mesh_probe"
+    "node_query"
   ],
   "builtinTools": [
     "read",

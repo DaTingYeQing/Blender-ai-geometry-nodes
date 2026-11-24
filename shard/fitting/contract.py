@@ -16,10 +16,8 @@
                                                               ▼
                                                     Blender 可赋值对象
 
-    Blender 输出 ──输出清单──► 打分
-
 "打包值"一律是普通 dict/list/number/str，可以直接 JSON 传输；
-只有 packed_to_native / native_to_packed 需要 mathutils（在 Blender 内调用）。
+只有 packed_to_native 需要 mathutils（在 Blender 内调用）。
 """
 
 from __future__ import annotations
@@ -39,17 +37,6 @@ KIND_MATRIX = "matrix"
 KIND_GEOMETRY = "geometry"
 KIND_FIXED = "fixed"
 
-KINDS = (
-    KIND_FLOAT, KIND_INT, KIND_BOOL, KIND_VECTOR,
-    KIND_COLOR, KIND_ROTATION, KIND_MATRIX, KIND_GEOMETRY, KIND_FIXED,
-)
-
-# 能进搜索空间的类型；geometry / fixed 只能当常量。
-SEARCHABLE_KINDS = (
-    KIND_FLOAT, KIND_INT, KIND_BOOL, KIND_VECTOR,
-    KIND_COLOR, KIND_ROTATION, KIND_MATRIX,
-)
-
 # Blender socket 归一化后的基类型 → 字段类型。
 SOCKET_TO_KIND = {
     "Float": KIND_FLOAT,
@@ -67,15 +54,6 @@ SOCKET_TO_KIND = {
 DIST_FLOAT = "float"
 DIST_INT = "int"
 DIST_CATEGORICAL = "categorical"
-
-DIST_TYPES = (DIST_FLOAT, DIST_INT, DIST_CATEGORICAL)
-
-# ---------------------------------------------------------------- 输出类型
-
-OUTPUT_MESH_STAT = "mesh_stat"
-OUTPUT_ATTRIBUTE = "attribute"
-
-OUTPUT_KINDS = (OUTPUT_MESH_STAT, OUTPUT_ATTRIBUTE)
 
 # ---------------------------------------------------------------- 数据结构
 
@@ -112,23 +90,10 @@ class ParamSpec:
 
 
 @dataclass(frozen=True)
-class OutputSpec:
-    """一个输出描述量。"""
-
-    key: str
-    label: str
-    kind: str
-    stat: str | None = None
-    attribute: str | None = None
-    attribute_type: str | None = None
-
-
-@dataclass(frozen=True)
 class SearchSpace:
     """一次实验的完整搜索空间。"""
 
     params: Tuple[ParamSpec, ...]
-    outputs: Tuple[OutputSpec, ...] = ()
 
     def components(self) -> Iterator[Tuple[ParamSpec, Component]]:
         """按参数顺序展开所有可采样维度。"""
@@ -138,9 +103,3 @@ class SearchSpace:
 
     def component_keys(self) -> list[str]:
         return [component.key for _, component in self.components()]
-
-    def param(self, key: str) -> ParamSpec:
-        for param in self.params:
-            if param.key == key:
-                return param
-        raise KeyError("搜索空间里没有参数 %r" % (key,))

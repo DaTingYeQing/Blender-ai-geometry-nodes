@@ -4,20 +4,29 @@
 单子结构（开头必须有 node，它也是默认的输入节点/输出节点）：
 
     {
+      "weights": {"shape": 2.0, "volume": 1.0},
+      "target":  "ref.ply",
       "blend": "...", "object": "...", "modifier": "...", "node": "...",
       "inputs":  [{"identifier": "...", "min": .., "max": ..},
                   {"node": "别的节点", "identifier": "...", "min": .., "max": ..}],
       "fixed":   [{"node": "上游模块节点", "identifier": "...", "value": 2.0}],
-      "outputs": ["volume", "area", "is_watertight"],
-      "loss":    {"targets": {"volume": 1.0}, "weights": {"volume": 1.0}},
-      "budget":  {"max_trials": 100, "target_loss": 0.01}
+      "skip":    ["center_mass"],
+      "budget":  {"max_trials": 100, "target_loss": 0.05}
     }
 
 inputs 每项可写 node（省略 = 顶层 node）；顶层 node 始终是“从哪个节点导出几何”。
 fixed 是把某些输入写死、不参与搜索（每轮求值前写回），用于锁住上游模块的参数；
 同一 (node, identifier) 不能既在 inputs 又在 fixed。
-输出只认网格字段（字段名来自 meshkit：volume / area / extents / ...）；
-每轮求值在 Blender 里导出 PLY，再由引擎侧算这些字段。
+
+参考数据由 target 卡提供，target 与 script 二选一：
+    target_file    参考模型文件，全部网格字段自动从它提取
+    target_script  生成参考数据的分段脚本（STAGES + build(**params, stage=None)）
+                   stage 指定跑第几段（从 1 开始，省略 = 最后一段）
+                   stage 数据落在 <run_dir>/stageN.json，其中的全量字段直接作为拟合目标
+写 target 或 script 时注册表自动选卡，也可以用 cards.target 指定。
+
+weights / skip / min_diff 由 score 卡负责校验；target/script/stage/params 由 target 卡负责；
+budget 由 budget 卡负责；inputs / fixed 由值类型卡负责构建。
 """
 
 from __future__ import annotations
@@ -30,7 +39,7 @@ from typing import Any
 
 from . import cards as cards_mod
 from . import translator as tr
-from .cards import _common as cards_common
+from .cards.blender import _common as cards_common
 from .contract import (
     KIND_BOOL,
     KIND_COLOR,
@@ -42,8 +51,6 @@ from .contract import (
     SearchSpace,
 )
 from .errors import ConfigError
-
-MESH_STATS_HINT = "mesh 统计方法待定（bbox、水密等由后续设计，stat 先留空）"
 
 
 def load_config(path: str) -> dict:
@@ -59,6 +66,39 @@ def load_config(path: str) -> dict:
 
 def _text(value: Any) -> str:
     return str(value).strip() if value is not None else ""
+
+
+def _flag(socket: dict, key: str, default: bool) -> bool:
+    value = socket.get(key)
+    return default if value is None else bool(value)
+
+
+def _unwritable_reason(socket: dict) -> str:
+    """这个 socket 为什么不能写；空字符串表示可以写。
+
+    hide_value 只影响界面上是否显示数值框，写了照样生效，所以不拦。
+    """
+    if socket.get("linked"):
+        return "已连线"
+    if not _flag(socket, "enabled", True):
+        return "当前条件禁用（enabled=False），写了也不参与求值"
+    return ""
+
+
+def _writable_names(node_schema: dict) -> list[str]:
+    """该节点上真正可写的输入口名字，用于报错提示。"""
+    names = []
+    for item in node_schema.get("inputs") or []:
+        if not isinstance(item, dict) or _unwritable_reason(item):
+            continue
+        try:
+            cards_common.param_from_socket(item)
+        except ConfigError:
+            continue
+        name = _text(item.get("identifier"))
+        if name:
+            names.append(name)
+    return sorted(names)
 
 
 def _number(value: Any, name: str) -> float:
@@ -288,113 +328,6 @@ def _validate_components(value: Any, identifier: str) -> dict:
     return clean
 
 
-def _validate_fields(value: Any) -> list[str]:
-    """outputs 现在只认网格字段：["volume", "area", "is_watertight", ...]。"""
-    if not isinstance(value, list) or not value:
-        raise ConfigError("outputs 需要是非空的网格字段数组，如 [\"volume\", \"area\"]")
-    fields = []
-    for index, item in enumerate(value):
-        if not isinstance(item, str):
-            raise ConfigError("outputs[%d] 需要是字段名字符串，收到 %r" % (index, item))
-        name = _text(item)
-        if not name:
-            raise ConfigError("outputs[%d] 需要是字段名" % index)
-        if name in fields:
-            raise ConfigError("outputs 里字段重复：%s" % name)
-        fields.append(name)
-    return fields
-
-
-def _target_allowed(name: str, fields: list[str]) -> bool:
-    if name in fields:
-        return True
-    return any(name.startswith(field + ".") for field in fields)
-
-
-def _validate_loss(value: Any, fields: list[str]) -> dict:
-    if not isinstance(value, dict):
-        raise ConfigError("loss 需要是对象，至少包含 targets")
-    targets = value.get("targets")
-    if not isinstance(targets, dict) or not targets:
-        raise ConfigError("loss.targets 需要是非空对象")
-    clean_targets = {}
-    for key, target in targets.items():
-        if not _target_allowed(str(key), fields):
-            raise ConfigError(
-                "loss.targets 引用了未声明的输出 %r（已声明：%s）"
-                % (key, ", ".join(fields))
-            )
-        clean_targets[str(key)] = _number(target, "loss.targets.%s" % key)
-
-    weights = value.get("weights") or {}
-    if not isinstance(weights, dict):
-        raise ConfigError("loss.weights 需要是对象")
-    clean_weights = {}
-    for key, weight in weights.items():
-        if str(key) not in clean_targets:
-            raise ConfigError("loss.weights 里有不做目标的输出 %r" % key)
-        weight = _number(weight, "loss.weights.%s" % key)
-        if weight < 0:
-            raise ConfigError("loss.weights.%s 不能是负数" % key)
-        clean_weights[str(key)] = weight
-    return {"targets": clean_targets, "weights": clean_weights}
-
-
-def _validate_budget(value: Any) -> dict:
-    if not isinstance(value, dict):
-        raise ConfigError("budget 需要是对象")
-    max_trials = value.get("max_trials", 100)
-    if isinstance(max_trials, bool) or not isinstance(max_trials, int) or max_trials < 1:
-        raise ConfigError("budget.max_trials 需要是正整数")
-
-    timeout = value.get("timeout_s")
-    if timeout is not None:
-        timeout = _number(timeout, "budget.timeout_s")
-        if timeout <= 0:
-            raise ConfigError("budget.timeout_s 必须大于 0")
-
-    target = value.get("target_loss")
-    if target is not None:
-        target = _number(target, "budget.target_loss")
-
-    seed = value.get("seed")
-    if seed is not None and (isinstance(seed, bool) or not isinstance(seed, int)):
-        raise ConfigError("budget.seed 需要是整数")
-
-    return {
-        "max_trials": max_trials,
-        "timeout_s": timeout,
-        "target_loss": target,
-        "seed": seed,
-    }
-
-
-def _resolve_storage(storage: Any, base_dir: str) -> Any:
-    if storage is None or _text(storage) == "":
-        return None
-    value = _text(storage)
-
-    journal_prefix = "journal://"
-    if value.startswith(journal_prefix):
-        from optuna.storages import JournalStorage
-        from optuna.storages.journal import JournalFileBackend
-
-        raw = value[len(journal_prefix):]
-        if not raw:
-            raise ConfigError("storage 的 journal:// 后面需要文件路径")
-        if not os.path.isabs(raw):
-            raw = os.path.abspath(os.path.join(base_dir, raw))
-        return JournalStorage(JournalFileBackend(raw))
-
-    prefix = "sqlite:///"
-    if value.startswith(prefix) and not value.startswith(prefix + "/"):
-        raw = value[len(prefix):]
-        if raw and not os.path.isabs(raw):
-            path = os.path.abspath(os.path.join(base_dir, raw))
-            return prefix + path.replace(os.sep, "/")
-    return value
-
-
 # ------------------------------------------------------------------ 准备与搜索空间
 
 
@@ -416,10 +349,6 @@ def prepare(config: dict, base_dir: str = ".") -> dict:
 
     inputs = _validate_inputs(config.get("inputs"), node_name)
     fixed = _validate_fixed(config.get("fixed"), node_name, inputs)
-    fields = _validate_fields(config.get("outputs"))
-    loss = _validate_loss(config.get("loss"), fields)
-    budget = _validate_budget(config.get("budget") or {})
-    storage = _resolve_storage(config.get("storage"), base_dir)
     study_name = _text(config.get("study_name")) or "fit"
 
     frame = config.get("frame")
@@ -433,7 +362,9 @@ def prepare(config: dict, base_dir: str = ".") -> dict:
     if run_dir_value not in (None, "", False):
         run_dir = os.path.abspath(os.path.join(base_dir, str(run_dir_value)))
 
-    report = _text(config.get("report")) or None
+    report = _text(config.get("report"))
+    if not report:
+        report = os.path.join(run_dir, "best.json") if run_dir else "best.json"
 
     return {
         "blend": blend,
@@ -446,11 +377,7 @@ def prepare(config: dict, base_dir: str = ".") -> dict:
         "input_nodes": sorted(
             {item["node"] for item in inputs} | {item["node"] for item in fixed}
         ),
-        "outputs": fields,
         "frame": frame,
-        "loss": loss,
-        "budget": budget,
-        "storage": storage,
         "study_name": study_name,
         "run_dir": run_dir,
         "report": report,
@@ -508,12 +435,14 @@ def build_space(prepared: dict, schema: dict):
         socket = inputs_by_id.get(identifier)
         if socket is None:
             raise ConfigError(
-                "节点 %r 没有输入 %r（可用：%s）"
-                % (node_name, identifier, ", ".join(sorted(inputs_by_id)))
+                "节点 %r 没有输入 %r（可写：%s）"
+                % (node_name, identifier, ", ".join(_writable_names(node_schema)) or "无")
             )
-        if socket.get("linked"):
+        reason = _unwritable_reason(socket)
+        if reason:
             raise ConfigError(
-                "节点 %r 的输入 %r 已连线，不能参与搜索" % (node_name, identifier)
+                "节点 %r 的输入 %r %s，不能参与搜索（可写：%s）"
+                % (node_name, identifier, reason, ", ".join(_writable_names(node_schema)) or "无")
             )
         param = cards_common.param_from_socket(socket)
         pairs.append((spec, _bind_node(param, node_name, prefix)))
@@ -534,12 +463,14 @@ def build_space(prepared: dict, schema: dict):
         socket = inputs_by_id.get(identifier)
         if socket is None:
             raise ConfigError(
-                "fixed 节点 %r 没有输入 %r（可用：%s）"
-                % (node_name, identifier, ", ".join(sorted(inputs_by_id)))
+                "fixed 节点 %r 没有输入 %r（可写：%s）"
+                % (node_name, identifier, ", ".join(_writable_names(node_schema)) or "无")
             )
-        if socket.get("linked"):
+        reason = _unwritable_reason(socket)
+        if reason:
             raise ConfigError(
-                "fixed 节点 %r 的输入 %r 已连线，不能写默认值" % (node_name, identifier)
+                "fixed 节点 %r 的输入 %r %s，不能写默认值（可写：%s）"
+                % (node_name, identifier, reason, ", ".join(_writable_names(node_schema)) or "无")
             )
         try:
             param = cards_common.param_from_socket(socket)

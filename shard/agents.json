@@ -17,7 +17,7 @@
     "blender_math": "extensions/blender_math.ts",
     "blender_screen": "extensions/blender_screen.ts",
     "node_query": "extensions/node_query.ts",
-    "mesh_probe": "extensions/mesh_probe.ts",
+    "mesh_view": "extensions/mesh_view.ts",
     "covtrace": "extensions/covtrace.ts",
     "wf_plan": "extensions/wf_plan.ts",
     "hook_skill": "extensions/hook_skill.ts"
@@ -26,13 +26,13 @@
   "profiles": {
     "full": [
       "bpy", "py", "blender", "blender_build", "blender_data", "blender_fit", "blender_math",
-      "blender_screen", "node_query", "mesh_probe", "covtrace", "wf_plan", "hook_skill"
+      "blender_screen", "node_query", "mesh_view", "covtrace", "wf_plan", "hook_skill"
     ],
     "scout": ["bpy", "blender", "blender_data", "blender_screen", "node_query"],
     "execute": ["blender", "blender_build", "blender_math", "blender_screen", "node_query"],
     "covtrace": ["blender", "blender_screen", "covtrace", "node_query"],
     "modeling": [],
-    "translate": ["node_query", "blender_build", "wf_plan", "mesh_probe", "py", "blender_fit"],
+    "translate": ["node_query", "blender_build", "wf_plan", "mesh_view", "py", "blender_fit"],
     "Single": [ "bpy", "blender", "blender_build",  "blender_math","blender_screen", "node_query", "wf_plan", "hook_skill"],
     "none": []
   },

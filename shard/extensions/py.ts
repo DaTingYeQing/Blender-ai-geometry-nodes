@@ -2,7 +2,7 @@
  * py 扩展 —— 在 Blender 内置 Python 里执行任意代码
  *
  * 只负责跑代码：起 py_run.py → 目标解释器 → 原样返回 stdout/stderr。
- * 探测 Blender 物体/节点用 bpy；分段导出网格脚本用 mesh_probe。
+ * 探测 Blender 物体/节点用 bpy；交互预览网格脚本用 mesh_view。
  */
 
 import { spawnSync } from "node:child_process";
@@ -61,7 +61,7 @@ const pyTool = defineTool({
 	description:
 		"在 Blender 内置 Python 里跑任意代码（单独进程），能 import meshkit / numpy / scipy / trimesh / pyvista。\n" +
 		"注意 import bpy 不可用（bpy 只活在 blender.exe 进程里）；要在 Blender 内跑代码用 blender_run。\n" +
-		"探测 Blender 物体/节点用 bpy；分段导出网格脚本用 mesh_probe。",
+		"探测 Blender 物体/节点用 bpy；交互预览网格脚本用 mesh_view。",
 	parameters: Type.Object({
 		expr: Type.String({ description: "要执行的 Python 代码" }),
 	}),

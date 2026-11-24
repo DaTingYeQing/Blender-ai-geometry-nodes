@@ -7,9 +7,9 @@
 
 from __future__ import annotations
 
-from .. import translator as tr
-from ..contract import DIST_FLOAT, Component, ParamSpec
-from ..errors import ConfigError
+from ... import translator as tr
+from ...contract import DIST_FLOAT, Component, ParamSpec
+from ...errors import ConfigError
 
 
 def param_from_socket(socket: dict) -> ParamSpec:

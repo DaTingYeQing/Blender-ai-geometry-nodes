@@ -33,7 +33,7 @@ function Initialize-SetupContext {
     $covtraceArchive = Join-Path (Split-Path -Parent $blenderArchive) 'covtrace-toolchain.zip'
     $resultPath = if ($Options.ResultPath) { Resolve-FullPath $Options.ResultPath } else { '' }
 
-    # 分层版本：runtime / config / seed / data 各自一个版本号，升级时逐层对账。
+    # 分层版本：runtime / config / data 各自一个版本号，升级时逐层对账。
     # 版本号在 shard\versions.json，换层语义时手动 +1；appVersion 由 Electron 传入。
     $versionsPath = Join-Path (Split-Path -Parent $envTemplate) 'versions.json'
     $versions = $null
@@ -51,7 +51,6 @@ function Initialize-SetupContext {
     $blenderBuild = if ($versions -and $versions.blenderBuild) { [string]$versions.blenderBuild } else { '' }
     $covtraceVersion = if ($versions -and $versions.covtraceVersion) { [string]$versions.covtraceVersion } else { '' }
     $configVersion = if ($versions -and $versions.configVersion) { [string]$versions.configVersion } else { '' }
-    $seedVersion = if ($versions -and $versions.seedVersion) { [string]$versions.seedVersion } else { '' }
     $dataSchemaVersion = if ($versions -and $versions.dataSchemaVersion) { [string]$versions.dataSchemaVersion } else { '' }
     # 组件版本不属于分层版本：Blender 版本从内置压缩包文件名取，换包自动跟着变。
     $blenderVersion = if ((Split-Path -Leaf $blenderArchive) -match 'blender-([\d.]+)') {
@@ -81,7 +80,6 @@ function Initialize-SetupContext {
         RuntimeLayout        = $runtimeLayout
         CovtraceVersion      = $covtraceVersion
         ConfigVersion        = $configVersion
-        SeedVersion          = $seedVersion
         DataSchemaVersion    = $dataSchemaVersion
 
         BlenderSrcRoot       = $blenderSrcRoot
@@ -254,7 +252,6 @@ function Write-SetupResult {
             runtimeLayout     = $setup.RuntimeLayout
             covtraceVersion   = $setup.CovtraceVersion
             configVersion     = $setup.ConfigVersion
-            seedVersion       = $setup.SeedVersion
             dataSchemaVersion = $setup.DataSchemaVersion
             managed           = Get-ManagedSnapshot
         })
@@ -272,7 +269,6 @@ function Write-SetupResult {
         runtimeLayout     = $setup.RuntimeLayout
         covtraceVersion   = $setup.CovtraceVersion
         configVersion     = $setup.ConfigVersion
-        seedVersion       = $setup.SeedVersion
         dataSchemaVersion = $setup.DataSchemaVersion
         node           = if ($nodeVersion) { $nodeVersion.ToString() } else { $null }
         nodeExe        = Get-NodeExe
@@ -323,7 +319,6 @@ function Invoke-CheckOnly {
         runtimeLayout     = $setup.RuntimeLayout
         covtraceVersion   = Get-CovtraceVersion
         configVersion     = $setup.ConfigVersion
-        seedVersion       = $setup.SeedVersion
         dataSchemaVersion = $setup.DataSchemaVersion
         node           = if ($node) { $node.ToString() } else { $null }
         nodeExe        = Get-NodeExe

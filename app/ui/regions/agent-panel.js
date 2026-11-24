@@ -33,7 +33,7 @@ const TOOL_HINTS = {
   blender_math: '公式生成',
   blender_screen: '场景快照',
   node_query: '节点查询',
-  mesh_probe: '网格探针',
+  mesh_view: '网格预览',
   covtrace: '覆盖率追踪',
   wf_plan: '工作流规划',
   hook_skill: '技能注入',

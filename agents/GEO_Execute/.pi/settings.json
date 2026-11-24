@@ -13,7 +13,6 @@
     "../../../shard/extensions/blender_fit.ts",
     "../../../shard/extensions/blender_math.ts",
     "../../../shard/extensions/blender_screen.ts",
-    "../../../shard/extensions/node_query.ts",
-    "../../../shard/extensions/mesh_probe.ts"
+    "../../../shard/extensions/node_query.ts"
   ]
 }

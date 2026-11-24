@@ -7,6 +7,7 @@ meshkit 的 Blender 侧入口；真正的导出逻辑在 meshkit/blender_export.
     blender --background --python export_by_name.py -- <场景.blend> <物体名> <修改器名> <几何节点名> <输出.ply> [帧号]
 """
 
+import json
 import os
 import sys
 
@@ -65,9 +66,11 @@ def main() -> None:
         sys.exit(1)
 
     if node_name == "LIST":
+        nodes = list_nodes(ng)
         print(f"节点组: {ng.name}（{len(ng.nodes)} 个节点）")
-        for line in list_nodes(ng):
+        for line in nodes:
             print(line)
+        print("RESULT " + json.dumps({"mode": "node_list", "nodes": nodes}, ensure_ascii=False))
         sys.exit(0)
 
     target = ng.nodes.get(node_name)
@@ -96,6 +99,15 @@ def main() -> None:
             print(f"文件[{label}]: {path}")
     for item in info["skipped"]:
         print(f"警告: 检测到{item}分量，暂不支持导出，已跳过")
+    print("RESULT " + json.dumps({
+        "mode": "export",
+        "components": info["components"],
+        "files": info["files"],
+        "skipped": info["skipped"],
+        "n_vertices": info["n_vertices"],
+        "n_faces": info["n_faces"],
+        "n_edges": info["n_edges"],
+    }, ensure_ascii=False))
 
 
 if __name__ == "__main__":

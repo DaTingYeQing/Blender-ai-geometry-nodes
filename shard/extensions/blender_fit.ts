@@ -4,6 +4,10 @@
  * 前端只做三件事：把表单拼成 fit.json、起 fitting.engine、从报告里抽一句摘要。
  * 完整 trial、最优参数、每轮 PLY 都在文件里，不塞进上下文。
  *
+ * 单次运行：每次都是全新的 in-memory study，不读写 Optuna journal；
+ * 只有「目标 / 场景 / 搜索空间 / 打分计划」完全一致时，才用 run_dir/seed.json
+ * 里上次的最优参数热启动前几个 trial。
+ *
  * 场景前提：object 上已有几何节点修改器（没有就先用 blender_build 的 bind），
  * 输入口必须未连线；顶层 node 是导出几何的那个节点，inputs 每项可指定别的节点。
  * 地址一律现读 py_environment.json；本文件不含任何绝对路径，可直接进 Git。
@@ -64,7 +68,31 @@ function blendFromState(work: string): string {
 	return "";
 }
 
-function buildConfig(params: Record<string, unknown>, work: string): Record<string, unknown> | { err: string } {
+type ParamsResult =
+	| { ok: true; value: Record<string, unknown> }
+	| { ok: false; err: string };
+
+/** params：对象或 JSON 字符串；不填 = 用脚本 SCHEMA 的默认值。 */
+function readParams(value: unknown): ParamsResult {
+	if (value === undefined || value === null || value === "") return { ok: true, value: {} };
+	if (typeof value === "string") {
+		try {
+			const parsed = JSON.parse(value);
+			if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+				return { ok: true, value: parsed as Record<string, unknown> };
+			}
+		} catch {
+			// 落到下面的统一报错
+		}
+		return { ok: false, err: 'ERROR: params 要写成 JSON 对象，如 {"n":24,"eps":0.003}' };
+	}
+	if (typeof value === "object" && !Array.isArray(value)) {
+		return { ok: true, value: value as Record<string, unknown> };
+	}
+	return { ok: false, err: 'ERROR: params 要写成对象，如 {"n":24,"eps":0.003}' };
+}
+
+function buildConfig(params: Record<string, unknown>, work: string, cwd: string): Record<string, unknown> | { err: string } {
 	const object = str(params.object);
 	const modifier = str(params.modifier);
 	const node = str(params.node);
@@ -81,11 +109,36 @@ function buildConfig(params: Record<string, unknown>, work: string): Record<stri
 	}
 	const blendPath = path.isAbsolute(blend) ? blend : path.resolve(work, blend);
 
-	const outputs = Array.isArray(params.outputs)
-		? (params.outputs as unknown[]).map(String).map((s) => s.trim()).filter(Boolean)
-		: [];
-	if (!outputs.length) {
-		return { err: 'ERROR: 需要 outputs（网格字段数组，如 ["volume","area","extents"]）' };
+	const target = str(params.target);
+	// 有 target（比如 bpy export 导出的 PLY）就以它为准，script/stage/params 全部忽略
+	const scriptRaw = target ? "" : str(params.script);
+	if (!target && !scriptRaw) {
+		return { err: "ERROR: 需要 target（参考模型/网格文件）或 script（生成参考数据的 .py）" };
+	}
+	const targetPath = target
+		? (path.isAbsolute(target) ? target : path.resolve(work, target))
+		: "";
+
+	// 脚本源：跑第 stage 段，落盘的 stage 数据就是拟合目标
+	let scriptPath = "";
+	let stageIndex: number | undefined;
+	let scriptParams: Record<string, unknown> = {};
+	if (scriptRaw) {
+		const candidates = path.isAbsolute(scriptRaw)
+			? [scriptRaw]
+			: [path.resolve(cwd, scriptRaw), path.resolve(work, scriptRaw)];
+		const abs = candidates.find((item) => fs.existsSync(item) && fs.statSync(item).isFile());
+		if (!abs) {
+			return { err: `ERROR: 找不到脚本 ${scriptRaw}\n试过：\n${candidates.join("\n")}` };
+		}
+		scriptPath = abs;
+		stageIndex = int(params.stage);
+		if (stageIndex !== undefined && stageIndex < 1) {
+			return { err: "ERROR: stage 需要是从 1 开始的整数（跑脚本的第几段）" };
+		}
+		const parsed = readParams(params.params);
+		if (!parsed.ok) return { err: parsed.err };
+		scriptParams = parsed.value;
 	}
 
 	const inputRows = Array.isArray(params.inputs) ? params.inputs : [];
@@ -124,65 +177,42 @@ function buildConfig(params: Record<string, unknown>, work: string): Record<stri
 		fixed.push(out);
 	}
 
-	const targets: Record<string, number> = {};
-	const weights: Record<string, number> = {};
-	const lossRows = Array.isArray(params.loss_targets) ? params.loss_targets : [];
-	for (const row of lossRows) {
-		const item = (row ?? {}) as Record<string, unknown>;
-		const field = str(item.field);
-		const value = num(item.value);
-		if (!field || value === undefined) {
-			return { err: 'ERROR: loss_targets 每项需要 field（字段名）和 value（目标数值）' };
-		}
-		targets[field] = value;
-		const weight = num(item.weight);
-		if (weight !== undefined) weights[field] = weight;
-	}
-	if (!Object.keys(targets).length) {
-		return { err: 'ERROR: 需要至少一个 loss_targets（如 [{"field":"volume","value":3.0}]）' };
-	}
+	const study = "fit";
+	const budget: Record<string, unknown> = { max_trials: 100, timeout_s: 1800 };
 
-	const study = str(params.study_name) || "fit";
-	const maxTrials = int(params.max_trials) ?? 100;
-	const timeoutS = num(params.timeout_s) ?? 1800;
-	const targetLoss = num(params.target_loss);
-	const seed = int(params.seed);
-	const frame = int(params.frame);
-
-	const budget: Record<string, unknown> = { max_trials: maxTrials, timeout_s: timeoutS };
-	if (targetLoss !== undefined) budget.target_loss = targetLoss;
-	if (seed !== undefined) budget.seed = seed;
-
-	const loss: Record<string, unknown> = { targets };
-	if (Object.keys(weights).length) loss.weights = weights;
+	// 落盘位置固定在工作区，AI 不用传；单次运行，无 Optuna storage
+	const runDir = path.join(work, "fit_runs", study);
+	const reportPath = path.join(runDir, "best.json");
+	const minDiff = num(params.min_diff) ?? 5;
 
 	const config: Record<string, unknown> = {
+		...(targetPath ? { target: targetPath } : {}),
+		...(scriptPath
+			? {
+				script: scriptPath,
+				...(stageIndex !== undefined ? { stage: stageIndex } : {}),
+				...(Object.keys(scriptParams).length ? { params: scriptParams } : {}),
+			}
+			: {}),
+		min_diff: minDiff,
 		blend: blendPath,
 		object,
 		modifier,
 		node,
 		inputs,
-		outputs,
-		loss,
 		budget,
 		study_name: study,
-		storage: str(params.storage) || "journal://" + path.join(work, "fit_" + study + ".log").replace(/\\/g, "/"),
-		report: str(params.report) || path.join(work, "fit_report.json"),
-		run_dir: str(params.run_dir) || path.join(work, "fit_runs", study),
+		report: reportPath,
+		run_dir: runDir,
 	};
 	if (fixed.length) config.fixed = fixed;
-	if (frame !== undefined) config.frame = frame;
-	const startup = num(params.startup_timeout_s);
-	const evalTimeout = num(params.eval_timeout_s);
-	if (startup !== undefined) config.startup_timeout_s = startup;
-	if (evalTimeout !== undefined) config.eval_timeout_s = evalTimeout;
 	return config;
 }
 
-function handleFit(params: Record<string, unknown>, env: any) {
+function handleFit(params: Record<string, unknown>, env: any, cwd: string) {
 	const PY = pythonOf(env);
 	const WORK = workspaceOf(env);
-	const built = buildConfig(params, WORK);
+	const built = buildConfig(params, WORK, cwd);
 	if ("err" in built) return errRes(String(built.err));
 	const config = built as Record<string, unknown>;
 
@@ -195,7 +225,6 @@ function handleFit(params: Record<string, unknown>, env: any) {
 
 	const reportPath = String(config.report);
 	const runDir = String(config.run_dir);
-	const storage = String(config.storage);
 	const budgetSeconds = Number((config.budget as Record<string, unknown>).timeout_s ?? 1800);
 	const waitMs = Number.isFinite(budgetSeconds) && budgetSeconds > 0
 		? Math.ceil(budgetSeconds * 1000) + 300_000
@@ -213,7 +242,7 @@ function handleFit(params: Record<string, unknown>, env: any) {
 	});
 	const stderr = (res.stderr ?? "").trim();
 	const stdout = (res.stdout ?? "").trim();
-	const extra = { config: configPath, report: reportPath, run_dir: runDir, storage };
+	const extra = { config: configPath, report: reportPath, run_dir: runDir };
 
 	if (res.error) {
 		return errRes(
@@ -238,22 +267,49 @@ function handleFit(params: Record<string, unknown>, env: any) {
 		);
 	}
 
-	const bestLoss = report?.best?.loss;
+	const bestLoss = report?.loss;
 	const trials = report?.trials || {};
+	const failedCount = Number(trials.failed ?? 0);
 	const verdict = report?.converged ? "已找到" : (report?.ok ? "跑完但未达目标" : "失败");
 	const lines = [
 		`[fit] ${verdict}：${str(report?.message) || "（无说明）"}`,
 		`  最优 loss：${bestLoss ?? "—"}；trial：${trials.total ?? "?"}（失败 ${trials.failed ?? 0}），耗时 ${report?.elapsed_s ?? "?"}s`,
-		`  报告：${reportPath}`,
-		`  每轮产物：${runDir}`,
-		`  存储：${storage}`,
-		`  （完整参数、每轮度量都在报告 JSON 里，需要再加 read 读）`,
 	];
+	const warm = report?.warm_start;
+	if (warm?.matched && Number(warm?.enqueued) > 0) {
+		lines.push(`  热启动：沿用上次 ${warm.enqueued} 组最优参数`);
+	}
+	if (failedCount > 0) {
+		const lastError = str(report?.last_error);
+		if (lastError) lines.push(`  最近失败原因：${lastError.slice(0, 300)}`);
+	}
+	const fields = Array.isArray(report?.fields) ? report.fields : [];
+	if (fields.length) {
+		const top = fields.slice(0, 8).map((row: any) => {
+			const name = String(row?.field ?? "?");
+			const diff = Number(row?.diff);
+			const best = row?.best;
+			const target = row?.target;
+			const pct = Number.isFinite(diff) ? `${(diff * 100).toFixed(1)}%` : "?";
+			return `${name} ${pct}（${best} → ${target}）`;
+		});
+		lines.push(`  偏差最大：${top.join("，")}`);
+	} else {
+		lines.push(`  偏差最大：没有超过 ${((Number(report?.min_diff) || 0) * 100).toFixed(1)}% 的字段`);
+	}
+	lines.push(
+		`  参考数据：${str(report?.target) || "（无）"}`,
+		`  最优网格：${str(report?.mesh) || "（无）"}`,
+		`  明细：${reportPath}`,
+	);
+	const seenPath = str(report?.best_seen);
+	if (seenPath) lines.push(`  可提升字段：${seenPath}`);
 	return okRes(lines.join("\n"), {
 		...extra,
 		converged: Boolean(report?.converged),
 		best_loss: bestLoss ?? null,
 		report_json: reportPath,
+		best_mesh: str(report?.mesh) || null,
 	});
 }
 
@@ -262,21 +318,44 @@ const blenderFitTool = defineTool({
 	name: "blender_fit",
 	label: "Blender Fit",
 	description:
-		"黑盒参数拟合：按一张参数单子跑 Optuna，自动写值、求值、算网格字段、打分。\n" +
-		"前提：物体上已有几何节点修改器（没有先用 blender_build 的 bind），输入的 socket 必须未连线。\n" +
+		"黑盒参数拟合：给一份参考模型，自动跑 Optuna，让生成结果的网格字段尽量接近它。\n" +
+		"target 是参考模型/网格文件（可用 bpy export 导出的 PLY），全部字段自动提取、逐字段归一化后按组打分。\n" +
+		"有 target 时忽略 script/stage/params；没有 target 才跑 script（分段网格脚本：STAGES + build(**params, stage=None)）。\n" +
+		"单次运行，不继承旧 study；目标/场景/搜索空间都没变时，会用上次的最优参数热启动。\n" +
+		"前提：物体上已有几何节点修改器。\n" +
+		"只能写「当前启用、未连线」的输入 socket。\n" +
+		"非数值类型（几何/字符串/菜单/材质等）会被拒绝。\n" +
+		"角度类插口（subtype=ANGLE）对外一律用「度」。\n" +
 		"顶层 node 是导出几何的节点；inputs 每项可写 node 指向其它节点（同一个节点组里）。\n" +
-		"fixed：把某些输入定死、不参与搜索（每轮求值前写回），用于锁住上游模块的参数；不能和 inputs 重叠。\n" +
-		"返回只给结论和报告/产物路径，完整 trial 和最优参数在报告 JSON 里。",
+		"fixed：把某些输入定死、不参与搜索。\n" +
+		"单轮求值失败只计数并在报告里给出原因，不影响其余 trial。\n" +
+		"返回只给结论、偏差最大的字段和报告/产物路径，完整 trial 在报告 JSON 里。",
 	parameters: Type.Object({
+		// ── Blender 场景：拟合哪个工程、哪个物体、哪个节点 ──────────────
 		blend: Type.Optional(Type.String({
 			description: "要拟合的 .blend。不填 = 从工作区/当前 flow 的 workflow_state.json 取",
 		})),
 		object: Type.String({ description: "物体 name" }),
 		modifier: Type.String({ description: "物体上的几何节点修改器名（必须已存在）" }),
 		node: Type.String({ description: "导出几何的节点 name（也是 inputs 的默认节点）" }),
+		// ── 参考数据：target 优先，没有 target 才跑 script ──────────────
+		target: Type.Optional(Type.String({
+			description: "参考模型/网格文件路径（.ply / .obj / .glb），也可以是 bpy export 导出的 PLY；给了 target 就忽略 script/stage/params",
+		})),
+		script: Type.Optional(Type.String({
+			description: "没有 target 时用：生成参考数据的 .py（分段脚本协议：STAGES + build(**params, stage=None)）",
+		})),
+		stage: Type.Optional(Type.Integer({
+			description: "跑脚本的第几段（从 1 开始，stage=k 表示累计跑到第 k 段；不填 = 最后一段）",
+		})),
+		params: Type.Optional(Type.Any({
+			description: '脚本 SCHEMA 参数的具体值，如 {"n":24,"eps":0.003}；不填 = 用 SCHEMA 默认值',
+		})),
+
+		// ── Optuna 搜索空间：搜什么、锁什么 ────────────────────────────
 		inputs: Type.Optional(Type.Array(Type.Object({
 			node: Type.Optional(Type.String({ description: "参数所在节点 name；不填 = 顶层 node" })),
-			identifier: Type.String({ description: "节点输入 socket 的 identifier 或唯一 name" }),
+			identifier: Type.String({ description: "节点输入 socket 的 identifier 或唯一 name（须是未连线的数字类插口）" }),
 			min: Type.Optional(Type.Number({ description: "数值下限（和 max 一起给）" })),
 			max: Type.Optional(Type.Number({ description: "数值上限" })),
 			step: Type.Optional(Type.Number({ description: "步长（可选）" })),
@@ -290,41 +369,19 @@ const blenderFitTool = defineTool({
 		})),
 		fixed: Type.Optional(Type.Array(Type.Object({
 			node: Type.Optional(Type.String({ description: "参数所在节点 name；不填 = 顶层 node" })),
-			identifier: Type.String({ description: "要定死的节点输入 socket identifier 或唯一 name" }),
+			identifier: Type.String({ description: "要定死的节点输入 socket identifier 或唯一 name（须是未连线的数字类插口）" }),
 			value: Type.Any({ description: "固定值：数字 / 布尔 / 数组，按该 socket 的类型给" }),
 		}), {
 			description: '不搜索、每轮写死的输入，如 [{"node":"Noise","identifier":"Scale","value":2.0}]；socket 必须未连线，不能和 inputs 重叠',
 		})),
-		outputs: Type.Array(Type.String(), {
-			description: '要量化的网格字段，如 ["volume","area","extents"]',
-		}),
-		loss_targets: Type.Array(Type.Object({
-			field: Type.String({ description: "字段名（须在 outputs 里，或它的子字段如 extents.0）" }),
-			value: Type.Number({ description: "目标值" }),
-			weight: Type.Optional(Type.Number({ description: "权重（默认 1；量纲大的字段调小）" })),
-		}), {
-			description: '目标列表，如 [{"field":"volume","value":3.0},{"field":"area","value":12.0,"weight":0.5}]',
-		}),
-		max_trials: Type.Optional(Type.Integer({ description: "最多 trial 数（默认 100）" })),
-		timeout_s: Type.Optional(Type.Number({ description: "墙钟时间上限秒（默认 1800）" })),
-		target_loss: Type.Optional(Type.Number({ description: "收敛门槛：最优 loss ≤ 它就停（可选）" })),
-		seed: Type.Optional(Type.Integer({ description: "TPE 随机种子（可选）" })),
-		study_name: Type.Optional(Type.String({ description: "study 名（默认 fit）" })),
-		storage: Type.Optional(Type.String({
-			description: "Optuna storage；默认 journal://<工作区>/fit_<study>.log",
+
+		// ── 报告 ───────────────────────────────────────────────────────
+		min_diff: Type.Optional(Type.Number({
+			description: "只列出偏差大于这个百分比的字段（默认 5，单位 %）",
 		})),
-		report: Type.Optional(Type.String({
-			description: "报告 JSON 路径；默认 <工作区>/fit_report.json",
-		})),
-		run_dir: Type.Optional(Type.String({
-			description: "每轮 PLY/JSON 目录；默认 <工作区>/fit_runs/<study>",
-		})),
-		frame: Type.Optional(Type.Integer({ description: "取第几帧（可选）" })),
-		startup_timeout_s: Type.Optional(Type.Number({ description: "Blender 启动超时秒（默认 180）" })),
-		eval_timeout_s: Type.Optional(Type.Number({ description: "单轮求值超时秒（默认 300）" })),
 	}),
 	async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-		return handleFit(params, envFor(ctx.cwd));
+		return handleFit(params, envFor(ctx.cwd), ctx.cwd);
 	},
 });
 

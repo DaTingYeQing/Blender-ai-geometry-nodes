@@ -11,6 +11,7 @@
     mesh_summary / pointcloud_summary
 """
 
+import json
 import os
 import re
 import subprocess
@@ -34,6 +35,28 @@ def _require_blender_exe() -> str:
     )
 
 
+RESULT_PREFIX = "RESULT "
+
+
+def _parse_result(stdout: str):
+    """从 Blender 的 stdout 里取唯一的结构化结果行（RESULT {json}）。
+
+    其余 stdout 只当日志，不参与解析——避免改一句中文文案就悄悄失配。
+    """
+    for line in (stdout or "").splitlines():
+        text = line.strip()
+        if not text.startswith(RESULT_PREFIX):
+            continue
+        raw = text[len(RESULT_PREFIX):]
+        try:
+            return json.loads(raw)
+        except ValueError as exc:
+            raise RuntimeError(
+                f"Blender 的结果行不是合法 JSON：{exc}\n{raw[:400]}"
+            ) from exc
+    return None
+
+
 def export_from_blender(
     blend_path: str,
     object_name: str,
@@ -52,7 +75,8 @@ def export_from_blender(
             "AI 需先打开场景确认物体上生效的几何节点修改器名字再调用。"
         )
     if out_path is None:
-        out_path = os.path.join(tempfile.gettempdir(), f"meshkit_{object_name}.ply")
+        # 每次调用独占一个临时目录，避免同名物体并发互相覆盖。
+        out_path = os.path.join(tempfile.mkdtemp(prefix="meshkit_"), "mesh.ply")
 
     cmd = [
         _require_blender_exe(), "--background", "--python", EXPORT_SCRIPT, "--",
@@ -78,26 +102,33 @@ def export_from_blender(
             f"{result.stdout}\n{result.stderr}"
         )
 
+    payload = _parse_result(result.stdout)
+    if payload is None:
+        raise RuntimeError(
+            "Blender 没有返回结果行（RESULT ...），无法判断导出结果。\n"
+            f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
+
     if node_name == "LIST":
-        nodes = [ln[5:] for ln in result.stdout.splitlines() if ln.startswith("NODE ")]
+        nodes = payload.get("nodes") or []
         return {"nodes": nodes}
 
-    files = {}
-    skipped = []
-    for line in result.stdout.splitlines():
-        if line.startswith("文件["):
-            label = line[3:line.index("]")]
-            files[label] = line[line.index(":") + 1:].strip()
-        elif line.startswith("警告: 检测到"):
-            skipped.append(line.split("分量")[0].replace("警告: 检测到", "").strip())
-
+    files = {
+        label: path
+        for label, path in (payload.get("files") or {}).items()
+        if path
+    }
     loaded = {label: load_mesh(path) for label, path in files.items()}
     return {
-        "components": list(files.keys()),
+        "components": payload.get("components") or list(files),
         "mesh": loaded.get("mesh"),
         "pointcloud": loaded.get("pointcloud"),
         "files": files,
-        "skipped": skipped,
+        "skipped": payload.get("skipped") or [],
+        # Blender 侧的原始计数，供摘要与 Blender 统计面板对齐
+        "n_vertices": payload.get("n_vertices"),
+        "n_faces": payload.get("n_faces"),
+        "n_edges": payload.get("n_edges"),
     }
 
 
@@ -162,12 +193,23 @@ def summarize_from_blender(
             }
         raise
 
+    counts = {
+        "n_vertices": result.get("n_vertices"),
+        "n_faces": result.get("n_faces"),
+        "n_edges": result.get("n_edges"),
+    }
+
     if data_type == "all":
         summaries = {}
         for component in result["components"]:
-            summaries[component] = _SUMMARY_TYPES[component](
-                result[component], keys=fields
-            )
+            if component == "mesh":
+                summaries[component] = mesh_summary(
+                    result[component], keys=fields, counts=counts
+                )
+            else:
+                summaries[component] = _SUMMARY_TYPES[component](
+                    result[component], keys=fields
+                )
         return {
             "status": "ok",
             "requested": "all",
@@ -183,9 +225,14 @@ def summarize_from_blender(
             "summary": None,
         }
 
+    if data_type == "mesh":
+        summary = mesh_summary(result[data_type], keys=fields, counts=counts)
+    else:
+        summary = _SUMMARY_TYPES[data_type](result[data_type], keys=fields)
+
     return {
         "status": "ok",
         "requested": data_type,
         "available": result["components"],
-        "summary": _SUMMARY_TYPES[data_type](result[data_type], keys=fields),
+        "summary": summary,
     }

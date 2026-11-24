@@ -11,6 +11,7 @@
     "../../../shard/extensions/bpy.ts",
     "../../../shard/extensions/blender.ts",
     "../../../shard/extensions/blender_build.ts",
+    "../../../shard/extensions/blender_fit.ts",
     "../../../shard/extensions/blender_math.ts",
     "../../../shard/extensions/blender_screen.ts",
     "../../../shard/extensions/node_query.ts",

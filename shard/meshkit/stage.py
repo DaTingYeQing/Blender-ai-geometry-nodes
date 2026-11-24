@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""meshkit.stage —— mesh_probe 的后端：导入一份网格脚本，按 STAGES 逐段导出 meshkit 数据。
+"""meshkit.stage —— 分段执行网格脚本：按 STAGES 逐段导出 meshkit 数据。
 
-用法（由 mesh_probe 工具调用，cwd 在 shard/）：
+用法（由 mesh_view / blender_fit 调用，cwd 在 shard/）：
     python -m meshkit.stage <payload.json>
 
 payload：
     {"script": "...", "params": {...}, "out_dir": "...", "result_path": "..."}
+    stage（可选，从 1 开始）：只跑第几段；不给就按 STAGES 全跑
 
 产物：
     <out_dir>/stage1.json、stage2.json……每段一份，含当时的参数 + meshkit 摘要
@@ -42,7 +43,7 @@ class ProbeError(RuntimeError):
 
 def _load_module(path: str):
     """按文件路径导入；同目录的辅助模块也能 import。"""
-    name = "_mesh_probe_" + hashlib.md5(path.lower().encode("utf-8")).hexdigest()[:10]
+    name = "_mesh_stage_" + hashlib.md5(path.lower().encode("utf-8")).hexdigest()[:10]
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         raise ProbeError(f"无法导入脚本：{path}")
@@ -95,6 +96,21 @@ def _read_params(module, overrides) -> dict:
             f"params 里有 SCHEMA 之外的键 {unknown}；可用：{sorted(schema)}"
         )
     return {**defaults, **overrides}
+
+
+def _read_stage_index(value, total: int) -> int | None:
+    """payload.stage：只跑第几段；None 表示按 STAGES 全跑。"""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ProbeError("stage 需要是从 1 开始的整数（第几段）")
+    if isinstance(value, float):
+        if not value.is_integer():
+            raise ProbeError(f"stage 需要是整数，收到 {value!r}")
+        value = int(value)
+    if value < 1 or value > total:
+        raise ProbeError(f"stage 超出范围：{value}（脚本共 {total} 段）")
+    return int(value)
 
 
 def _to_mesh(value):
@@ -201,11 +217,14 @@ def _write_json(path: str, data) -> None:
         json.dump(data, handle, ensure_ascii=False, indent=2)
 
 
-def _clear_stage_files(out_dir: str) -> None:
+def _clear_stage_files(out_dir: str, only: str | None = None) -> None:
     """只删本工具产出的 stage*.json，避免上次多出来的段残留。"""
     for name in os.listdir(out_dir):
-        if _STAGE_FILE.match(name):
-            os.remove(os.path.join(out_dir, name))
+        if not _STAGE_FILE.match(name):
+            continue
+        if only is not None and name != only:
+            continue
+        os.remove(os.path.join(out_dir, name))
 
 
 def run(payload: dict) -> dict:
@@ -221,6 +240,7 @@ def run(payload: dict) -> dict:
     module = _load_module(script)
     stages = _read_stages(module)
     params = _read_params(module, payload.get("params") or {})
+    wanted = _read_stage_index(payload.get("stage"), len(stages))
 
     build = getattr(module, "build", None)
     if not callable(build):
@@ -228,11 +248,17 @@ def run(payload: dict) -> dict:
     if "stage" not in inspect.signature(build).parameters:
         raise ProbeError("build 必须接受 stage 参数：build(**params, stage=None)")
 
-    _clear_stage_files(out_dir)
+    if wanted is None:
+        _clear_stage_files(out_dir)
+        selected = [(index, name) for index, name in enumerate(stages, 1)]
+    else:
+        name = "stage%d.json" % wanted
+        _clear_stage_files(out_dir, name)
+        selected = [(wanted, stages[wanted - 1])]
 
     started = time.perf_counter()
     records = []
-    for index, name in enumerate(stages, 1):
+    for index, name in selected:
         stage_started = time.perf_counter()
         try:
             value = build(stage=name, **params)
@@ -293,7 +319,7 @@ def main(argv) -> int:
         if result_path:
             _write_json(result_path, result)
         print(
-            "[mesh_probe] %s：%d 段 -> %s"
+            "[meshkit.stage] %s：%d 段 -> %s"
             % (result["script_name"], len(result["stages"]), result["out_dir"])
         )
         return 0

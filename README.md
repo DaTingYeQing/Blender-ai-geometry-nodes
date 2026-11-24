@@ -50,10 +50,6 @@
 * There are still skills, but I've divided them into tiny domains — each AI only has to focus on one small piece.
 > The initial flow is not fully polished yet, but Solo mode is usable.
 
-> I've grown thoroughly tired of designing. I try to make every tool as straightforward as possible — nothing like weights, which are vague and need heavy testing. Everything is a fairly rigorous runtime design (not rigorous in how the code is written, but in the method of solving the problem).
-
-> But in the end there are still too many usable tools, which means I'd need a lot of testing before I can define a workflow. I think the team mode should be a good approach, but I may not be able to handle it. In the end the only thing I can do is converge the final set of tools, verify whether they're worth keeping, and then I'll stop updating. I've run out of good ideas. Unless I can figure out how to structure context — by what means to orchestrate and organize it so it stays at low occupancy (say 10–15%), which would keep the AI focused and undistracted; attention is a scarce resource. But organizing it costs a lot — a lot, a lot, a lot.
-
 # Tool and depend
 
 <details>
@@ -76,13 +72,17 @@
 
 ## Tool
 
-### mesh_probe
-* Used as a probe into the code underlying the procedural mesh, it extracts the mesh state at various points in the geometry flow.
+### mesh_view
+* Opens an interactive preview window (pyvista sliders generated from the script's `SCHEMA`); dragging a parameter rebuilds the whole chain. The window runs in its own process and stays open until you close it.
 
 ### blender_fit
 
 *A tool that translates code written in some special notation into node graphs; given a specified output and a given search range, let Optuna fit it and see whether a result can be found.
-> Not certain, but at least it's some progress.
+>~~not certain, but at least it's some progress.~~
+
+> That seems feasible for a scalar, but unlikely for a field.
+
+> A field seems to be a kind of virtual point cloud—vertices. You process it with a formula, then assign the point cloud to the geometry, which changes the shape of the current geometry. I had always assumed that fields were built into the input socket of every geometry node.
 
 ### covtrace.ts
 

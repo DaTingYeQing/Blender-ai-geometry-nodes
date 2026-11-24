@@ -1,4 +1,19 @@
 {
+  "weights": {
+    "shape": 2.0,
+    "volume": 1.0,
+    "dimension": 1.0,
+    "topology": 1.0,
+    "quality": 0.5,
+    "position": 0.5,
+    "scale": 0.3
+  },
+  "script": "C:/path/to/gen.py",
+  "stage": 3,
+  "params": {"n": 24, "eps": 0.003},
+  "min_diff": 5,
+  "skip": [],
+
   "blend": "C:/path/to/scene.blend",
   "object": "Terrain",
   "modifier": "Geometry Nodes",
@@ -13,21 +28,13 @@
     {"node": "Module1", "identifier": "Seed", "value": 42}
   ],
 
-  "outputs": ["volume", "area", "is_watertight"],
-
-  "loss": {
-    "targets": {"volume": 3.0, "area": 12.0},
-    "weights": {"volume": 1.0, "area": 0.5}
-  },
-
   "budget": {
     "max_trials": 200,
     "timeout_s": 1800,
-    "target_loss": 0.01,
+    "target_loss": 0.05,
     "seed": 42
   },
 
-  "storage": "journal://C:/Users/zjn13/Desktop/github仓库/Blender-ai-geometry-nodes/workspace/fit.log",
   "report": "fit_report.json",
   "study_name": "fit"
 }

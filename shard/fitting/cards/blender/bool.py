@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """bool 卡片：两个类别。"""
 
-from ..contract import DIST_CATEGORICAL, Component
-from ..errors import ConfigError
+from ...contract import DIST_CATEGORICAL, Component
+from ...errors import ConfigError
 from ._common import pack, param_with
 
 KIND = "bool"
