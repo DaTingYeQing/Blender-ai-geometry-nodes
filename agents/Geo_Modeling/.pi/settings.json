@@ -7,7 +7,5 @@
     "edit",
     "write"
   ],
-  "extensions": [
-    "../../../shard/extensions/call.ts"
-  ]
+  "extensions": []
 }

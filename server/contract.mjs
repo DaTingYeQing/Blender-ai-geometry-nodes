@@ -9,7 +9,7 @@
  * 换 UI 只允许消费这张表，不允许改表。
  */
 
-export const API_VERSION = 2;
+export const API_VERSION = 4;
 
 export const ENDPOINTS = Object.freeze([
   {
@@ -48,23 +48,50 @@ export const ENDPOINTS = Object.freeze([
     summary: "列出已注册 Agent",
   },
   {
-    id: "agent-create",
-    method: "POST",
-    path: "/api/agents",
-    request: {
-      name: { type: "string", required: true },
-      projectPath: { type: "string", required: true },
-    },
-    response: { agent: "Agent" },
-    summary: "注册项目级 Agent",
-  },
-  {
     id: "agent-delete",
     method: "DELETE",
     pattern: "^\\/api\\/agents\\/([^/]+)$",
     template: "/api/agents/:id",
     response: { ok: "true" },
     summary: "删除 Agent 注册记录",
+  },
+  {
+    id: "tools",
+    method: "GET",
+    path: "/api/tools",
+    response: { tools: "string[]", profiles: "object" },
+    summary: "工具目录（工具名 + 组合）",
+  },
+  {
+    id: "agent-config-create",
+    method: "POST",
+    path: "/api/agents/create",
+    request: {
+      name: { type: "string", required: true },
+      tools: { type: "array" },
+    },
+    response: { agent: "Agent", config: "AgentConfig" },
+    summary: "新建 Agent 项目目录并写入初始配置",
+  },
+  {
+    id: "agent-config-get",
+    method: "GET",
+    pattern: "^\\/api\\/agents\\/([^/]+)\\/config$",
+    template: "/api/agents/:id/config",
+    response: { agent: "Agent", config: "AgentConfig", derived: "boolean" },
+    summary: "读取 Agent 的 .pi/agent.json（缺失时按当前 settings 推导）",
+  },
+  {
+    id: "agent-config-save",
+    method: "PUT",
+    pattern: "^\\/api\\/agents\\/([^/]+)\\/config$",
+    template: "/api/agents/:id/config",
+    request: {
+      name: { type: "string", required: true },
+      tools: { type: "array", required: true },
+    },
+    response: { agent: "Agent", config: "AgentConfig" },
+    summary: "保存 Agent 配置并重编译 settings / pi-flow",
   },
   {
     id: "agent-session",
@@ -141,7 +168,7 @@ export const ENDPOINTS = Object.freeze([
     pattern: "^\\/api\\/flows\\/([^/]+)$",
     template: "/api/flows/:id",
     response: { ok: "true" },
-    summary: "删除流程及其工作区",
+    summary: "删除流程（工作区属于 Agent，不受影响）",
   },
   {
     id: "run",
@@ -179,12 +206,20 @@ export const ENDPOINTS = Object.freeze([
     summary: "中止运行",
   },
   {
+    id: "files",
+    method: "GET",
+    pattern: "^\\/api\\/agents\\/([^/]+)\\/files$",
+    template: "/api/agents/:id/files",
+    response: { files: "FileEntry[]" },
+    summary: "列出某个 Agent 工作区里的文件",
+  },
+  {
     id: "file",
     method: "GET",
     path: "/api/file",
     query: { path: { type: "string", required: true } },
     response: { content: "string", size: "number" },
-    summary: "读取流程产物文件（受 Agent 目录约束）",
+    summary: "读取工作区文件（受 Agent 目录约束）",
   },
 ]);
 

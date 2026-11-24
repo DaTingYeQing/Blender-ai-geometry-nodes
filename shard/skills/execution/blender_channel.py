@@ -426,36 +426,23 @@ _STATE_NAME = "workflow_state.json"
 
 
 def _flow_state_dirs():
-    """当前 run 里按优先级查找 state 的目录。"""
+    """当前工作区里按优先级查找 state 的目录。"""
     return [
         (os.environ.get("PI_FLOW_INPUT_DIR") or "").strip(),
         (os.environ.get("PI_FLOW_OUTPUT_DIR") or "").strip(),
-        (os.environ.get("PI_FLOW_RUN_DIR") or "").strip(),
     ]
 
 
 def _flow_root():
-    """<project>/.pi/flow/<flowId>/runs/<runId> → <project>/.pi/flow/<flowId>。"""
-    run_dir = (os.environ.get("PI_FLOW_RUN_DIR") or "").strip()
-    if not run_dir:
-        return ""
-    return os.path.dirname(os.path.dirname(os.path.abspath(run_dir)))
+    """当前工作区根：Agent 的项目目录（文件直接在这里读写）。"""
+    workspace = (os.environ.get("PI_FLOW_WORKSPACE") or os.environ.get("PI_FLOW_OUTPUT_DIR") or "").strip()
+    return os.path.abspath(workspace) if workspace else ""
 
 
 def _flow_roots():
-    """当前 flow 下所有 agent 项目的 flow 目录（当前项目 + PI_FLOW_FLOW_DIRS）。"""
-    roots = []
+    """当前工作区（文件直接在这里读写，不再有 flow 目录）。"""
     root = _flow_root()
-    if root:
-        roots.append(root)
-    for item in (os.environ.get("PI_FLOW_FLOW_DIRS") or "").split(os.pathsep):
-        item = item.strip()
-        if not item:
-            continue
-        item = os.path.abspath(item)
-        if item not in roots:
-            roots.append(item)
-    return roots
+    return [root] if root else []
 
 
 def find_state_file(state_path=None, cwd=None):
@@ -1066,13 +1053,8 @@ def _do_check() -> int:
     except Exception as exc:
         print("Blender 版本: 获取失败（%s）" % exc)
 
-    run_dir = (os.environ.get("PI_FLOW_RUN_DIR") or "").strip()
-    print("flow run    : %s" % (run_dir or "(不在 Pi Flow run 中)"))
-    roots = _flow_roots()
-    if roots:
-        print("flow dirs   : %s" % os.pathsep.join(roots))
-    else:
-        print("工作区      : %s" % (_ENVCARD_WORKSPACE or "(拿不到)"))
+    workspace = (os.environ.get("PI_FLOW_WORKSPACE") or os.environ.get("PI_FLOW_OUTPUT_DIR") or "").strip()
+    print("工作区      : %s" % (workspace or "(拿不到)"))
     sp = find_state_file()
     if sp:
         print("workflow_state.json : %s" % sp)

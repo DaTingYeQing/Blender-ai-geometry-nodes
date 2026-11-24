@@ -5,10 +5,9 @@ export default {
   version: 1,
 
   provides: {
-    prepare: "function",
-    collect: "function",
+    listFiles: "function",
+    moveInputs: "function",
     read: "function",
-    removeWorkspaces: "function",
   },
 
   requires: {

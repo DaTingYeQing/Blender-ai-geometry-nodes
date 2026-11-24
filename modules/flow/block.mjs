@@ -15,14 +15,10 @@ export default {
 
   requires: {
     store: ["ApiError", "db", "now", "rid", "saveState"],
-    artifacts: ["removeWorkspaces"],
   },
 
   create({ api }) {
-    const module = createFlowServer({
-      store: api.store,
-      onDelete: (flowId) => api.artifacts.removeWorkspaces(flowId),
-    });
+    const module = createFlowServer({ store: api.store });
     return { api: module.api, routes: module.routes, meta: { recovered: module.recovered } };
   },
 };

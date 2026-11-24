@@ -1,7 +1,7 @@
 /**
  * blender_build 扩展 —— 建/删/设/连/断节点 + 组边界接口
  *
- * 薄前端：收参数 → payload 写工作区 → 起 skills/execution/node_build.py → 原样带回。
+ * 薄前端：收参数 → payload 写工作区 → 起 skills/execution/build/node_build.py → 原样带回。
  * 拼批次、定落盘、找工作档、经 blender_channel 进 Blender、读回业务结果、拼摘要，
  * 全在后端 node_build.py 里；本文件不碰 blender.exe，也不自己读工作档。
  * 地址一律现读上一级的 py_environment.json；本文件不含任何绝对路径，可直接进 Git。
@@ -14,7 +14,7 @@ import { Type } from "@earendil-works/pi-ai";
 import { defineTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { envFor, pyEnv, pythonOf, workspaceOf, SKILLS } from "../lib/env.ts";
 
-const NODE_BUILD = path.join(SKILLS, "execution", "node_build.py");
+const NODE_BUILD = path.join(SKILLS, "execution", "build", "node_build.py");
 
 function errRes(text: string, extra?: Record<string, unknown>) {
 	return { content: [{ type: "text", text }], details: { ok: false, ...extra }, isError: true };
@@ -192,6 +192,10 @@ const ACTIONS: Record<string, (p: Record<string, unknown>) => Batch | { err: str
 		const ifs = needObjs(p.ifs, 'action=interface 需要 ifs：[{"direction":"input/output","name":接口名,"socket_type":接口类型}]');
 		return Array.isArray(ifs) ? { interface: ifs } : ifs;
 	},
+	bind: (p) => {
+		const objs = needList(p.objects, 'action=bind 需要 objects（物体 name 数组），如 ["Cube"]');
+		return Array.isArray(objs) ? { bind: objs.map((o) => ({ object: o })) } : objs;
+	},
 };
 
 function handleBuild(params: Record<string, unknown>, env: any) {
@@ -211,6 +215,8 @@ function handleBuild(params: Record<string, unknown>, env: any) {
 	const payload: Record<string, unknown> = {
 		...batch,
 		tree: group,
+		// bind 只挂已有组：组名写错要报错列名单，绝不能让后端自动新建一个空组
+		no_create: action === "bind",
 		out_dir: WORK, // 批次 / 结果 / 快照都落工作区
 		workdir: WORK, // 兼容旧参数；state 统一按 flow 查找
 	};
@@ -241,18 +247,19 @@ const blenderBuildTool = defineTool({
 	description:
 		"所有参数都按字段填。\n" +
 		"引用规则：节点一律用 name；同 idname 多个节点也用 name 区分。\n" +
-		"不确定接口先 node_find/node_full 查准再填。",
+		"不确定接口先 node_find/node_full 查准再填。\n" +
+		"bind 只挂已有节点组：物体名或组名写错不会自动新建，直接在报错里列出工程中可用的名字。",
 	parameters: Type.Object({
 		action: Type.Union([
 			Type.Literal("add"), Type.Literal("del"),
 			Type.Literal("link"), Type.Literal("unlink"),
 			Type.Literal("set"), Type.Literal("interface"),
-			Type.Literal("add_item"),
+			Type.Literal("add_item"), Type.Literal("bind"),
 		], {
-			description: "本次要做的操作。add=建节点 / del=删节点 / link=连线 / unlink=断线 / set=设值或改属性 / interface=建组边界接口 / add_item=给 zone 加携带项",
+			description: "本次要做的操作。add=建节点 / del=删节点 / link=连线 / unlink=断线 / set=设值或改属性 / interface=建组边界接口 / add_item=给 zone 加携带项 / bind=把物体挂到几何节点组",
 		}),
 		group: Type.String({
-			description: "必填。节点组名。组不存在时 add / interface 都会自动新建一个空组；add 建出的树没有 Group Input/Output，interface 建的树自带。",
+			description: "必填。节点组名。add / interface 组不存在时会自动新建；bind 不会（组名错会列出工程里的几何节点组）。",
 		}),
 		ids: Type.Optional(Type.Array(Type.String(), {
 			description: "action=add：要建的节点 idname",
@@ -310,6 +317,9 @@ const blenderBuildTool = defineTool({
 			item_name: Type.String({ description: "状态名（携带项的名字）" }),
 		}), {
 			description: "action=add_item：给 zone 输出节点加携带项，每条一个对象。",
+		})),
+		objects: Type.Optional(Type.Array(Type.String(), {
+			description: "action=bind：要挂到 group 上的物体 name 数组，如 [\"Cube\"]。",
 		})),
 	}),
 	async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

@@ -1,6 +1,6 @@
 # How These Tools Were Designed
 
->The AI model I run on is DeepSeek-Flash. It has no vision capability, which is why I haven't given the AI any real vision tools either.
+> The AI model I run on is DeepSeek-Flash. It has no vision capability, which is why I haven't given the AI any real vision tools either.
 
 ## 1. The Core Idea
 
@@ -16,11 +16,11 @@ These two things often conflict. A graphical interface that feels simple to a pe
 
 I considered MCP at first, but ultimately dropped it. A few reasons:
 
-| Concern | MCP | CLI running in the background |
-|---|---|---|
-| Weight | Heavier | Lightweight |
-| State management | Prone to reading stale values (depsgraph risk) | Fetched fresh on every call |
-| Cognitive load on the AI | Must understand a connection/context protocol | Just invoke one command |
+| Concern                  | MCP                                            | CLI running in the background |
+| ------------------------ | ---------------------------------------------- | ----------------------------- |
+| Weight                   | Heavier                                        | Lightweight                   |
+| State management         | Prone to reading stale values (depsgraph risk) | Fetched fresh on every call   |
+| Cognitive load on the AI | Must understand a connection/context protocol  | Just invoke one command       |
 
 The core worry was the **depsgraph**: if not handled properly, the AI can read **stale values** without ever realizing it. This kind of "silent error" is especially fatal for an AI — it won't question the data, it will just keep computing on top of the wrong value.
 
@@ -130,10 +130,10 @@ So the moment a field is involved, numeric mode can't read anything.
 
 That said, it **isn't necessarily a bad thing** — because a field still ends up **showing on the mesh**. Which led to this division of labor:
 
-| Mode | What it can read | What happens with a field |
-|---|---|---|
-| Numeric mode | Individual field values | As soon as a field is involved, the script tells the AI to switch to geometry mode for reading data |
-| Geometry mode | Information expressed as mesh changes | A field lands on the mesh eventually, so it can be read here |
+| Mode          | What it can read                      | What happens with a field                                                                           |
+| ------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Numeric mode  | Individual field values               | As soon as a field is involved, the script tells the AI to switch to geometry mode for reading data |
+| Geometry mode | Information expressed as mesh changes | A field lands on the mesh eventually, so it can be read here                                        |
 
 In other words: **a field can't be evaluated directly, but its effect always leaves a trace on the mesh.** If you can't read the field itself, read the result it produced.
 
@@ -169,6 +169,7 @@ The reason for deleting the frontend is simple: **I still had my eye on the AI's
 
 Since the AI can write code, I could **lean on Python packages** — the ones that handle meshes — and have the AI **export the mesh**, then **use algorithms from outside programs** to solve the "can't read everything" problem.
 
+
 In other words, rather than piling ever more complex fetching logic inside Blender, move the whole mesh out and hand it to a tool that is better at reading it. The stubborn problem of **incomplete data** went from "add another mode inside" to "swap tools outside."
 
 I **didn't delete `blender data` itself**, though — its **numeric mode is still usable**.
@@ -187,14 +188,14 @@ That's the **`bpy` tool**.
 
 It lets the AI **focus on the algorithm rather than the nodes** in the early stage. Instead of first figuring out "how should these nodes be wired," it clarifies the mathematical relationships first. This tool did give the AI a real boost as well.
 
-### `zone probe`: a semi-custom form for Simulation Zones (now deleted — 2026.10.7)
+### ~~`zone probe`: a semi-custom form for Simulation Zones (now deleted — 2026.10.7)~~
 
-Next came **`zone probe`**, a tool built to handle **Simulation Zones**.
+~~Next came `zone probe`, a tool built to handle Simulation Zones.~~
 
-Unlike the fully wrapped forms before it, this one leans **semi-custom**:
+~~Unlike the fully wrapped forms before it, this one leans semi-custom:~~
 
-- **How many frames to bake — the AI chooses**;
-- **What data to get — the AI writes it itself**.
+- ~~How many frames to bake — the AI chooses;~~
+- ~~What data to get — the AI writes it itself.~~
 
 ## 7. Back to the Starting Point
 
@@ -246,23 +247,30 @@ If you understand Geometry Nodes well, **you can perhaps abstract it into tasks 
 
 ## What Came Next
 
-* Later I wanted the AI to know how a node is actually implemented internally. I still felt that a knowledge base was too heavy a thing, and not something I could build on my own, so I chose to let the AI go read the code that actually runs behind a feature itself — and that's how the covtrace tool came about.
+- Later I wanted the AI to know how a node is actually implemented internally. I still felt that a knowledge base was too heavy a thing, and not something I could build on my own, so I chose to let the AI go read the code that actually runs behind a feature itself — and that's how the covtrace tool came about.
+
 > Blender's source code is instrumented, so it can detect which code paths actually run at runtime.
 
-* Recently I asked the AI to recommend a bunch of approaches: verysleep, AST, ctag, clangd (I can never remember whether it's clang or clangd — either way, it's not the compiler). I eventually got something built, but it all failed, because there is simply far too much code — it really can drown you. And if you don't give the AI a clear direction, it won't work efficiently. So the solution I came up with was to figure out how to filter things down (Blender contains a huge amount of code with no real business logic). That filtering isn't finished either; the current logic is this:
+- Recently I asked the AI to recommend a bunch of approaches: verysleep, AST, ctag, clangd (I can never remember whether it's clang or clangd — either way, it's not the compiler). I eventually got something built, but it all failed, because there is simply far too much code — it really can drown you. And if you don't give the AI a clear direction, it won't work efficiently. So the solution I came up with was to figure out how to filter things down (Blender contains a huge amount of code with no real business logic). That filtering isn't finished either; the current logic is this:
 
 > Suppose there are three nodes A-B-C. If the AI wants to know how node B is implemented internally, put A's geometry output on the group output, then put B's geometry output on the group output, and run it twice. Take all the resulting edges, subtract them from each other, and keep the overlapping part of the functions as the boundary — maybe, roughly, probably, that should be approximately right.
 
 > In fact, building this tool was the most vibe-coded of all my tools. With the others I could still intervene in the trade-offs and the intermediate logic, or ask the AI to explain the principles and the cost to me. But with compilation I had no way to intervene at all — I could only state the granularity of the result I wanted and watch the AI hammer away at it.
 
-* Then I turned all of this into a piece of software. I have been simplifying the configuration step by step, but it was still too much hassle; now you don't have to deal with any paths at all, and everything needed is integrated. At the same time the number of tools kept growing, so it seemed reasonable to switch to a node workflow where AI works alongside AI, sharing the load — and skills naturally disappeared.
+- Then I turned all of this into a piece of software. I have been simplifying the configuration step by step, but it was still too much hassle; now you don't have to deal with any paths at all, and everything needed is integrated. At the same time the number of tools kept growing, so it seemed reasonable to switch to a node workflow where AI works alongside AI, sharing the load — and skills naturally disappeared.
+
 > At first I didn't really like sub-agents, because that stuff is a black box within a black box, but now I've picked it back up. Still, the workflow has to be rigorously defined; node orchestration is at least controllable and can be defined by you.
 
-* I tightened up some of the weaker parts from before: the workflow, and the math skill I mentioned earlier. These things can now be quantified — though that only becomes possible with the nodes you orchestrate. I used to think I had quantified them, but throwing all the tools at the AI doesn't mean **quantification**.
+- I tightened up some of the weaker parts from before: the workflow, and the math skill I mentioned earlier. These things can now be quantified — though that only becomes possible with the nodes you orchestrate. I used to think I had quantified them, but throwing all the tools at the AI doesn't mean **quantification**.
+- The next updates are about the node orchestration flow: first make Team mode usable (I'm not even sure whether it will work), then tighten up the covtrace tool by adding a filtering mechanism. And once all of that converges, a memory plugin will be needed to help the AI — not to remember more, but to compress, to fight for its **attention**, and to see whether that makes it stronger. That's quite hard too; as things stand, it's an open problem for the whole AI industry.
 
-* The next updates are about the node orchestration flow: first make Team mode usable (I'm not even sure whether it will work), then tighten up the covtrace tool by adding a filtering mechanism. And once all of that converges, a memory plugin will be needed to help the AI — not to remember more, but to compress, to fight for its **attention**, and to see whether that makes it stronger. That's quite hard too; as things stand, it's an open problem for the whole AI industry.
+- I tried using Optuna to turn code into a node graph. The idea is mainly to use the mesh generated by the code as the data source: extract mesh data from it, describe the mesh with a chosen set of fields, have the AI build the node graph, expose some of the graph's inputs, and let Optuna search for the best input parameters. Then see whether it can fit the same result. If it can, that might prove this skeleton is viable.
+- If it works, it could greatly cut down the AI's meaningless trial and error, which would optimize context usage and keep its attention from scattering. Or at least, can we finally say the node graph has been quantified? I'm not sure.
+
+> This is an experiment. I haven't fully implemented it — or at least I've found a workable approach. I've been looking for a way to translate code directly into a node graph, and now there finally seems to be a path forward.
 
 ## 9. Finally
 
 **There were many, many other ideas besides these, but eventually I always ran into the limits of my own ability. So I consider the project incomplete: a work in progress.**
-> This project doesn't seem to have much point — it's not really worth doing. What is meaningful to me is using whatever ability I have to see AI's ceiling clearly and get hands-on with AI 
+
+> This project doesn't seem to have much point — it's not really worth doing. What is meaningful to me is using whatever ability I have to see AI's ceiling clearly and get hands-on with AI

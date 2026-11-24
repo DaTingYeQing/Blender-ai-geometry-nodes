@@ -23,6 +23,8 @@
 * Only works with **Blender 4.5.0** 
 >Different Blender versions may add or update geometry nodes, so some node information changes, which mainly affects the usability of these skills.
 
+* It is built on top of the Pi Agent.
+
 * There are still some design details that aren't handled well — not bugs, exactly, but small, fiddly things that weren't accounted for one by one, because there are simply too many cases involved. Some of these details you won't discover — you have no way of knowing the AI would do that — until you've run it a good many times.
 
 
@@ -45,8 +47,12 @@
 
 ### Team
 
-* There are no skills anymore; the skills are decided by the node flow you orchestrate yourself, because there are too many tools and I think it's hard for the AI to remember them all.
+* There are still skills, but I've divided them into tiny domains — each AI only has to focus on one small piece.
 > The initial flow is not fully polished yet, but Solo mode is usable.
+
+> I've grown thoroughly tired of designing. I try to make every tool as straightforward as possible — nothing like weights, which are vague and need heavy testing. Everything is a fairly rigorous runtime design (not rigorous in how the code is written, but in the method of solving the problem).
+
+> But in the end there are still too many usable tools, which means I'd need a lot of testing before I can define a workflow. I think the team mode should be a good approach, but I may not be able to handle it. In the end the only thing I can do is converge the final set of tools, verify whether they're worth keeping, and then I'll stop updating. I've run out of good ideas. Unless I can figure out how to structure context — by what means to orchestrate and organize it so it stays at low occupancy (say 10–15%), which would keep the AI focused and undistracted; attention is a scarce resource. But organizing it costs a lot — a lot, a lot, a lot.
 
 # Tool and depend
 
@@ -55,36 +61,39 @@
 
 * These are nothing more than thin wrappers around the tool calls; all the real backend logic lives in the Python files.
 
-## Skills
+## Depend
+### Skills
 
 - **math** — used for early-stage math verification in Python; some packages need to be installed (see [Python environment](#python-environment))
 - **node_information** — the node information tool mentioned earlier; a database containing detailed info about geometry nodes
 - **execution** — a tool for building and testing
 
-## Python environment
-Python **3.13.14**
-
-| Package   | Version |
-|-----------|---------|
-| pyvista   | 0.49.0  |
-| trimesh   | 5.1.0   |
-| numpy     | 2.5.3   |
-| scipy     | 1.18.1  |
-| manifold3d| 3.5.3   |
-
-## blender
+### blender
 * [Blender-ai-geometry-nodes-trace](https://github.com/DaTingYeQing/Blender-ai-geometry-nodes-trace) — **experimental; it is already bundled and downloaded with the installer, but not ready yet**, **and it is only available in Team mode**
 
-## covtrace.ts
+### Python environment
+* The dependencies are bundled into the Python interpreter that ships with Blender 4.5.
+
+## Tool
+
+### mesh_probe
+* Used as a probe into the code underlying the procedural mesh, it extracts the mesh state at various points in the geometry flow.
+
+### blender_fit
+
+*A tool that translates code written in some special notation into node graphs; given a specified output and a given search range, let Optuna fit it and see whether a result can be found.
+> Not certain, but at least it's some progress.
+
+### covtrace.ts
 
 * A tool that lets the AI understand how a node is implemented internally.
 >Maybe?
 
-## blender_math.ts
+### blender_math.ts
 
 * Lets the AI build math nodes quickly. The AI only needs to enter a math expression in this front end, and the background script automatically verifies it (`eval`) and builds the node group (`build`).
 
-## blender_build.ts
+### blender_build.ts
 
 * Lets the AI operate on the node tree quickly (`add`, `link`, `unlink`, `del`, `set`, `interface`, `add item`). The AI just needs to write small entries in the given format to perform the operations.
 
@@ -92,28 +101,24 @@ Python **3.13.14**
 
 * This is the AI's eyes. It lets the AI quickly see which nodes exist in the node tree (**rough mode**), and which socket on a specific node is connected to which other node's socket (**detailed mode**).
 
-## bpy.ts
+### bpy.ts
 
 * This is the bridge to the external Python. The AI uses it to export models from inside Blender directly to Python, and with the help of the external packages () it can read the data it wants.
 
-## node_query.ts
+### node_query.ts
 
 * Gives the AI static and dynamic information about nodes. From a vague memory, the AI can first find a node's idname (**find mode**), then enter the idname to get the full details of that node (**node full mode**).
 
-## wf_plan.ts
+### wf_plan.ts
 
 * A modular task list. The AI calls this tool after completing the early-stage testing.
 
 
-## blender.ts
+### blender.ts
 
 * A fixed channel for sending scripts into Blender. When the tools above cannot help the AI, it will write code directly and send it to Blender to get what it wants.
 
-## py_environment.josn
-
-* The environment configuration file.
-
-## hook_skill.ts
+### hook_skill.ts
 
 * Updated the skill prompts and added a new hook skill that automatically tells the AI which skills to load during wf_plan.
 

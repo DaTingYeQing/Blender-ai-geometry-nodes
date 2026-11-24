@@ -8,11 +8,11 @@
     "write"
   ],
   "extensions": [
-    "../../../shard/extensions/bpy.ts",
+    "../../../shard/extensions/py.ts",
     "../../../shard/extensions/blender.ts",
     "../../../shard/extensions/blender_data.ts",
     "../../../shard/extensions/blender_screen.ts",
-    "../../../shard/extensions/node_query.ts",
-    "../../../shard/extensions/call.ts"
+    "../../../shard/extensions/bpy.ts",
+    "../../../shard/extensions/node_query.ts"
   ]
 }

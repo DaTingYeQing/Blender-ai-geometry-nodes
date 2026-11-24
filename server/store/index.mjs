@@ -2,11 +2,9 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
-import { fileURLToPath } from "node:url";
+import { ApiError, ROOT_DIR, APP_DIR, SHARED_DIR, isInside } from "../common.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export const ROOT_DIR = path.resolve(__dirname, "../..");
+export { ApiError, ROOT_DIR, APP_DIR, SHARED_DIR, isInside };
 
 /** 分层版本清单：数据层只关心 dataSchemaVersion，其余版本由 setup 对账。 */
 function readVersions() {
@@ -21,8 +19,6 @@ function readVersions() {
 }
 
 export const DATA_SCHEMA_VERSION = String(readVersions().dataSchemaVersion || "");
-export const APP_DIR = path.join(ROOT_DIR, "app");
-export const SHARED_DIR = path.join(ROOT_DIR, "shared");
 
 // 必须在调用时读取：main.mjs 会在启动阶段才设置 PI_FLOW_DATA_DIR。
 // 模块加载时就算好会把路径锁在 app.asar 里，打包后 mkdir 直接 ENOTDIR。
@@ -39,20 +35,8 @@ export const rid = (prefix) => `${prefix}-${crypto.randomBytes(4).toString("hex"
 
 export const db = { state: null };
 
-export class ApiError extends Error {
-  constructor(status, message) {
-    super(message);
-    this.status = status;
-  }
-}
-
 export async function ensureDir(dir) {
   await fsp.mkdir(dir, { recursive: true });
-}
-
-export function isInside(root, target) {
-  const rel = path.relative(root, target);
-  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
 function emptyState() {

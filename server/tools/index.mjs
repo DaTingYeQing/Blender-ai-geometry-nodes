@@ -17,5 +17,7 @@ export function createToolGateway({ shardDir = defaultShardDir(), adapter } = {}
     version: TOOL_CONTRACT_VERSION,
     resolve: (projectPath) => impl.resolve(projectPath),
     catalog: () => impl.catalog(),
+    readAgentConfig: (projectPath) => impl.readAgentConfig(projectPath),
+    writeAgentConfig: (projectPath, config) => impl.writeAgentConfig(projectPath, config),
   });
 }

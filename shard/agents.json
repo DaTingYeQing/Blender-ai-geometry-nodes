@@ -1,5 +1,5 @@
 {
-  "_comment": "sync.mjs 的唯一输入。settings.json（provider/model/tools/extensions）由 sync 生成；SKILL.md 文本由人手动放到项目 .pi/skills/，sync 不碰。projects[].path 相对本目录（shard/），不写则按 shard/ 解析；isolate=true 会生成 .pi/pi-flow.json，Pi Flow 启动该 agent 时用 --no-extensions 并只显式加载项目扩展。改完跑 node sync.mjs sync [项目]。",
+  "_comment": "sync.mjs 的工具目录与默认值。每个 agent 的实际配置在 <项目>/.pi/agent.json（唯一配置源）；缺失时 sync 会按本清单的 profile + settings 生成一次。settings.json / pi-flow.json 均由 sync 生成，不要手改。SKILL.md 由人手动放到项目 .pi/skills/，sync 不碰。projects[].path 相对本目录（shard/）。改完跑 node sync.mjs sync [项目]。",
 
   "defaults": {
     "defaultProvider": "deepseek",
@@ -9,30 +9,31 @@
 
   "tools": {
     "bpy": "extensions/bpy.ts",
+    "py": "extensions/py.ts",
     "blender": "extensions/blender.ts",
     "blender_build": "extensions/blender_build.ts",
     "blender_data": "extensions/blender_data.ts",
+    "blender_fit": "extensions/blender_fit.ts",
     "blender_math": "extensions/blender_math.ts",
     "blender_screen": "extensions/blender_screen.ts",
     "node_query": "extensions/node_query.ts",
+    "mesh_probe": "extensions/mesh_probe.ts",
     "covtrace": "extensions/covtrace.ts",
     "wf_plan": "extensions/wf_plan.ts",
-    "hook_skill": "extensions/hook_skill.ts",
-    "call": "extensions/call.ts"
+    "hook_skill": "extensions/hook_skill.ts"
   },
 
   "profiles": {
     "full": [
-      "bpy", "blender", "blender_build", "blender_data", "blender_math",
-      "blender_screen", "node_query", "covtrace", "wf_plan", "hook_skill","call"
+      "bpy", "py", "blender", "blender_build", "blender_data", "blender_fit", "blender_math",
+      "blender_screen", "node_query", "mesh_probe", "covtrace", "wf_plan", "hook_skill"
     ],
-    "scout": ["bpy", "blender", "blender_data", "blender_screen", "node_query","call"],
-    "execute": ["blender", "call","blender_build", "blender_math", "blender_screen", "node_query"],
-    "covtrace": ["blender", "blender_screen", "call", "covtrace", "node_query"],
-    "modeling": ["call"],
-    "translate": ["call", "node_query", "blender", "wf_plan"],
-    "Single": [ "bpy", "blender", "blender_build", "blender_data", "blender_math",
-      "blender_screen", "node_query", "wf_plan", "hook_skill"],
+    "scout": ["bpy", "blender", "blender_data", "blender_screen", "node_query"],
+    "execute": ["blender", "blender_build", "blender_math", "blender_screen", "node_query"],
+    "covtrace": ["blender", "blender_screen", "covtrace", "node_query"],
+    "modeling": [],
+    "translate": ["node_query", "blender_build", "wf_plan", "mesh_probe", "py", "blender_fit"],
+    "Single": [ "bpy", "blender", "blender_build",  "blender_math","blender_screen", "node_query", "wf_plan", "hook_skill"],
     "none": []
   },
 

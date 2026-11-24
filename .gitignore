@@ -17,3 +17,5 @@ resources/bundles/*
 !resources/bundles/wheels-constraints.txt
 icon/
 experiments
+tests/
+docs/

@@ -1,5 +1,3 @@
-import fsp from "node:fs/promises";
-import path from "node:path";
 import { t } from "../../../shared/messages.mjs";
 
 const MAX_LOGS = 400;
@@ -19,20 +17,20 @@ function makeLogger(run) {
   };
 }
 
-function buildPrompt({ task, handoffEnabled, inputDir }) {
+function buildPrompt({ task, handoffEnabled, workspace, files = [] }) {
   if (handoffEnabled === false) return task;
+  const moved = files.length
+    ? `\n\n上游移入的文件：\n${files.map((file) => `- ${file.name}`).join("\n")}`
+    : "";
   return `${task}
 
-上游产物目录（需要时从这里读取）：
-${inputDir}`;
+工作区目录（直接在这里读写文件）：
+${workspace}${moved}`;
 }
 
-export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools }) {
+export function createRuntimeServer({ store, agents, artifacts, pi, tools }) {
   if (!tools || typeof tools.resolve !== "function") {
     throw new Error("runtime 需要工具网关（tools.resolve）");
-  }
-  if (!flow || typeof flow.get !== "function") {
-    throw new Error("runtime 需要流程模块（flow.get）");
   }
   const { ApiError, db, now, rid, saveState } = store;
   const liveRuns = new Map();
@@ -99,17 +97,7 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
   }
   if (pruneRuns() > 0) recovered = true;
 
-  function flowDirs(flowId) {
-    const current = flow.get(flowId);
-    if (!current) return [];
-    const dirs = new Set();
-    for (const item of current.nodes || []) {
-      const nodeAgent = agents.get(item.agentId);
-      if (!nodeAgent?.projectPath) continue;
-      dirs.add(path.join(nodeAgent.projectPath, ".pi", "flow", String(flowId)));
-    }
-    return [...dirs];
-  }
+  /* 文件直接在各自 Agent 的工作区里移动，不再有流程目录。 */
 
   function runningRun(flowId, nodeId) {
     return (
@@ -119,48 +107,19 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
     );
   }
 
-  /* runId 在整个 state 里必须唯一：runs、liveRuns、转录都按它索引。
-   * 所以序号全局递增，并在第一次分配时就"预订"下来 —— 两个节点并发启动
-   * 不会读到同一个最大值（run-001、run-002… 只保证唯一，不再按流程重排）。 */
+  /* runId 只用于内存里的轮询 / 中止索引，不再对应磁盘目录。
+   * 序号在内存里同步递增（并发启动不会拿到同一个），首次使用时从已有记录接上。 */
   let runSeq = null;
-  let runSeqInit = null;
-
-  async function scanRunSeq() {
-    let max = 0;
-    const dirs = [];
-    for (const agent of agents.list()) {
-      const root = path.join(agent.projectPath, ".pi", "flow");
-      try {
-        for (const name of await fsp.readdir(root)) dirs.push(path.join(root, name));
-      } catch {
-        // 还没有流程目录
-      }
-    }
-    for (const dir of dirs) {
-      try {
-        for (const name of await fsp.readdir(path.join(dir, "runs"))) {
-          const match = /^run-(\d+)$/.exec(name);
-          if (match) max = Math.max(max, Number(match[1]));
-        }
-      } catch {
-        // 该流程还没跑过
-      }
-    }
-    for (const run of Object.values(db.state.runs)) {
-      const match = /^run-(\d+)$/.exec(run.id);
-      if (match) max = Math.max(max, Number(match[1]));
-    }
-    return max;
-  }
-
-  async function reserveRunSeq() {
+  function nextRunId() {
     if (runSeq === null) {
-      const scanned = await (runSeqInit ??= scanRunSeq());
-      // 等待期间可能有另一个调用先完成初始化，以它为准。
-      if (runSeq === null) runSeq = scanned;
+      runSeq = 0;
+      for (const id of Object.keys(db.state.runs)) {
+        const match = /^run-(\d+)$/.exec(id);
+        if (match) runSeq = Math.max(runSeq, Number(match[1]));
+      }
     }
     runSeq += 1;
-    return runSeq;
+    return `run-${String(runSeq).padStart(3, "0")}`;
   }
 
   /** 只清理已结束的旧 run；正在运行的和最新记录保留。返回删除数量。 */
@@ -182,33 +141,7 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
     return removed;
   }
 
-  async function writeRunRecord(agent, runDir, run) {
-    try {
-      await fsp.writeFile(
-        path.join(runDir, "run.json"),
-        JSON.stringify(
-          {
-            id: run.id,
-            node: run.nodeTitle,
-            agent: agent.name,
-            projectPath: agent.projectPath,
-            sessionId: run.sessionId,
-            sessionFile: run.sessionFile,
-            inputs: run.inputs,
-            artifacts: run.artifacts,
-            startedAt: run.startedAt,
-            finishedAt: run.finishedAt,
-            status: run.status,
-            error: run.error,
-          },
-          null,
-          2,
-        ),
-      );
-    } catch {
-      // 记录失败不影响 run 本身。
-    }
-  }
+  /* 运行记录只留在内存（state.json）里供轮询 / 恢复使用，不再写 run.json。 */
 
   async function start({ node, flowId, inputFiles = [] }) {
     if (!node?.agentId) throw new ApiError(400, t("节点缺少 agentId"));
@@ -221,10 +154,9 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
     if (!agent) throw new ApiError(404, t("Agent 不存在"));
     if (runningRun(flowId, node.id)) throw new ApiError(409, t("节点正在运行"));
 
-    const seq = await reserveRunSeq();
-    const runId = `run-${String(seq).padStart(3, "0")}`;
-    const prepared = await artifacts.prepare({ agent, flowId, runId, inputFiles });
-    const { runDir, inputDir, outDir, inputs } = prepared;
+    const runId = nextRunId();
+    /* 连线上选中的文件：从上游工作区移动到本节点的工作区（移动，不复制）。 */
+    const inputs = await artifacts.moveInputs({ agent, files: inputFiles });
     if (runningRun(flowId, node.id)) throw new ApiError(409, t("节点正在运行"));
     const session = agents.beginSession(agent.id, node);
 
@@ -262,10 +194,15 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
         mode: session.reused ? t("复用 {id}", { id: session.piSessionId }) : t("新建"),
       }),
     );
-    log(t("输入 {n} 个文件 → 输出到 {dir}", { n: inputs.length, dir: outDir }));
+    log(t("移入 {n} 个上游文件", { n: inputs.length }));
     await saveState();
 
-    const prompt = buildPrompt({ task, handoffEnabled: node.handoffEnabled !== false, inputDir });
+    const prompt = buildPrompt({
+      task,
+      handoffEnabled: node.handoffEnabled !== false,
+      workspace: agent.projectPath,
+      files: inputs,
+    });
     const resources = tools.resolve(agent.projectPath);
     if (resources.noExtensions) {
       log(t("扩展隔离：--no-extensions，只加载 {n} 个项目扩展", { n: resources.extensions.length }));
@@ -278,11 +215,10 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
       extensions: resources.extensions,
       env: {
         PI_FLOW_FLOW_ID: String(flowId),
-        PI_FLOW_RUN_ID: runId,
-        PI_FLOW_RUN_DIR: runDir,
-        PI_FLOW_INPUT_DIR: inputDir,
-        PI_FLOW_OUTPUT_DIR: outDir,
-        PI_FLOW_FLOW_DIRS: flowDirs(flowId).join(path.delimiter),
+        /* 没有 run 目录了：agent 直接在自己的工作区里读写。 */
+        PI_FLOW_WORKSPACE: agent.projectPath,
+        PI_FLOW_INPUT_DIR: agent.projectPath,
+        PI_FLOW_OUTPUT_DIR: agent.projectPath,
       },
       timeoutMs: Number(process.env.PI_RUN_TIMEOUT_MS || 15 * 60_000),
       onLog: log,
@@ -298,19 +234,18 @@ export function createRuntimeServer({ store, agents, artifacts, pi, flow, tools 
         if (result.text?.trim()) {
           log(t("回复：{text}", { text: result.text.trim().slice(0, 500) }));
         }
-        run.artifacts = await artifacts.collect(outDir);
+        /* 产物 = 这个 Agent 工作区里现有的文件，不再扫描 output 目录。 */
+        run.artifacts = await artifacts.listFiles({ agentId: agent.id });
         run.status = "done";
         run.finishedAt = now();
         agents.finishSession(agent.id, session.internalId, run.artifacts.length);
-        log(t("完成，收集到 {n} 个产物", { n: run.artifacts.length }));
-        await writeRunRecord(agent, runDir, run);
+        log(t("完成，工作区现有 {n} 个文件", { n: run.artifacts.length }));
       })
-      .catch(async (error) => {
+      .catch((error) => {
         run.status = "error";
         run.error = error.message;
         run.finishedAt = now();
         log(t("失败：{message}", { message: error.message }));
-        await writeRunRecord(agent, runDir, run);
       })
       .finally(async () => {
         liveRuns.delete(runId);

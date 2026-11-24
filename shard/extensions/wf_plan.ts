@@ -133,12 +133,11 @@ const wfPlanTool = defineTool({
 			};
 		}
 
-		// 落盘 workflow_state.json(计划+状态合一+唯一工作档路径)，固定落本次 run 的 output
+		// 落盘 workflow_state.json（计划 + 状态 + 唯一工作档路径），直接写当前工作区
 		const state = {
 			project,
 			blend: blendPath, // 唯一工作档：所有构建/执行都固定读写此档
 			flowId: process.env.PI_FLOW_FLOW_ID ?? null,
-			runId: process.env.PI_FLOW_RUN_ID ?? null,
 			modules: modules.map((m, i) => ({ id: i + 1, name: m.name, idnames: m.idnames, status: "pending" })),
 			cur: 0,
 			phase: "build",

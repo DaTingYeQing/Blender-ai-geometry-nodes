@@ -7,6 +7,7 @@ export default {
   provides: {
     list: "function",
     get: "function",
+    rename: "function",
     create: "function",
     remove: "function",
     beginSession: "function",

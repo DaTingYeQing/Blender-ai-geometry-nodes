@@ -14,6 +14,15 @@ export function createAgentsServer({ store }) {
     return db.state.agents.find((agent) => agent.id === id) || null;
   }
 
+  function rename(id, name) {
+    const agent = get(id);
+    if (!agent) throw new ApiError(404, t("Agent 不存在"));
+    const next = String(name ?? "").trim();
+    if (!next) throw new ApiError(400, t("Agent 名称不能为空"));
+    agent.name = next;
+    return agent;
+  }
+
   function normalizePath(input) {
     const raw = String(input || "").trim();
     if (!raw) throw new ApiError(400, t("项目路径不能为空"));
@@ -145,6 +154,7 @@ export function createAgentsServer({ store }) {
   const api = {
     list,
     get,
+    rename,
     create,
     remove,
     beginSession,
@@ -161,15 +171,6 @@ export function createAgentsServer({ store }) {
         method: "GET",
         path: "/api/agents",
         handler: () => ({ agents: list() }),
-      },
-      {
-        method: "POST",
-        path: "/api/agents",
-        handler: async ({ body }) => {
-          const agent = await create(body);
-          await saveState();
-          return { agent };
-        },
       },
       {
         method: "GET",

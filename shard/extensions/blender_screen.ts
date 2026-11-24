@@ -1,7 +1,7 @@
 /**
  * blender_screen 扩展 —— 只读查节点树（接口 / 连线 / 节点清单）
  *
- * 薄前端：收参数 → payload 写工作区 → 起 skills/execution/screen.py → 原样带回。
+ * 薄前端：收参数 → payload 写工作区 → 起 skills/execution/build/screen.py → 原样带回。
  * 找档、进 Blender、快照渲染全在后端 screen.py 里；查询只读不存盘（save=False）。
  * 地址一律现读上一级的 py_environment.json；本文件不含任何绝对路径，可直接进 Git。
  */
@@ -13,7 +13,7 @@ import { Type } from "@earendil-works/pi-ai";
 import { defineTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { envFor, pyEnv, pythonOf, workspaceOf, SKILLS } from "../lib/env.ts";
 
-const SCREEN = path.join(SKILLS, "execution", "screen.py");
+const SCREEN = path.join(SKILLS, "execution", "build", "screen.py");
 
 function errRes(text: string, extra?: Record<string, unknown>) {
 	return { content: [{ type: "text", text }], details: { ok: false, ...extra }, isError: true };

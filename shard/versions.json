@@ -1,6 +1,7 @@
 {
-  "_comment": "分层版本：每一层语义变化时手动 +1。setup 启动时逐层对账，决定跳过 / 补件 / 重建 / 迁移。appVersion 由 Electron 传入，Blender 版本从内置压缩包名提取。",
+  "_comment": "分层版本：每一层语义变化时手动 +1。setup 启动时逐层对账，决定跳过 / 补件 / 重建 / 迁移。appVersion 由 Electron 传入，Blender 版本从内置压缩包名提取；同一版本号重新编译 Blender 时只改 blenderBuild。",
   "runtimeLayout": "1.0.0",
+  "blenderBuild": "2026-11-22",
   "covtraceVersion": "1.0.0",
   "configVersion": "1.0.0",
   "seedVersion": "1.0.0",

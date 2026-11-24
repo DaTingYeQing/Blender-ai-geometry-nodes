@@ -1,0 +1,21 @@
+{
+  "_comment": "该 Agent 的唯一配置源。.pi/settings.json 与 .pi/pi-flow.json 由 shard/sync.mjs 生成，不要手改。",
+  "version": 1,
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "profile": "translate",
+  "isolate": true,
+  "tools": [
+    "node_query",
+    "blender",
+    "blender_fit",
+    "mesh_probe",
+    "py"
+  ],
+  "builtinTools": [
+    "read",
+    "bash",
+    "edit",
+    "write"
+  ]
+}

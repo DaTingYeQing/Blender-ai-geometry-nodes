@@ -1,0 +1,54 @@
+/* ===== 启动门 =====
+ * 非 ready 状态覆盖全屏；业务根同时被标记 inert（见 startup-gate.js）。
+ */
+
+.app-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg-main);
+  color: var(--text);
+}
+
+.app-gate[hidden] {
+  display: none;
+}
+
+.app-gate-card {
+  width: min(420px, 100%);
+  padding: 28px 32px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-side);
+  box-shadow: 0 18px 60px rgb(0 0 0 / 45%);
+  text-align: center;
+}
+
+.app-gate-title {
+  margin: 0 0 8px;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+
+.app-gate-hint {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+
+.app-gate-detail {
+  margin: 14px 0 0;
+  color: var(--orange);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.app-gate-detail[hidden] {
+  display: none;
+}

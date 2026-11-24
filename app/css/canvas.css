@@ -22,12 +22,40 @@
 }
 .ws-canvas.dragging { cursor: grabbing; }
 
-/* 点阵：纯静态的固定间距点（24px），不随拖拽或缩放移动 */
-.canvas-dots {
+/* 点阵：三个槽位承载当前可见的分级层（世界间距 4 / 8 / 16 / 32 / 64 / 128px，
+   屏幕间距落在 0.75T~2T 的层按粗细依次占用槽位，T = 28px）。
+   层间是 2 倍关系，细层的点包含粗层的所有点，切换时旧点不会消失，
+   只是补进新点 / 去掉一半，所以任何缩放级别都有稳定的点阵。
+   位置按平移取模，点钉在世界坐标上，缩放时围绕锚点聚拢 / 散开。 */
+.canvas-dots,
+.canvas-dots::before,
+.canvas-dots::after {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background-image: radial-gradient(circle, #3a3a40 1.2px, transparent 1.3px);
-  background-size: 24px 24px;
+  background-repeat: repeat;
+}
+.canvas-dots::before,
+.canvas-dots::after { content: ''; }
+
+/* 槽位 1：主元素 */
+.canvas-dots {
+  background-size: var(--dot-size-0, 32px) var(--dot-size-0, 32px);
+  background-position: var(--dot-pos-0, 0 0);
+  opacity: var(--dot-opacity-0, 1);
+}
+/* 槽位 2 */
+.canvas-dots::before {
+  background-size: var(--dot-size-1, 0px) var(--dot-size-1, 0px);
+  background-position: var(--dot-pos-1, 0 0);
+  opacity: var(--dot-opacity-1, 0);
+}
+/* 槽位 3 */
+.canvas-dots::after {
+  background-size: var(--dot-size-2, 0px) var(--dot-size-2, 0px);
+  background-position: var(--dot-pos-2, 0 0);
+  opacity: var(--dot-opacity-2, 0);
 }
 
 /* 画布世界层：所有内容都在这层，平移缩放只改它的 transform */
@@ -36,6 +64,14 @@
   left: 0;
   top: 0;
   transform-origin: 0 0;
+}
+
+/* 新画布的场景根：世界坐标的定位原点（连线层与节点都绝对定位在它里面）。
+   不设宽高，避免撑出滚动区域。 */
+.canvas-scene {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 /* 连线层：显式大尺寸画布（20000×20000，世界原点在中心），任何内核都稳定渲染 */
@@ -210,7 +246,10 @@
  * 不走 CSS class —— 避免和入场动画 cardPop 抢同一个 transform 属性。 */
 
 /* 节点删除动画：缩小直至消失 */
-.team-card.removing {
+/* 退场：特异性故意比 .canvas-card.drop-in 高一级。
+ * 入场 cardPop 与退场 nodeOut 都占用 .team-card 的 animation，
+ * 入场规则写在后面；不提权的话刚拖出来的节点删除时不会播退场。 */
+.canvas-card.team-card.removing {
   pointer-events: none;
   animation: nodeOut 0.3s ease-in both;
   transform-origin: center;
@@ -231,7 +270,7 @@
   border-radius: 10px;
   background: rgba(255,255,255,0.06);
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   user-select: none;
 }
 
@@ -271,7 +310,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 700;
   color: #fff;
   pointer-events: none;

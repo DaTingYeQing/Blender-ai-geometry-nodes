@@ -14,9 +14,8 @@ export default {
   requires: {
     store: ["ApiError", "db", "now", "rid", "saveState"],
     agents: ["list", "get", "beginSession", "bindSession", "finishSession"],
-    artifacts: ["prepare", "collect"],
+    artifacts: ["listFiles", "moveInputs"],
     pi: ["start"],
-    flow: ["get"],
     tools: ["resolve"],
   },
 
@@ -26,7 +25,6 @@ export default {
       agents: api.agents,
       artifacts: api.artifacts,
       pi: api.pi,
-      flow: api.flow,
       tools: api.tools,
     });
     return { api: module.api, routes: module.routes, meta: { recovered: module.recovered } };

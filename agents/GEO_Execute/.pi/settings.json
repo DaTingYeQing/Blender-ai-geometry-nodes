@@ -9,10 +9,11 @@
   ],
   "extensions": [
     "../../../shard/extensions/blender.ts",
-    "../../../shard/extensions/call.ts",
     "../../../shard/extensions/blender_build.ts",
+    "../../../shard/extensions/blender_fit.ts",
     "../../../shard/extensions/blender_math.ts",
     "../../../shard/extensions/blender_screen.ts",
-    "../../../shard/extensions/node_query.ts"
+    "../../../shard/extensions/node_query.ts",
+    "../../../shard/extensions/mesh_probe.ts"
   ]
 }

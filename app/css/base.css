@@ -12,6 +12,17 @@
   --accent: #4e8cff;
   --orange: #e0663f;          /* 主题橙：取自立方体图标上的圆点 */
   --split-hover: var(--orange);
+
+  /* 字号阶梯：组件里的 font-size 一律引用这里，改一处即可全站缩放。
+   * 装饰性大字（28 / 44 / 48 / 64）仍写死，它们和具体图形尺寸绑定。 */
+  --fs-2xs: 12px;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 15px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 21px;
+  --fs-display: 28px;
 }
 
 html, body {
@@ -20,39 +31,24 @@ html, body {
   font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
   background: var(--bg-main);
   color: var(--text);
-  font-size: 14px;
+  font-size: var(--fs-md);
+  font-weight: 500;
 }
 
 /* 带有 hidden 的一律隐藏，优先级压过任何 display 设置 */
 [hidden] { display: none !important; }
 
-/* ===== 轻提示 =====
- * 走 API 就一定会有失败（校验、网络、权限）。没有提示的话，
- * 用户只会看到"点了没反应"，那比报错更难排查。 */
-.toast-host {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
-}
-.toast-item {
-  max-width: 320px;
-  padding: 10px 14px;
-  border: 1px solid rgba(224, 102, 63, 0.45);
-  border-radius: 10px;
-  background: #2a1a15;
-  color: #f0d8cc;
-  font-size: 13px;
-  line-height: 1.5;
-  opacity: 0;
-  transform: translateX(12px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.toast-item.in {
-  opacity: 1;
-  transform: none;
+/* ===== 减少动效 =====
+ * JS 动画走 AnimationPort（adapters/animation/dom.js）已在 reduce 时立即完成；
+ * 这里把 CSS 过渡/关键帧也压到一帧，避免“状态已跳过、视觉还在播”的错位。
+ * 画布里有专门的 reduced-motion 规则保留提醒标记，本块不覆盖它。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

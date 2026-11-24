@@ -24,7 +24,7 @@
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-md);
   color: var(--text);
   -webkit-app-region: no-drag;   /* logo 可点击，别被拖动区吞掉 */
 }
@@ -165,7 +165,7 @@ body.dragging-node .trash-zone.burst {
 .sidebar .side-content .item.label {
   cursor: default;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .sidebar .side-content .item.label:hover {
   background: transparent;
@@ -185,14 +185,25 @@ body.dragging-node .trash-zone.burst {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
   border-radius: 6px;
-  font-size: 28px;
+  font: inherit;
+  font-size: var(--fs-display);
   line-height: 1;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.15s, opacity 0.25s ease, visibility 0s linear 0s;
 }
 .sidebar .side-content .item.row .add-btn:hover {
   color: var(--text);
   background: rgba(255,255,255,0.08);
+}
+/* 工作区里不显示加号：淡出并退出交互（淡出结束后才不可聚焦）。 */
+.sidebar.in-workspace .side-content .item.row .add-btn {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
 .sidebar .side-divider {
   height: 1px;
@@ -252,24 +263,35 @@ body.dragging-node .trash-zone.burst {
   gap: 10px;
   flex: 0 0 auto;
 }
-/* 打开目录：卡片右上角的小文件夹。白色描边，悬停放大。 */
+/* 打开目录：卡片右上角的小文件夹。白色描边，悬停放大。
+ * 按钮只当命中区，图形在内部 SVG 上，样式不能直接写在按钮上。 */
 .team-item .ti-folder {
   width: 16px;
   height: 16px;
   margin-left: auto;              /* 推到这一行的最右 */
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(0, 0, 0, 0.75);     /* 跟着折叠态深色字走，展开时再改回白色 */
+  cursor: pointer;
+  transform-origin: center;
+  transition: transform 0.16s ease;
+}
+.team-item .ti-folder svg {
+  width: 16px;
+  height: 16px;
   fill: none;
-  stroke: #ffffff;
+  stroke: currentColor;
   stroke-width: 2.6;              /* 线框加粗 */
   stroke-linecap: round;
   stroke-linejoin: round;
-  cursor: pointer;
-  transform-origin: center;
-  pointer-events: all;            /* 只有描边的图形，整块都要能点 */
-  transition: stroke 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
 }
 .team-item .ti-folder:hover {
-  stroke: #ffffff;
   transform: scale(1.18);         /* 悬停放大 */
 }
 .team-item:hover { filter: brightness(1.35); }
@@ -301,6 +323,7 @@ body.dragging-node .trash-zone.burst {
 }
 /* 透明底上黑字看不清，展开时文字改用亮色（同样是压内联色） */
 .team-item.expanded .t-name { color: var(--text) !important; }
+.team-item.expanded .ti-folder { color: #ffffff; }
 .team-item.expanded .chip { background: rgba(255,255,255,0.28) !important; }
 
 /* ---------- 展开卡片的内容区 ---------- */
@@ -369,7 +392,7 @@ body.dragging-node .trash-zone.burst {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.7;
   color: var(--text-dim);
   white-space: pre-wrap;        /* 工具输出这类纯文本照原样换行 */
@@ -377,7 +400,7 @@ body.dragging-node .trash-zone.burst {
 }
 /* 一段对话里的条目：用户 / 助手 / 思考 / 工具 */
 .ti-entry {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.7;
   color: var(--text-dim);
 }
@@ -398,7 +421,7 @@ body.dragging-node .trash-zone.burst {
 .ti-entry h1, .ti-entry h2, .ti-entry h3,
 .ti-entry h4, .ti-entry h5, .ti-entry h6 {
   margin: 8px 0 4px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--text);
 }
@@ -424,22 +447,22 @@ body.dragging-node .trash-zone.burst {
   border-radius: 4px;
 }
 .ti-entry pre code { padding: 0; background: none; }
-.ti-entry table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.ti-entry table { width: 100%; border-collapse: collapse; font-size: var(--fs-2xs); }
 .ti-entry th, .ti-entry td { border: 1px solid var(--border); padding: 2px 4px; text-align: left; }
 .ti-entry hr { border: 0; border-top: 1px solid var(--border); margin: 6px 0; }
 .ti-entry.thinking { font-style: italic; opacity: 0.75; }
 
 /* ---- 产物视图 ---- */
 .ti-title {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text);
 }
 /* 标题右边的运行编号（run 001） */
 .ti-run-tag {
   margin-left: 8px;
-  font-size: 11px;
-  font-weight: 400;
+  font-size: var(--fs-2xs);
+  font-weight: 500;
   color: var(--text-dim);
   letter-spacing: 0.3px;
 }
@@ -482,7 +505,7 @@ body.dragging-node .trash-zone.burst {
   background: rgba(255,255,255,0.05);
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.4;
   cursor: pointer;
   outline: none;
@@ -534,7 +557,7 @@ body.dragging-node .trash-zone.burst {
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -558,7 +581,7 @@ body.dragging-node .trash-zone.burst {
 .ti-empty {
   margin: 0;
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-dim);
 }
 .ti-list::-webkit-scrollbar { width: 0; height: 0; display: none; }
@@ -568,7 +591,7 @@ body.dragging-node .trash-zone.burst {
   border-radius: 8px;
   background: rgba(255,255,255,0.06);   /* 浅灰底 */
   color: var(--text);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease;
 }
@@ -581,19 +604,13 @@ body.dragging-node .trash-zone.burst {
   display: flex;
   justify-content: flex-end;   /* 对勾贴右下角 */
 }
-.ti-line {
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--text-dim);
-}
-
 /* 默认屏的当前对话：名字 + 铅笔（改名） + 垃圾桶（删除） */
 .ti-session-line {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.55;
   color: var(--text);
 }
@@ -607,25 +624,35 @@ body.dragging-node .trash-zone.burst {
 .ti-session-edit,
 .ti-session-trash {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.ti-session-edit svg,
+.ti-session-trash svg {
   width: 14px;
   height: 14px;
   fill: none;
-  stroke: var(--text-dim);
+  stroke: currentColor;
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
-  cursor: pointer;
-  /* 只有描边的 SVG 默认只响应线条本身，点中间会穿透。
-   * 整个包围盒都接点击，图标才真的能按。 */
-  pointer-events: all;
-  transition: stroke 0.15s;
+  pointer-events: none;
 }
-.ti-session-edit:hover { stroke: var(--orange); }
-.ti-session-trash:hover { stroke: #dd6350; }
+.ti-session-edit:hover { color: var(--orange); }
+.ti-session-trash:hover { color: #dd6350; }
 /* 没有对话时两个图标压暗，点不动（点击会给提示） */
 .ti-session-edit[aria-disabled="true"],
 .ti-session-trash[aria-disabled="true"] {
-  stroke: #4a4a4f;
+  color: #4a4a4f;
   cursor: not-allowed;
 }
 .ti-session-name-input {
@@ -637,7 +664,7 @@ body.dragging-node .trash-zone.burst {
   background: rgba(0,0,0,0.25);
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   outline: none;
 }
 .ti-divider {
@@ -654,7 +681,7 @@ body.dragging-node .trash-zone.burst {
   background: rgba(255,255,255,0.04);
   color: var(--text);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
   resize: vertical;          /* 可以拉长 */
   outline: none;
@@ -683,13 +710,25 @@ body.dragging-node .trash-zone.burst {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--team, var(--orange));   /* 对勾颜色跟随团队/节点色 */
+  cursor: pointer;                      /* 它是个按钮：点了＝确认并退出 */
+  transition: color 0.18s ease;
+}
+.ti-check svg {
+  width: 18px;
+  height: 18px;
   fill: none;
-  stroke: var(--team, var(--orange));   /* 对勾颜色跟随团队/节点色 */
+  stroke: currentColor;
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  cursor: pointer;                      /* 它是个按钮：点了＝确认并退出 */
-  transition: stroke 0.18s ease;
+  pointer-events: none;
 }
 /* 运行 / 中止两个图标放在一起，靠左；滑块仍占右边的位置 */
 .ti-actions {
@@ -702,23 +741,35 @@ body.dragging-node .trash-zone.burst {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--team, var(--orange));
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+.ti-x svg {
+  width: 18px;
+  height: 18px;
   fill: none;
-  stroke: var(--team, var(--orange));
+  stroke: currentColor;
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
-  cursor: pointer;
-  transition: stroke 0.18s ease;
+  pointer-events: none;
 }
 /* 没在运行时点不动，压成暗灰 */
 .ti-x[aria-disabled="true"] {
-  stroke: #6f5a55;
+  color: #6f5a55;
   cursor: not-allowed;
 }
 /* 产物视图的对勾：没选中产物之前点不动，压成暗灰红（回落到暗色底上仍能看见形状，
  * 但明显比团队色弱一档，光标也改成禁止）。选中一条产物后交回上面的团队色。 */
 .ti-pane-products .ti-check[aria-disabled="true"] {
-  stroke: #6f5a55;
+  color: #6f5a55;
   cursor: not-allowed;
 }
 /* 二选一滑块：滑块底色跟随团队色（不是自由拖动的那种）。
@@ -774,7 +825,7 @@ body.dragging-node .trash-zone.burst {
   align-items: center;
   justify-content: center;
   padding: 0 10px;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   white-space: nowrap;       /* 英文标签不换行：宁可把整个滑块撑宽 */
   color: var(--text-dim);
   transition: color 0.2s ease;
@@ -787,7 +838,7 @@ body.dragging-node .trash-zone.burst {
   border-radius: 8px;
   background: rgba(255,255,255,0.05);
   color: var(--text);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -817,8 +868,10 @@ body.dragging-node .trash-zone.burst {
   transition: opacity 0.16s ease;
 }
 .team-item .t-name {
-  font-size: 13px;
-  color: var(--text);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  /* 卡片底色是团队色（含黄/绿这类亮色），浅色字对比不够；折叠态统一用深色字。 */
+  color: rgba(0, 0, 0, 0.86);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -904,7 +957,7 @@ body.ap-dragging * { cursor: col-resize !important; }
 .ap-name {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--text);
   overflow: hidden;
@@ -919,7 +972,7 @@ body.ap-dragging * { cursor: col-resize !important; }
   border-radius: 6px;
   background: transparent;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
@@ -935,14 +988,14 @@ body.ap-dragging * { cursor: col-resize !important; }
 }
 .ap-scroll::-webkit-scrollbar { width: 0; height: 0; }
 .ap-content {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.7;
   color: var(--text);
 }
 .ap-content h1, .ap-content h2, .ap-content h3,
 .ap-content h4, .ap-content h5, .ap-content h6 {
   margin: 12px 0 6px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   color: var(--text);
 }
@@ -970,7 +1023,7 @@ body.ap-dragging * { cursor: col-resize !important; }
   border-radius: 6px;
 }
 .ap-content pre code { padding: 0; background: none; }
-.ap-content table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.ap-content table { width: 100%; border-collapse: collapse; font-size: var(--fs-2xs); }
 .ap-content th, .ap-content td { border: 1px solid var(--border); padding: 3px 6px; text-align: left; }
 .ap-content hr { border: 0; border-top: 1px solid var(--border); margin: 8px 0; }
 .ap-content a { color: var(--orange); }
@@ -1024,13 +1077,13 @@ body.ap-dragging * { cursor: col-resize !important; }
 }
 .confirm-title {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   color: var(--text);
 }
 .confirm-text {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.6;
   color: var(--text-dim);
 }
@@ -1046,7 +1099,7 @@ body.ap-dragging * { cursor: col-resize !important; }
   border-radius: 6px;
   background: transparent;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }

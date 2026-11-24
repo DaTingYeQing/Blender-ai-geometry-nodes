@@ -47,6 +47,8 @@ function Initialize-SetupContext {
         }
     }
     $runtimeLayout = if ($versions -and $versions.runtimeLayout) { [string]$versions.runtimeLayout } else { '' }
+    # 同版本重新编译不会改变 blender.exe 的 ProductVersion，用显式构建标记识别换包。
+    $blenderBuild = if ($versions -and $versions.blenderBuild) { [string]$versions.blenderBuild } else { '' }
     $covtraceVersion = if ($versions -and $versions.covtraceVersion) { [string]$versions.covtraceVersion } else { '' }
     $configVersion = if ($versions -and $versions.configVersion) { [string]$versions.configVersion } else { '' }
     $seedVersion = if ($versions -and $versions.seedVersion) { [string]$versions.seedVersion } else { '' }
@@ -75,6 +77,7 @@ function Initialize-SetupContext {
         ResultPath           = $resultPath
         AppVersion           = $appVersion
         BlenderVersion       = $blenderVersion
+        BlenderBuild         = $blenderBuild
         RuntimeLayout        = $runtimeLayout
         CovtraceVersion      = $covtraceVersion
         ConfigVersion        = $configVersion
@@ -86,6 +89,7 @@ function Initialize-SetupContext {
         CovtraceEngine       = Join-Path $blenderSrcDir 'covtrace-kit\CovTrace\engine.py'
         BlenderSrcBlender    = Join-Path $blenderSrcRoot 'blender'
         BlenderSrcBlenderExe = Join-Path $blenderSrcRoot 'blender\blender.exe'
+        BlenderBuildFile     = Join-Path $blenderSrcRoot 'blender\.pi-flow-build'
         CovtraceLlvmCov      = Join-Path $blenderSrcRoot 'llvm-mini\bin\llvm-cov.exe'
         CovtraceVersionFile  = Join-Path $blenderSrcRoot '.covtrace-version'
 
@@ -235,6 +239,8 @@ function Write-SetupResult {
     else {
         ''
     }
+    # 清单记录实际铺好的构建标记；没铺过（老安装）就是空，下次启动会强制替换。
+    $blenderBuild = Get-BlenderInstalledBuild
     # 清单记录实际铺好的工具链版本；没铺过就是空，下次启动会重新部署。
     $setup.CovtraceVersion = Get-CovtraceVersion
     if ($Error) {
@@ -244,6 +250,7 @@ function Write-SetupResult {
             error          = $Error
             appVersion        = $setup.AppVersion
             blenderVersion    = $setup.BlenderVersion
+            blenderBuild      = $blenderBuild
             runtimeLayout     = $setup.RuntimeLayout
             covtraceVersion   = $setup.CovtraceVersion
             configVersion     = $setup.ConfigVersion
@@ -261,6 +268,7 @@ function Write-SetupResult {
         checkOnly      = $false
         appVersion        = $setup.AppVersion
         blenderVersion    = $setup.BlenderVersion
+        blenderBuild      = $blenderBuild
         runtimeLayout     = $setup.RuntimeLayout
         covtraceVersion   = $setup.CovtraceVersion
         configVersion     = $setup.ConfigVersion
@@ -311,6 +319,7 @@ function Invoke-CheckOnly {
         checkOnly         = $true
         appVersion        = $setup.AppVersion
         blenderVersion    = if ($blenderVersion) { $blenderVersion } else { $null }
+        blenderBuild      = Get-BlenderInstalledBuild
         runtimeLayout     = $setup.RuntimeLayout
         covtraceVersion   = Get-CovtraceVersion
         configVersion     = $setup.ConfigVersion

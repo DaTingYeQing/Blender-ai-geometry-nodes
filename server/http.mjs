@@ -3,11 +3,10 @@ import http from "node:http";
 import path from "node:path";
 import { setLocale, t } from "../shared/messages.mjs";
 import { blocks } from "./blocks.mjs";
+import { ApiError, APP_DIR, SHARED_DIR, isInside } from "./common.mjs";
 import { assertEndpointTable, contractEntry, publicContract, routeKey } from "./contract.mjs";
 import { createKernel } from "./kernel/index.mjs";
-import { ApiError, APP_DIR, SHARED_DIR } from "./store/index.mjs";
 import { validateEndpointPayload } from "./validate.mjs";
-import * as store from "./store/index.mjs";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -68,7 +67,7 @@ async function serveStatic(res, pathname, { appDir, sharedDir }) {
         ? clean.slice(4)
         : clean;
   const abs = path.join(root, rel);
-  if (!store.isInside(root, abs)) {
+  if (!isInside(root, abs)) {
     res.writeHead(403);
     return res.end("Forbidden");
   }
@@ -112,32 +111,14 @@ export async function createServer({
   if (booted.meta.flow?.recovered || booted.meta.runtime?.recovered) {
     await services.store.saveState();
   }
-  const routes = booted.routes;
-  assertEndpointTable([
-    { method: "GET", path: "/api/state" },
-    { method: "GET", path: "/api/contract" },
-    { method: "POST", path: "/api/single/launch" },
-    ...routes,
-  ]);
+  const routes = [
+    ...booted.routes,
+    { method: "GET", path: "/api/contract", handler: () => publicContract() },
+  ];
+  assertEndpointTable(routes);
 
   async function handleApi(req, res, url) {
     const { pathname } = url;
-    if (req.method === "GET" && pathname === "/api/state") {
-      return json(res, 200, {
-        agents: services.agents.list(),
-        flows: services.flow.list(),
-        mode: "pi",
-      });
-    }
-
-    if (req.method === "GET" && pathname === "/api/contract") {
-      return json(res, 200, publicContract());
-    }
-
-    if (req.method === "POST" && pathname === "/api/single/launch") {
-      return json(res, 200, services.single.launch());
-    }
-
     for (const route of routes) {
       const params = matchRoute(route, req.method, pathname);
       if (!params) continue;
@@ -173,6 +154,7 @@ export async function createServer({
         url: `http://${host}:${actual}`,
         apis: {
           agents: services.agents,
+          agentconfig: services.agentconfig,
           flows: services.flow,
           artifacts: services.artifacts,
           pi: services.pi,

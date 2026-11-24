@@ -1,5 +1,17 @@
 ﻿# Blender：只从安装包内置的便携 zip 部署，没有动态安装方式。
 
+# 构建标记写在 blender 目录里：强制替换会连同旧标记一起删掉，解压成功后再写新的。
+function Write-BlenderBuildMarker {
+    $setup = $script:Setup
+    if (-not $setup.BlenderBuild) { return }
+    try {
+        Set-Content -LiteralPath $setup.BlenderBuildFile -Value $setup.BlenderBuild -Encoding ASCII
+    }
+    catch {
+        Write-WarnLine "写入 Blender 构建标记失败：$($_.Exception.Message)"
+    }
+}
+
 function Install-Blender([string]$Archive) {
     $setup = $script:Setup
     Write-Step "解压 Blender"
@@ -23,6 +35,7 @@ function Install-Blender([string]$Archive) {
     if (-not (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe)) {
         throw "解压后没有找到 blender.exe：$($setup.BlenderSrcBlenderExe)"
     }
+    Write-BlenderBuildMarker
     Write-Ok "Blender 已部署到 $($setup.BlenderSrcBlenderExe)"
 }
 

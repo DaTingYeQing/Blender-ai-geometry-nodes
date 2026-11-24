@@ -20,13 +20,3 @@ description: "Blender 4.5 几何节点执行+调试阶段：建节点树、连 s
 1. 用 write/edit 更新 `workflow\_state.json`：`modules\[cur].status = "done"`，`cur += 1`；
 2. 若 `cur < modules.length`：继续下一个模块；
 3. 全部模块 done：`phase = "done"`，收尾。
-
-
-### 工具分工（谁干什么、何时调用）
-
-* **blender\_build** —— 节点树的一切结构操作，禁止用脚本硬编码代替。
-* **blender\_math** —— 任何需要数学计算的地方，禁止手摆数学节点。
-* **blender\_screen** —— 想知道当前档里有哪些节点。
-* **blender\_data** ——想对比"改了某个上游/几何节点值前后，数据变没变、变哪"时。
-* **bpy** ——想知道"几何节点对网格的影响，或需要 Python 侧数值分析而 Blender 内工具覆盖不到时。
-* **blender\_run**——往blender里面写代码的工具

@@ -7,6 +7,21 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const requested = process.argv[2] || "all";
 const suites = requested === "all" ? ["server", "ui"] : [requested];
 
+/** Windows 与 Linux 都能找到 tests/server、tests/UI（目录名大小写不敏感匹配）。 */
+async function resolveSuiteDir(suite) {
+  const testsRoot = path.join(root, "tests");
+  let entries;
+  try {
+    entries = await fsp.readdir(testsRoot, { withFileTypes: true });
+  } catch {
+    return null;
+  }
+  const match = entries.find(
+    (entry) => entry.isDirectory() && entry.name.toLowerCase() === suite.toLowerCase(),
+  );
+  return match ? path.join(testsRoot, match.name) : null;
+}
+
 const files = [];
 const appExists = await fsp.access(path.join(root, "app")).then(
   () => true,
@@ -15,17 +30,13 @@ const appExists = await fsp.access(path.join(root, "app")).then(
 for (const suite of suites) {
   if (suite === "ui" && !appExists) {
     if (requested !== "all") {
-      console.error("app/ 不存在，UI 层已被移除，无法运行 ui 测试。");
+      console.error("app/ 不存在，UI 层已被移除，无法运行 UI 测试。");
       process.exit(1);
     }
     continue;
   }
-  const dir = path.join(root, "tests", suite);
-  const exists = await fsp.access(dir).then(
-    () => true,
-    () => false,
-  );
-  if (!exists) {
+  const dir = await resolveSuiteDir(suite);
+  if (!dir) {
     if (requested !== "all") {
       console.error(`没有 tests/${suite}，无法运行 ${suite} 测试。`);
       process.exit(1);
@@ -41,7 +52,7 @@ const strayTests = (await fsp.readdir(path.join(root, "tests"), { withFileTypes:
   .filter((entry) => entry.isFile() && entry.name.endsWith(".test.mjs"))
   .map((entry) => `tests/${entry.name}`);
 if (strayTests.length) {
-  console.error(`测试文件必须放在 tests/server 或 tests/ui：${strayTests.join("、")}`);
+  console.error(`测试文件必须放在 tests/server 或 tests/UI：${strayTests.join("、")}`);
   process.exit(1);
 }
 

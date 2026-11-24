@@ -1,8 +1,7 @@
 import { t } from "../../../shared/messages.mjs";
 
-/** 流程节点上只清掉纯运行日志类字段；
- *  lastRunId 要保留 —— 重进工作区后靠它把上次的产物列表找回来。 */
-const LEGACY_NODE_FIELDS = ["status", "logs", "artifacts", "lastSessionId"];
+/** 流程节点上只清掉纯运行日志类字段；文件已经改为各自工作区，流程不再记运行索引。 */
+const LEGACY_NODE_FIELDS = ["status", "logs", "artifacts", "lastSessionId", "lastRunId"];
 
 function stripLegacyNodeFields(node) {
   if (!node || typeof node !== "object") return false;

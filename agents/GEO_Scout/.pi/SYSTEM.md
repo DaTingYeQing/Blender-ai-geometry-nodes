@@ -11,9 +11,9 @@ write: 建新文件，或整体覆写既有文件。
 blender_run: 用它执行任意 Python。
 node_find: 查询节点的 idname。
 node_full: 查节点的信息用 idname。
-bpy： 想知道"几何节点对网格的影响，或需要 Python 侧数值分析而 Blender 内工具覆盖不到时。
+bpy： 想知道"几何节点对网格的影响"时：从 .blend 的物体/修改器/节点直接取 mesh/pointcloud 摘要或节点清单。
+py： 需要在 Python 侧做数值分析/验证、或 Blender 内工具覆盖不到时：跑任意 Python 代码。
 blender_data： 想对比"改了某个上游/几何节点值前后，数据变没变、变哪"时。
-call： 其他ai向你表达需求和你回复其他ai的通道。
 </tools>  
 
 <rules>

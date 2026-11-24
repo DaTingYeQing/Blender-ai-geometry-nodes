@@ -10,7 +10,6 @@
   "extensions": [
     "../../../shard/extensions/blender.ts",
     "../../../shard/extensions/blender_screen.ts",
-    "../../../shard/extensions/call.ts",
     "../../../shard/extensions/covtrace.ts",
     "../../../shard/extensions/node_query.ts"
   ]

@@ -80,6 +80,7 @@ async function expectedVersions() {
   return {
     appVersion: app.getVersion(),
     runtimeLayout: String(versions.runtimeLayout || ""),
+    blenderBuild: String(versions.blenderBuild || ""),
     covtraceVersion: String(versions.covtraceVersion || ""),
     configVersion: String(versions.configVersion || ""),
     blenderVersion: match ? normalizeVersion(match[1]) : "",
@@ -91,7 +92,14 @@ export async function runtimeVersionMismatches(info) {
   const expected = await expectedVersions();
   const result = info?.resultData || {};
   // 旧版清单没有版本字段：跑一次幂等 setup 把版本补上，不重建 Blender。
-  if (!result.runtimeLayout && !result.blenderVersion) return ["legacy"];
+  if (!result.runtimeLayout && !result.blenderVersion) {
+    const legacy = ["legacy"];
+    // 老清单没有构建标记：本版包里若是新编译的 Blender，同一次 setup 就替换掉。
+    if (expected.blenderBuild && String(result.blenderBuild || "") !== expected.blenderBuild) {
+      legacy.push("blenderBuild");
+    }
+    return legacy;
+  }
 
   const mismatches = [];
   if (expected.runtimeLayout && String(result.runtimeLayout || "") !== expected.runtimeLayout) {
@@ -99,6 +107,10 @@ export async function runtimeVersionMismatches(info) {
   }
   if (expected.blenderVersion && String(result.blenderVersion || "") !== expected.blenderVersion) {
     mismatches.push("blenderVersion");
+  }
+  // 同版本重新编译的 Blender：ProductVersion 不变，靠显式构建标记判断。
+  if (expected.blenderBuild && String(result.blenderBuild || "") !== expected.blenderBuild) {
+    mismatches.push("blenderBuild");
   }
   if (expected.covtraceVersion && String(result.covtraceVersion || "") !== expected.covtraceVersion) {
     mismatches.push("covtraceVersion");
@@ -150,7 +162,8 @@ export async function inspectRuntime() {
 export async function applyRuntimeEnv(info) {
   process.env.PI_ENV_JSON = info.config;
   process.env.PI_FLOW_HOME = SHARD_DIR;
-  if (IS_PACKAGED) process.env.PI_FLOW_AGENTS_ROOT = agentsDir();
+  // 新建 Agent 的默认落点；开发模式同样指向数据目录，避免写进仓库模板。
+  process.env.PI_FLOW_AGENTS_ROOT = agentsDir();
   if (info.piCli) process.env.PI_BIN = info.piCli;
   if (info.nodeExe) process.env.PI_NODE = info.nodeExe;
   // pi 的 bash 工具按 PATH 找 bash；内置 Git 解压在 runtime 下时需要显式加入。
@@ -306,7 +319,7 @@ export async function runSetup({ onStep, forceBlender = false } = {}) {
 }
 
 /** 哪些相对路径由播种层管理；生成的配置和运行时产物不碰。 */
-function shouldCopyRel(rel) {
+function shouldCopyRel(rel, targetRoot) {
   if (!rel) return true;
   if (rel.includes("/.pi/flow")) return false;
   if (
@@ -315,6 +328,12 @@ function shouldCopyRel(rel) {
     rel.endsWith("/.pi/py_environment.json")
   ) {
     return false;
+  }
+  // agent.json 只有在该项目还没有 settings 时才播种：
+  // 新装用户拿到包里的默认配置；老用户交给 sync 从现有 settings 反推，避免覆盖手工调整。
+  if (rel.endsWith("/.pi/agent.json")) {
+    const project = rel.slice(0, -"/.pi/agent.json".length);
+    return !fs.existsSync(path.join(targetRoot, project, ".pi", "settings.json"));
   }
   const parts = rel.split("/");
   if (parts.includes("extensions.legacy") || parts.includes("__pycache__")) return false;
@@ -377,7 +396,7 @@ export async function ensureAgents() {
     targetRoot: dir,
     previous,
     seedVersion: String(versions.seedVersion || ""),
-    filter: shouldCopyRel,
+    filter: (rel) => shouldCopyRel(rel, dir),
   });
   await runAgentSync(dir);
   await writeSeedMarker(dir, marker);
@@ -406,9 +425,10 @@ export async function ensureRuntime({ onStep, force = false } = {}) {
     }
 
     console.log(`Pi Flow 运行时版本变化：${mismatches.join(", ")}`);
-    // 只有布局变化才重建整个 runtime；旧清单和配置版本只跑幂等补件。
+    // 只有布局变化才重建整个 runtime；旧清单、Blender 换包和配置版本只跑幂等补件。
     const rebuild = mismatches.includes("runtimeLayout");
-    const forceBlender = mismatches.includes("blenderVersion") && !rebuild;
+    const forceBlender = !rebuild
+      && (mismatches.includes("blenderVersion") || mismatches.includes("blenderBuild"));
     const backup = rebuild ? await moveAsideRuntime() : "";
     try {
       info = await runSetup({ onStep, forceBlender });

@@ -324,6 +324,18 @@ function Get-BlenderFileVersion([string]$Path) {
     }
 }
 
+# 已铺好的 Blender 构建标记：只有 setup 真正解压过压缩包才会写，用它识别同版本换包。
+function Get-BlenderInstalledBuild {
+    $file = $script:Setup.BlenderBuildFile
+    if (-not $file -or -not (Test-Path -LiteralPath $file)) { return '' }
+    try {
+        return (Get-Content -LiteralPath $file -Raw -ErrorAction Stop).Trim()
+    }
+    catch {
+        return ''
+    }
+}
+
 # Blender 内置 python：与 blender.exe 同目录的 4.5\python\bin\python.exe。
 # 安装器不再单独装 Python —— 外层胶水脚本直接用它（几何包已 pip 进 zip 里的 site-packages）。
 function Get-BlenderPythonExe([string]$BlenderExe) {

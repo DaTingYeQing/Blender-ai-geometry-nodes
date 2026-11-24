@@ -10,6 +10,11 @@ blender_run: 只有 blender_data / bpy 都取不到你要的数据时，才用�
 blender_math: 当需要放置数学节点时用它可以非常方便的创建数学节点，从而不用`blender build`手动摆节点。
 node_find： 不知道节点的 idname？用它拿词找。
 node_full： 用idname查节点
+blender_build**： 节点树的一切结构操作，禁止用脚本硬编码代替。
+blender_math**： 任何需要数学计算的地方，禁止手摆数学节点。
+blender_screen： 想知道当前档里有哪些节点。
+bpy： 想知道"几何节点对网格的影响"时：从 .blend 的物体/修改器/节点直接取 mesh/pointcloud 摘要或节点清单。
+blender_run： 往blender里面写代码的工具
 </tools>  
 
 <rules>

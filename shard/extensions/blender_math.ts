@@ -1,10 +1,10 @@
 /**
  * blender_math 扩展 —— 傻瓜式写数学表达式 → 自动建 Blender 数学节点组
  *
- * 薄前端：收参数 → payload 写工作区 → 起 skills/execution 的数学脚本 → 原样带回。
+ * 薄前端：收参数 → payload 写工作区 → 起 skills/execution/math 的数学脚本 → 原样带回。
  *   eval ：math_eval.py 纯 Python 试算（与 Blender 同一条语义路径），不碰 Blender；
- *   build：math_compile.py 一条龙——编译、生成建节点脚本、经同目录 blender_channel
- *          进 Blender 建组，并按 workflow_state.json 里的工作档自动读/存（Pi Flow 查 flow，终端查工作区）。
+ *   build：math_compile.py 一条龙——编译、生成建节点脚本、经上一级（execution 根）
+ *          blender_channel 进 Blender 建组，并按 workflow_state.json 里的工作档自动读/存（Pi Flow 查 flow，终端查工作区）。
  *          本文件不碰 blender.exe，也不自己读工作档。
  * 地址一律现读上一级的 py_environment.json；本文件不含任何绝对路径，可直接进 Git。
  */
@@ -16,7 +16,7 @@ import { StringEnum, Type } from "@earendil-works/pi-ai";
 import { defineTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { envFor, pyEnv, pythonOf, workspaceOf, SKILLS } from "../lib/env.ts";
 
-const MATH_DIR = path.join(SKILLS, "execution"); // 数学套件正式位置
+const MATH_DIR = path.join(SKILLS, "execution", "math"); // 数学套件位置
 
 function errRes(text: string, extra?: Record<string, unknown>) {
 	return { content: [{ type: "text", text }], details: { ok: false, ...extra }, isError: true };

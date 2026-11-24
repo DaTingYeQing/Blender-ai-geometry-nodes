@@ -35,7 +35,11 @@
 .modal-overlay.closing .modal { pointer-events: none; }
 /* 各弹窗的尺寸（原来写在行内，现在收进类） */
 .modal.modal-logo     { width: 480px; height: 380px; }
-.modal.modal-register { width: 480px; height: 300px; }
+.modal.modal-agent {
+  width: min(880px, calc(100vw - 80px));
+  height: min(620px, calc(100vh - 80px));
+  --nav-w: 220px;
+}
 
 /* 左栏宽度用变量统一管理：竖线、左栏、右栏三处必须对齐。
  * 原来是 1/6（480px 下只有 80px），换成英文后 Language / Workspace
@@ -60,7 +64,7 @@
   border: none;
   background: transparent;
   color: var(--text-dim);
-  font-size: 15px;
+  font-size: var(--fs-lg);
   line-height: 1;
   cursor: pointer;
   border-radius: 6px;
@@ -79,7 +83,7 @@
   bottom: 0;
   display: flex;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .modal .m-left  { left: 0;  width: var(--nav-w); flex-direction: column; align-items: stretch; padding: 24px 16px; gap: 4px; }
 .modal .m-right { left: var(--nav-w); right: 0; align-items: center; justify-content: center; }
@@ -89,15 +93,6 @@
   justify-content: flex-start;
   align-items: stretch;
   padding: 24px 28px;
-}
-/* 变体：整栏表单（注册agent，无左栏） */
-.modal .m-right.form-panel {
-  left: 0;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  gap: 16px;
-  padding: 28px;
 }
 
 /* 左栏导航项 */
@@ -150,7 +145,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   position: relative;
   z-index: 1;
@@ -166,15 +161,11 @@
 
 /* ===== 表单控件（注册agent 等弹窗）===== */
 .dlg-title {
-  font-size: 18px;
+  font-size: var(--fs-xl);
   font-weight: 600;
   color: var(--text);
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
-}
-.dlg-row {
-  display: flex;
-  gap: 10px;
 }
 .dlg-input {
   flex: 1;
@@ -184,7 +175,7 @@
   border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: var(--text);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   outline: none;
   transition: border-color 0.15s;
 }
@@ -197,7 +188,7 @@
   border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: var(--text);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
@@ -238,6 +229,17 @@
   background: rgba(255,255,255,0.02);
   overflow-y: auto;
 }
+/* 空态：在容器里居中显示，避免文字贴住边框 */
+.ws-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
 /* 方框容器内的条目：浅黑色圆角长方形，左边名字、右边铅笔 */
 .box-item {
   height: 44px;
@@ -262,7 +264,7 @@
 .box-name {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -294,7 +296,7 @@
   border-radius: 6px;
   background: #1a1a1c;
   color: var(--text);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   outline: none;
 }
 /* 单人模式：说明文字 */
@@ -305,14 +307,14 @@
 }
 .solo-text {
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   line-height: 1.6;
 }
 /* 清理提示：贴在按钮行上方，两种模式都可见 */
 .ws-hint {
   margin: auto 16px 10px 0;  /* auto 把提示和按钮行一起压到底部 */
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.6;
 }
 /* 底栏：文件夹/加号在左，取消/确定靠右 */
@@ -334,7 +336,7 @@
   border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: var(--text);
-  font-size: 20px;
+  font-size: var(--fs-2xl);
   line-height: 1;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
@@ -365,11 +367,192 @@
   border-color: var(--orange);
 }
 .trash-btn svg,
-.folder-btn svg { width: 16px; height: 16px; }
+.folder-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
 /* 禁用态：确定/垃圾桶没得点的时候，压暗 + 不响应鼠标（连 hover 也不亮） */
 .dlg-btn:disabled,
 .trash-btn:disabled {
   opacity: 0.35;
   cursor: default;
   pointer-events: none;
+}
+
+/* ===== Agent 配置面板：页签 + 表单 + 工具多选 ===== */
+.modal .m-right.agent-main {
+  left: var(--nav-w);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 24px 26px;
+}
+.agent-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.agent-field-grow {
+  flex: 1;
+  min-height: 0;
+}
+.agent-label {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+/* .dlg-input 默认 flex:1；放进纵向表单后只让它占固定高度 */
+.agent-name {
+  flex: 0 0 auto;
+  width: 100%;
+}
+.agent-tools {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+}
+.tool-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 132px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-dim);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tool-chip:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--orange);
+}
+.tool-chip.active {
+  background: rgba(255,123,46,0.16);
+  border-color: var(--orange);
+}
+.tool-chip-name {
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+.tool-chip-hint {
+  font-size: var(--fs-2xs);
+  color: var(--text-dim);
+}
+.tool-chip.active .tool-chip-hint {
+  color: var(--text);
+  opacity: 0.85;
+}
+.agent-tools-empty {
+  padding: 18px 10px;
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+/* 现有 agent 列表：放在页签下方，占满剩余高度 */
+.agent-picker {
+  flex: 1;
+  min-height: 0;
+  margin-top: 10px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+}
+/* 列表和工具区都藏掉滚动条，滚轮 / 触控板仍可滚动 */
+.agent-picker,
+.agent-tools {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* 旧版 Edge / IE */
+}
+.agent-picker::-webkit-scrollbar,
+.agent-tools::-webkit-scrollbar {
+  display: none;              /* Chromium / Electron */
+}
+.agent-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+}
+.agent-card {
+  flex: 0 0 auto;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.agent-card:hover {
+  background: rgba(255,255,255,0.08);
+}
+.agent-card-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+.agent-card-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.agent-picker-empty {
+  padding: 18px 10px;
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+/* ===== 新组件层（Agent 面板 pilot）===== */
+/* 页签容器：组件根是包裹层，需要自己撑出纵向间距 */
+.agent-tab-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* 状态/错误提示 */
+.agent-status {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.agent-status.error {
+  color: var(--orange);
+}
+/* 注册表找不到组件时的降级占位 */
+.component-unknown {
+  padding: 8px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: var(--fs-xs);
 }

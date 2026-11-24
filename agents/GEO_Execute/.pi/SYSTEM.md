@@ -10,7 +10,6 @@ blender_run: 用它执行任意 Python。
 blender_math: 当需要放置数学节点时用它可以非常方便的创建数学节点，从而不用`blender build`手动摆节点
 node_find: 查询节点的 idname。
 node_full: 查节点的信息用 idname。
-call： 寻求场外援助的工具，说清楚你的需求，其他ai会帮助你
 </tools>  
 
 <rules>
@@ -31,9 +30,4 @@ call： 寻求场外援助的工具，说清楚你的需求，其他ai会帮助�
 2. 若 `cur < modules.length`：继续下一个模块；
 3. 全部模块 done：`phase = "done"`，收尾。
 
-```
-call：
-可以用来呼叫其他ai帮你分析**一个几何节点的内部代码实现**最好能说清楚是具体哪个**带有几何数据接口**节点的**name**；
-可以帮你**分析当前几何体的数据**，最好能说清具体是当前场景里面这个几何体什么类型的数据；
-```
 </rules>

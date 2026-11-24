@@ -15,17 +15,25 @@ export default {
   },
 
   create({ api }) {
+    const launch = (options = {}) =>
+      launchSingle({
+        ...options,
+        ApiError: api.store.ApiError,
+        resolveExtensions:
+          options.resolveExtensions || ((projectPath) => api.tools.resolve(projectPath)),
+      });
     return {
       api: {
-        launch: (options = {}) =>
-          launchSingle({
-            ...options,
-            ApiError: api.store.ApiError,
-            resolveExtensions:
-              options.resolveExtensions || ((projectPath) => api.tools.resolve(projectPath)),
-          }),
+        launch,
         path: singleAgentPath,
       },
+      routes: [
+        {
+          method: "POST",
+          path: "/api/single/launch",
+          handler: () => launch(),
+        },
+      ],
     };
   },
 };

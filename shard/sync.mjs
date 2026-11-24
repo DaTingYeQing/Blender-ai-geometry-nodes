@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 /**
- * sync.mjs —— 按 shard/agents.json 维护各项目 agent 的工具清单。
+ * sync.mjs —— 把每个 Agent 的 .pi/agent.json 编译成 Pi 读取的配置。
  *
  *   node sync.mjs init [--force] [--dry-run]      # 扫描现状，生成 agents.json
  *   node sync.mjs check [项目...]                  # 只比对，有漂移退出码 1
- *   node sync.mjs sync  [项目...] [--dry-run]      # 写入各项目 .pi/settings.json / py_environment.json
+ *   node sync.mjs sync  [项目...] [--dry-run]      # 生成 .pi/agent.json（缺失时）并写入 settings / pi-flow / py_environment
  *
+ * 唯一的手工配置源是各项目的 .pi/agent.json；它不存在时按清单（profile + settings）
+ * 和磁盘上现有配置反向生成一次，之后归用户所有，sync 不再覆盖。
  * 只管理指向本目录 extensions/ 的条目；项目的 skills/（SKILL.md 文本）完全由人手动放，
  * 脚本也不碰。项目里其它扩展条目（如 subagent 的占位 + 排除对）原样保留。
  * 改完需重启 pi 或 /reload 才生效。
@@ -14,6 +16,14 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, wri
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateManifest } from "../shared/agents-manifest.mjs";
+import {
+	AGENT_CONFIG_FILE,
+	buildAgentConfig,
+	compileAgentFlow,
+	compileAgentSettings,
+	createExtensionPathFormatter,
+	normalizeAgentConfig,
+} from "../shared/agent-config.mjs";
 
 const HOME = dirname(fileURLToPath(import.meta.url));
 const MANIFEST = String(process.env.PI_FLOW_AGENTS_JSON || "").trim()
@@ -56,22 +66,16 @@ function readSettings(dir) {
 	return { file, data: raw.trim() ? JSON.parse(raw) : {} };
 }
 
-function toolNames(manifest, entry) {
-	let names = entry.tools ?? (entry.profile ? manifest.profiles?.[entry.profile] : []);
-	if (!Array.isArray(names)) throw new Error(`profile "${entry.profile}" 不存在或不是数组`);
-	const off = new Set(entry.disableTools ?? []);
-	names = [...names, ...(entry.extraTools ?? [])].filter((n) => !off.has(n));
-	return [...new Set(names)];
+function agentConfigFile(dir) {
+	return join(dir, ".pi", AGENT_CONFIG_FILE);
 }
 
-function wanted(manifest, entry) {
-	const names = toolNames(manifest, entry);
-	const extensions = names.map((n) => {
-		const rel = manifest.tools?.[n];
-		if (!rel) throw new Error(`tools 里没有 "${n}"`);
-		return resolve(HOME, rel);
-	});
-	return { names, extensions };
+function readAgentConfig(dir) {
+	const file = agentConfigFile(dir);
+	if (!existsSync(file)) return { file, present: false, raw: null, config: null, warnings: [] };
+	const raw = readJson(file);
+	const { config, warnings } = normalizeAgentConfig(raw, { file: posix(file) });
+	return { file, present: true, raw, config, warnings };
 }
 
 /** 本目录的 extensions/，加上迁移前用过、需要一并清理的旧位置。 */
@@ -79,26 +83,62 @@ function managedRoots(manifest) {
 	return [TOOLS_DIR, ...(manifest.previousHomes ?? []).map((h) => join(resolve(h), "extensions"))];
 }
 
-/** 保留项目里不属于共享目录（含历史位置）的条目，替换掉我们管理的部分。 */
-function mergeEntries(current, ours, roots, baseDir) {
-	const kept = (current ?? []).filter((e) => {
-		const resolved = resolve(baseDir, stripPrefix(e));
-		return !roots.some((root) => inside(root, resolved));
-	});
-	return [...kept, ...ours.map(posix)];
+/** 共享扩展的真实路径 -> 工具名；含历史位置，供迁移时反推。 */
+function toolCatalogByPath(manifest) {
+	const map = new Map();
+	for (const [name, rel] of Object.entries(manifest.tools ?? {})) {
+		map.set(key(resolve(HOME, rel)), name);
+		for (const home of manifest.previousHomes ?? []) {
+			map.set(key(resolve(home, rel)), name);
+		}
+	}
+	return map;
 }
 
-function expectedSettings(manifest, entry, data, dir) {
-	const want = wanted(manifest, entry);
-	const next = { ...(manifest.defaults ?? {}), ...(entry.settings ?? {}) };
+/** 把现有 settings.extensions 反推成工具名，把历史现状冻结进 agent.json。 */
+function toolsFromExtensions(manifest, extensions, dir) {
+	const byPath = toolCatalogByPath(manifest);
+	const roots = managedRoots(manifest);
+	const baseDir = join(dir, ".pi");
+	const names = [];
+	const unknown = [];
+	for (const raw of extensions ?? []) {
+		if (typeof raw !== "string") continue;
+		const value = raw.trim();
+		if (!value || value.startsWith("-") || value.startsWith("!") || value.startsWith("builtin:")) continue;
+		const target = value.startsWith("+") ? value.slice(1) : value;
+		const resolved = resolve(baseDir, target);
+		const name = byPath.get(key(resolved));
+		if (!name) {
+			if (roots.some((root) => inside(root, resolved))) unknown.push(target);
+			continue;
+		}
+		if (!names.includes(name)) names.push(name);
+	}
+	return { names, unknown };
+}
+
+function expectedSettings(manifest, entry, data, dir, config) {
 	const baseDir = join(dir, ".pi");
 	// 仓库内的 agent 用相对路径，整个 hub 换位置后无需重新配置。
-	const inHub = inside(dirname(HOME), dir);
-	const ours = want.extensions.map((ext) => (inHub ? relative(baseDir, ext) : ext));
-	const ext = mergeEntries(data.extensions, ours, managedRoots(manifest), baseDir);
-	if (ext.length) next.extensions = ext;
-	else delete next.extensions;
-	return next;
+	const roots = managedRoots(manifest);
+	return compileAgentSettings({
+		manifest,
+		entry,
+		config,
+		current: data,
+		extensionPath: (name) => {
+			const rel = manifest.tools?.[name];
+			if (!rel) throw new Error(`tools 里没有 "${name}"`);
+			return resolve(HOME, rel);
+		},
+		formatExtension: createExtensionPathFormatter({
+			hubDir: dirname(HOME),
+			projectDir: dir,
+		}),
+		isManagedEntry: (raw) =>
+			roots.some((root) => inside(root, resolve(baseDir, stripPrefix(raw)))),
+	});
 }
 
 function expectedEnv(entry, dir) {
@@ -121,12 +161,9 @@ function expectedEnv(entry, dir) {
 	return { file, data };
 }
 
-function expectedFlowFile(entry, dir) {
+function expectedFlowFile(entry, dir, config) {
 	const file = join(dir, ".pi", "pi-flow.json");
-	const data = entry.isolate
-		? { _comment: "由 shard/sync.mjs 生成；isolate=true 时 Pi Flow 以 --no-extensions 启动。", isolate: true }
-		: null;
-	return { file, data };
+	return { file, data: compileAgentFlow({ config, entry }) };
 }
 
 function legacyWarnings(dir) {
@@ -147,10 +184,43 @@ function plan(manifest, filter) {
 		if (entry.enabled === false) return null;
 		const dir = projectDir(manifest, name);
 		const { file, data } = readSettings(dir);
-		const next = expectedSettings(manifest, entry, data, dir);
+		const flowPath = join(dir, ".pi", "pi-flow.json");
+		const currentFlow = existsSync(flowPath) ? readJson(flowPath) : null;
+		const agent = readAgentConfig(dir);
+		// 没有 agent.json 的项目按当前生效状态反向生成一份，之后归用户所有。
+		const legacyTools = Array.isArray(data.extensions)
+			? toolsFromExtensions(manifest, data.extensions, dir)
+			: null;
+		const config = agent.present
+			? agent.config
+			: buildAgentConfig({
+					manifest,
+					entry,
+					settings: data,
+					flow: currentFlow,
+					tools: legacyTools?.names ?? null,
+				});
+		const warnings = [
+			...agent.warnings,
+			...(legacyTools?.unknown.map((p) => `无法识别的共享扩展（迁移时忽略）：${p}`) ?? []),
+		];
+		const { settings: next } = expectedSettings(manifest, entry, data, dir, config);
 		const env = expectedEnv(entry, dir);
-		const flow = expectedFlowFile(entry, dir);
-		return { name, dir, settings: { file, before: data, after: next }, env, flow };
+		const flow = expectedFlowFile(entry, dir, config);
+		return {
+			name,
+			dir,
+			agent: {
+				file: agent.file,
+				present: agent.present,
+				before: agent.raw,
+				after: agent.present ? null : config,
+				warnings,
+			},
+			settings: { file, before: data, after: next },
+			env,
+			flow,
+		};
 	}).filter(Boolean);
 }
 
@@ -176,6 +246,11 @@ function diffText(label, before, after) {
 }
 
 function printDrift(item) {
+	if (item.agent.present) {
+		for (const w of item.agent.warnings ?? []) console.log(`  ! ${w}`);
+	} else {
+		console.log(`  ${posix(item.agent.file)}（将创建：该 Agent 的唯一配置源）`);
+	}
 	const { file, before, after } = item.settings;
 	if (!same(before, after)) console.log(diffText(posix(file), before, after));
 	if (item.env) {
@@ -204,7 +279,7 @@ function runCheck(manifest, filter) {
 		const flowCur = item.flow && existsSync(item.flow.file) ? readJson(item.flow.file) : null;
 		const flowSame =
 			!item.flow || (item.flow.data === null ? flowCur === null : same(flowCur, item.flow.data));
-		if (!same(before, after) || !envSame || !flowSame) {
+		if (!item.agent.present || !same(before, after) || !envSame || !flowSame) {
 			drift++;
 			console.log(`DIFF  ${item.name}`);
 			printDrift(item);
@@ -227,8 +302,17 @@ function runSync(manifest, filter, dryRun) {
 	const items = plan(manifest, filter);
 	let changed = 0;
 	for (const item of items) {
-		const warns = legacyWarnings(item.dir);
+		const warns = [...legacyWarnings(item.dir), ...(item.agent.warnings ?? [])];
 		for (const w of warns) console.log(`WARN  ${item.name}: ${w}`);
+		if (!item.agent.present) {
+			changed++;
+			if (dryRun) {
+				console.log(`DRY   ${item.name} -> 创建 ${posix(item.agent.file)}`);
+			} else {
+				writeIfChanged(item.agent.file, item.agent.after);
+				console.log(`WRITE ${item.name} -> ${posix(item.agent.file)}`);
+			}
+		}
 		const { file, before, after } = item.settings;
 		if (!same(before, after)) {
 			changed++;

@@ -5,20 +5,23 @@
  * profile、settings.json 长什么样。换工具时只改 adapter 或 shard/agents.json。
  */
 
-export const TOOL_CONTRACT_VERSION = 1;
+export const TOOL_CONTRACT_VERSION = 2;
 
 export const TOOL_METHODS = Object.freeze({
   resolve: "resolve(projectPath) -> { noExtensions: boolean, extensions: string[] }",
   catalog: "catalog() -> { tools: Record<string, string>, profiles: Record<string, string[]> }",
+  readAgentConfig:
+    "readAgentConfig(projectPath) -> { config: AgentConfig, selection: AgentSelection, derived: boolean }",
+  writeAgentConfig:
+    "writeAgentConfig(projectPath, config) -> { config: AgentConfig, selection: AgentSelection }",
 });
 
-/** 网关只暴露这两个方法；adapter 必须提供同名实现。 */
+/** 网关只暴露这四个方法；adapter 必须提供同名实现。 */
 export function assertToolGateway(gateway) {
-  if (!gateway || typeof gateway.resolve !== "function") {
-    throw new Error("工具网关缺少 resolve(projectPath)");
-  }
-  if (typeof gateway.catalog !== "function") {
-    throw new Error("工具网关缺少 catalog()");
+  for (const method of ["resolve", "catalog", "readAgentConfig", "writeAgentConfig"]) {
+    if (typeof gateway?.[method] !== "function") {
+      throw new Error(`工具网关缺少 ${method}()`);
+    }
   }
   return gateway;
 }

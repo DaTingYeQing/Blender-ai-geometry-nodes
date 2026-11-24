@@ -1,7 +1,7 @@
 {
   "name": "pi-flow",
   "productName": "Pi Flow",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "项目级 Pi Agent 节点编排",
   "type": "module",
@@ -13,6 +13,7 @@
     "check": "node scripts/dev/check-syntax.mjs",
     "test": "node scripts/dev/check-syntax.mjs && node scripts/dev/run-tests.mjs",
     "test:server": "node scripts/dev/run-tests.mjs server",
+    "test:ui": "node scripts/dev/run-tests.mjs ui",
     "fetch:bundles": "node scripts/build/fetch-bundles.mjs",
     "check:bundles": "node scripts/build/fetch-bundles.mjs --check",
     "pack": "node scripts/build/fetch-bundles.mjs --check && electron-builder --win && node scripts/build/clean-release.mjs"

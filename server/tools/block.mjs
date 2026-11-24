@@ -8,6 +8,8 @@ export default {
   provides: {
     resolve: "function",
     catalog: "function",
+    readAgentConfig: "function",
+    writeAgentConfig: "function",
   },
 
   requires: {},
