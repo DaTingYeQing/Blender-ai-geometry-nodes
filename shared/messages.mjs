@@ -264,6 +264,40 @@ export const EN = {
   "安装完成，但运行时文件仍不完整": "Setup finished, but the runtime is still incomplete",
   "找不到 agent 模板：{path}": "Agent templates not found: {path}",
   "同步 agent 配置失败（退出码 {code}）{tail}": "Failed to sync agent configuration (exit code {code}){tail}",
+
+  // 更新
+  "检查更新": "Check for updates",
+  "正在检查更新…": "Checking for updates…",
+  "有新版本可用": "An update is available",
+  "已是最新版本": "You're up to date",
+  "检查更新失败": "Update check failed",
+  "检查更新失败：{message}": "Update check failed: {message}",
+  "发现新版本": "Update available",
+  "需要下载": "To download",
+  "已是最新，不会下载": "Up to date, not downloaded",
+  "总计：{size}": "Total: {size}",
+  "立即更新": "Update now",
+  "稍后": "Later",
+  "正在下载": "Downloading",
+  "正在下载 {name}": "Downloading {name}",
+  "准备重启": "Ready to restart",
+  "更新已下载完成，重启后生效。": "The update is downloaded and will take effect after restart.",
+  "重启并完成更新": "Restart to finish",
+  "更新失败": "Update failed",
+  "下载失败": "Download failed",
+  "旧版本没有被修改。": "The current version was not changed.",
+  "重试": "Retry",
+  "用户数据、工作区和已有配置不会被删除。":
+    "Your data, workspaces and existing settings will be kept.",
+  "程序": "App",
+  "开发版": "dev",
+  "演示模式：这里会重启应用": "Demo mode: this is where the app would restart",
+  "更新功能尚未接入": "Updates are not wired up yet",
+  "更新": "Update",
+  "安装程序即将启动": "The installer is about to start",
+  "请按提示完成安装；完成后重新打开 Pi Flow，已下载的运行时会在启动时应用。":
+    "Follow the installer, then reopen Pi Flow. The downloaded runtime will be applied at startup.",
+  "继续": "Continue",
 };
 
 function readStored() {

@@ -1,8 +1,8 @@
 {
-  "_comment": "分层版本：每一层语义变化时手动 +1。setup 启动时逐层对账，决定跳过 / 补件 / 重建 / 迁移。appVersion 由 Electron 传入，Blender 版本从内置压缩包名提取；同一版本号重新编译 Blender 时只改 blenderBuild。",
+  "_comment": "分层版本：runtimeLayout / configVersion / dataSchemaVersion 语义变化时手动 +1；blenderBuild / covtraceVersion 由 npm run versions:sync 按压缩包哈希自动生成，不要手改。setup 启动时逐层对账，决定跳过 / 补件 / 重建 / 迁移；appVersion 由 Electron 传入。",
   "runtimeLayout": "1.0.0",
-  "blenderBuild": "2026-11-22",
-  "covtraceVersion": "1.0.0",
+  "blenderBuild": "b-e1a51e415ac0",
+  "covtraceVersion": "c-493e3cd6afd3",
   "configVersion": "1.0.0",
   "dataSchemaVersion": "1.0.0"
 }

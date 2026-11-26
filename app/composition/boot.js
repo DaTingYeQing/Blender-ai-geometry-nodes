@@ -24,6 +24,7 @@ import { mountPanelChrome } from './panel-chrome.js';
 import { createApiPorts } from './api.js';
 import { mountAgentPanelPilot } from './agent-panel.js';
 import { mountLogoPanelPilot } from './logo-panel.js';
+import { mountUpdatePilot } from './update.js';
 import { mountSidebarPilot } from './sidebar.js';
 import { mountCanvasStage } from './canvas.js';
 import { mountWorkspaceControl } from './workspace-control.js';
@@ -375,12 +376,21 @@ export function boot(options = {}) {
     notify,
   });
 
+  /* 顶栏更新入口：检查、下载、重启都在组装根，窗口本身只是视图。 */
+  const updatePanel = mountUpdatePilot({
+    document,
+    translate: t,
+    notify,
+  });
+  globalThis.addEventListener?.('pagehide', () => updatePanel.destroy());
+
   /* 新区域的语言变化统一走 store：语言一变就让自己重画。 */
   uiKernel.store.subscribe((state, previous) => {
     if (state.settings.lang === previous.settings.lang) return;
     agentPanel.refresh();
     logoPanel.refresh();
     sidebarPilot.refresh();
+    updatePanel.refresh();
   });
   /* 面板外壳：Esc / 遮罩 / ✕ 与开合后的焦点都在这里。 */
   const panelChrome = mountPanelChrome({ kernel: uiKernel, document, translate: t });

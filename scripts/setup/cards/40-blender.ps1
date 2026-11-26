@@ -12,31 +12,76 @@ function Write-BlenderBuildMarker {
     }
 }
 
-function Install-Blender([string]$Archive) {
-    $setup = $script:Setup
-    Write-Step "解压 Blender"
-    Ensure-Directory $setup.BlenderSrcBlender
+function Expand-BlenderArchive([string]$Archive, [string]$Target) {
+    Ensure-Directory $Target
     $tar = Get-TarExe
     $extracted = $false
     if ($tar) {
-        # 去掉 zip 顶层的 blender-4.5.0-trace-win64\，直接铺到 blender-src\blender。
-        & $tar -xf $Archive -C $setup.BlenderSrcBlender --strip-components=1 1>$null 2>$null
+        # 去掉 zip 顶层的 blender-4.5.0-trace-win64\，直接铺到目标目录。
+        & $tar -xf $Archive -C $Target --strip-components=1 1>$null 2>$null
         $extracted = ($LASTEXITCODE -eq 0)
     }
     if (-not $extracted) {
-        $unpack = Join-Path $setup.WorkDir 'blender-unpack'
+        $unpack = Join-Path $script:Setup.WorkDir ('blender-unpack-' + [guid]::NewGuid().ToString('N'))
         if (Test-Path -LiteralPath $unpack) { Remove-Item -LiteralPath $unpack -Recurse -Force }
         Expand-Archive -LiteralPath $Archive -DestinationPath $unpack -Force
         $inner = Get-ChildItem -LiteralPath $unpack -Directory | Select-Object -First 1
         if (-not $inner) { throw "解压后没有找到 Blender 目录：$Archive" }
         Get-ChildItem -LiteralPath $inner.FullName -Force |
-            Move-Item -Destination $setup.BlenderSrcBlender -Force
+            Move-Item -Destination $Target -Force
+        Remove-Item -LiteralPath $unpack -Recurse -Force -ErrorAction SilentlyContinue
     }
-    if (-not (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe)) {
-        throw "解压后没有找到 blender.exe：$($setup.BlenderSrcBlenderExe)"
+}
+
+# 先解压到 staging，验证 blender.exe 存在后再替换；失败时把旧目录改回去。
+function Install-BlenderAtomically([string]$Archive) {
+    $setup = $script:Setup
+    $target = $setup.BlenderSrcBlender
+    $staging = Join-Path $setup.BlenderSrcRoot ('.staging-blender-' + [guid]::NewGuid().ToString('N'))
+    $backup = ''
+
+    # 上一次成功替换后残留的备份可以在目标存在时安全清理。
+    if (Test-Path -LiteralPath $target) {
+        Get-ChildItem -LiteralPath $setup.BlenderSrcRoot -Directory -Filter 'blender.old-*' -ErrorAction SilentlyContinue |
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
     }
-    Write-BlenderBuildMarker
-    Write-Ok "Blender 已部署到 $($setup.BlenderSrcBlenderExe)"
+
+    try {
+        Expand-BlenderArchive $Archive $staging
+        if (-not (Test-Path -LiteralPath (Join-Path $staging 'blender.exe'))) {
+            throw "解压后没有找到 blender.exe：$Archive"
+        }
+
+        if (Test-Path -LiteralPath $target) {
+            $backup = $target + '.old-' + (Get-Date -Format 'yyyyMMddHHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 6)
+            Move-Item -LiteralPath $target -Destination $backup -Force
+        }
+        Move-Item -LiteralPath $staging -Destination $target -Force
+        Write-BlenderBuildMarker
+
+        if ($backup -and (Test-Path -LiteralPath $backup)) {
+            Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+    catch {
+        if (Test-Path -LiteralPath $staging) {
+            Remove-Item -LiteralPath $staging -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        if (-not (Test-Path -LiteralPath $target) -and $backup -and (Test-Path -LiteralPath $backup)) {
+            try {
+                Move-Item -LiteralPath $backup -Destination $target -Force
+            }
+            catch {
+                Write-WarnLine "Blender 回滚失败：$($_.Exception.Message)；旧目录在 $backup"
+            }
+        }
+        throw
+    }
+    finally {
+        if (Test-Path -LiteralPath $staging) {
+            Remove-Item -LiteralPath $staging -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
 }
 
 # Blender 内置 python 被直接 spawn 时不会经过 blender.exe 的初始化，
@@ -79,23 +124,24 @@ function Invoke-BlenderCardStatic {
         }
         throw "加了 -SkipBlender，但 Blender 不存在：$($setup.BlenderSrcBlenderExe)"
     }
-    if ($setup.ForceBlender -and (Test-Path -LiteralPath $setup.BlenderSrcBlender)) {
-        Write-Step "替换 Blender（版本变化）"
-        Remove-Item -LiteralPath $setup.BlenderSrcBlender -Recurse -Force
-    }
+
     if (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe) {
-        Write-Ok "Blender 已存在：$($setup.BlenderSrcBlenderExe)"
-        Install-BlenderCrt $setup.BlenderSrcBlenderExe
-        $setup.BlenderExe = $setup.BlenderSrcBlenderExe
-        return $true
+        if (-not $setup.ForceBlender) {
+            Write-Ok "Blender 已存在：$($setup.BlenderSrcBlenderExe)"
+            Install-BlenderCrt $setup.BlenderSrcBlenderExe
+            $setup.BlenderExe = $setup.BlenderSrcBlenderExe
+            return $true
+        }
+        Write-Step "替换 Blender（版本变化）"
     }
-    if (Get-BlenderExe) {
+    elseif (Get-BlenderExe) {
         Write-WarnLine "检测到旧版 Blender，改为部署安装包内置版本"
     }
+
     if (-not (Test-BlenderArchive $setup.BlenderArchive)) {
         throw "安装包缺少可用的 Blender 压缩包：$($setup.BlenderArchive)"
     }
-    Install-Blender $setup.BlenderArchive
+    Install-BlenderAtomically $setup.BlenderArchive
     if (-not (Test-Path -LiteralPath $setup.BlenderSrcBlenderExe)) {
         throw "Blender 部署失败：$($setup.BlenderSrcBlenderExe)"
     }

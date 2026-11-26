@@ -1,0 +1,238 @@
+/* ===== 更新入口：顶栏版本按钮 ===== */
+
+.update-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: var(--fs-2xs);
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.update-chip:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.update-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.update-chip:disabled {
+  cursor: default;
+}
+
+.update-chip-version {
+  min-width: 34px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.update-chip-icon {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.update-chip.is-checking .update-chip-icon {
+  animation: updateSpin 0.9s linear infinite;
+}
+
+.update-chip.is-checking {
+  color: var(--text);
+}
+
+.update-chip.is-downloading .update-chip-version {
+  color: var(--accent);
+}
+
+.update-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 2px var(--bg-topbar);
+}
+
+.update-chip.is-ready .update-chip-dot {
+  background: #3fb950;
+}
+
+.update-chip.has-error .update-chip-dot {
+  background: var(--orange);
+}
+
+@keyframes updateSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 更新窗口 ===== */
+
+.modal.modal-update {
+  width: min(520px, calc(100vw - 48px));
+  max-height: min(620px, calc(100vh - 80px));
+  display: flex;
+  flex-direction: column;
+}
+
+.update-body {
+  padding: 26px 28px 4px;
+  overflow: auto;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+
+.update-title {
+  padding-right: 28px;
+  color: var(--text);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+}
+
+.update-sub {
+  margin-top: 6px;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.update-section-title {
+  margin-top: 20px;
+  color: var(--text-dim);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.04em;
+}
+
+.update-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.update-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.update-row.is-unchanged {
+  opacity: 0.55;
+}
+
+.update-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.update-row-version {
+  color: var(--text-dim);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.update-row-size {
+  flex: none;
+  color: var(--text-dim);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.update-total {
+  margin-top: 14px;
+  color: var(--text);
+  font-size: var(--fs-sm);
+}
+
+.update-note {
+  margin-top: 10px;
+  color: var(--text-dim);
+  font-size: var(--fs-2xs);
+}
+
+.update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 28px 24px;
+}
+
+.update-progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  color: var(--text);
+}
+
+.update-progress-percent {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.update-bar {
+  height: 8px;
+  margin-top: 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.update-bar-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #7aa7ff);
+  transition: width 0.2s ease;
+}
+
+.update-progress-meta {
+  margin-top: 8px;
+  color: var(--text-dim);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.update-error {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(224, 102, 63, 0.4);
+  border-left-width: 3px;
+  border-radius: 8px;
+  background: rgba(224, 102, 63, 0.08);
+  color: var(--text);
+  word-break: break-word;
+}
+
+.update-ready {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  border-left-width: 3px;
+  border-radius: 8px;
+  background: rgba(63, 185, 80, 0.08);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-chip.is-checking .update-chip-icon { animation: none; }
+  .update-bar-fill { transition: none; }
+}

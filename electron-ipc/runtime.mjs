@@ -7,6 +7,12 @@ import { fileURLToPath } from "node:url";
 import { t } from "../shared/messages.mjs";
 import { mergeSeedTree } from "./seed.mjs";
 import { normalizeVersion } from "../shared/versions.mjs";
+import {
+  clearPending,
+  readInstalledAssets,
+  readPending,
+  writeInstalledAssets,
+} from "./update-state.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IS_PACKAGED = __dirname.includes("app.asar");
@@ -21,7 +27,6 @@ const BUNDLED_BLENDER_ZIP = path.join(
   IS_PACKAGED ? path.join(process.resourcesPath, "blender") : path.join(RESOURCES_DIR, "resources", "blender"),
   "blender-4.5.0-trace-win64.zip",
 );
-const BUNDLED_COVTRACE_ZIP = path.join(path.dirname(BUNDLED_BLENDER_ZIP), "covtrace-toolchain.zip");
 const BUNDLE_DIR = IS_PACKAGED
   ? path.join(process.resourcesPath, "bundles")
   : path.join(RESOURCES_DIR, "resources", "bundles");
@@ -87,6 +92,18 @@ async function expectedVersions() {
   };
 }
 
+const TOOL_ID_RE = /^[bc]-[0-9a-f]{12}$/i;
+
+/**
+ * 新版工具标记是内容哈希；旧安装记录的是日期/版本号。
+ * 期望是哈希、已装不是哈希时先不强制 setup，交给更新器下载后由 pending 应用，
+ * 避免在线版一启动就因为“标签格式不同”卡住。
+ */
+function toolMarkerUnknown(expectedValue, installedValue) {
+  return TOOL_ID_RE.test(String(expectedValue || ""))
+    && !TOOL_ID_RE.test(String(installedValue || ""));
+}
+
 /** 对比已安装清单和本版期望，返回需要处理的层。空数组表示可以直接复用。 */
 export async function runtimeVersionMismatches(info) {
   const expected = await expectedVersions();
@@ -95,7 +112,11 @@ export async function runtimeVersionMismatches(info) {
   if (!result.runtimeLayout && !result.blenderVersion) {
     const legacy = ["legacy"];
     // 老清单没有构建标记：本版包里若是新编译的 Blender，同一次 setup 就替换掉。
-    if (expected.blenderBuild && String(result.blenderBuild || "") !== expected.blenderBuild) {
+    if (
+      expected.blenderBuild
+      && String(result.blenderBuild || "") !== expected.blenderBuild
+      && !toolMarkerUnknown(expected.blenderBuild, result.blenderBuild)
+    ) {
       legacy.push("blenderBuild");
     }
     return legacy;
@@ -109,10 +130,18 @@ export async function runtimeVersionMismatches(info) {
     mismatches.push("blenderVersion");
   }
   // 同版本重新编译的 Blender：ProductVersion 不变，靠显式构建标记判断。
-  if (expected.blenderBuild && String(result.blenderBuild || "") !== expected.blenderBuild) {
+  if (
+    expected.blenderBuild
+    && String(result.blenderBuild || "") !== expected.blenderBuild
+    && !toolMarkerUnknown(expected.blenderBuild, result.blenderBuild)
+  ) {
     mismatches.push("blenderBuild");
   }
-  if (expected.covtraceVersion && String(result.covtraceVersion || "") !== expected.covtraceVersion) {
+  if (
+    expected.covtraceVersion
+    && String(result.covtraceVersion || "") !== expected.covtraceVersion
+    && !toolMarkerUnknown(expected.covtraceVersion, result.covtraceVersion)
+  ) {
     mismatches.push("covtraceVersion");
   }
   if (expected.configVersion && String(info?.configData?.configVersion || "") !== expected.configVersion) {
@@ -190,7 +219,12 @@ const STEP_ERROR_RE = /^PIFLOW_ERROR=(.*)$/;
 const ERROR_LINE_RE = /^ERROR:\s*(.*)$/;
 const ANSI_RE = /\x1b\[[0-9;]*m/g;
 
-export async function runSetup({ onStep, forceBlender = false } = {}) {
+export async function runSetup({
+  onStep,
+  forceBlender = false,
+  blenderArchive = BUNDLED_BLENDER_ZIP,
+  bundleDir = BUNDLE_DIR,
+} = {}) {
   const paths = runtimePaths();
   await fsp.mkdir(paths.root, { recursive: true });
   if (!(await exists(SETUP_SCRIPT))) {
@@ -199,13 +233,9 @@ export async function runSetup({ onStep, forceBlender = false } = {}) {
   if (!(await exists(ENV_TEMPLATE))) {
     throw new Error(t("找不到地址簿模板：{path}", { path: ENV_TEMPLATE }));
   }
-  if (!(await exists(BUNDLED_BLENDER_ZIP))) {
-    throw new Error(t("安装包缺少 Blender：{path}", { path: BUNDLED_BLENDER_ZIP }));
-  }
-  if (!(await exists(BUNDLED_COVTRACE_ZIP))) {
-    throw new Error(t("安装包缺少 CovTrace 工具链：{path}", { path: BUNDLED_COVTRACE_ZIP }));
-  }
-
+  // 注意：在线版安装包不自带 Blender / CovTrace。
+  // 这里不提前拦，交给 setup 的卡片判断：运行时已经完整且版本一致时会直接跳过；
+  // 真正需要部署却没有压缩包时，卡片再报错（下载器接入后由它提供文件）。
   const logPath = paths.log;
   const appendLog = (line) => {
     try {
@@ -235,9 +265,9 @@ export async function runSetup({ onStep, forceBlender = false } = {}) {
       "-EnvTemplate",
       ENV_TEMPLATE,
       "-BundleDir",
-      BUNDLE_DIR,
+      bundleDir,
       "-BlenderArchive",
-      BUNDLED_BLENDER_ZIP,
+      blenderArchive,
       "-ResultPath",
       paths.result,
       "-AppVersion",
@@ -409,10 +439,51 @@ export async function ensureRuntime({ onStep, force = false } = {}) {
   let info = await inspectRuntime();
   const allowSetup = IS_PACKAGED || process.env.PI_FLOW_SETUP === "1" || force;
 
+  /* 上次更新下载好的运行时包：只有目标程序版本和当前进程一致才应用。
+   * 旧程序不能拿新程序期望的运行时，避免版本错位。 */
+  const pending = await readPending(installRoot());
+  const pendingUsable = Boolean(
+    pending
+    && (!pending.appVersion
+      || normalizeVersion(pending.appVersion) === normalizeVersion(app.getVersion())),
+  );
+  const blenderArchive = pendingUsable && pending?.blender?.path
+    ? pending.blender.path
+    : BUNDLED_BLENDER_ZIP;
+
+  /* pending 是按内容哈希判断的；setup 的版本标记可能是旧标签。
+   * 标签没变但 ID 变了时，要主动补一条差异 / 清掉标记，否则 setup 会跳过。 */
+  const installedAssets = await readInstalledAssets(installRoot());
+  const pendingBlender = Boolean(
+    pendingUsable && pending?.blender?.id && pending.blender.id !== installedAssets.blenderId,
+  );
+  const pendingCovtrace = Boolean(
+    pendingUsable && pending?.covtrace?.id && pending.covtrace.id !== installedAssets.covtraceId,
+  );
+
+  async function consumePending() {
+    if (!pendingUsable) return;
+    const assets = await readInstalledAssets(installRoot());
+    const next = { ...assets };
+    if (pending?.blender?.id) next.blenderId = pending.blender.id;
+    if (pending?.covtrace?.id) next.covtraceId = pending.covtrace.id;
+    if (Object.keys(next).length) {
+      await writeInstalledAssets(installRoot(), next);
+    }
+    await clearPending(installRoot());
+  }
+
   // 环境完整时再对账版本：全部一致才跳过，有差异按层补。
   if (info.ready && !force) {
     const mismatches = await runtimeVersionMismatches(info);
+    if (pendingBlender && !mismatches.includes("blenderBuild")) {
+      mismatches.push("blenderBuild");
+    }
+    if (pendingCovtrace && !mismatches.includes("covtraceVersion")) {
+      mismatches.push("covtraceVersion");
+    }
     if (mismatches.length === 0) {
+      await consumePending();
       await applyRuntimeEnv(info);
       return { ...info, ranSetup: false, skipped: false, mismatches };
     }
@@ -427,9 +498,16 @@ export async function ensureRuntime({ onStep, force = false } = {}) {
     const rebuild = mismatches.includes("runtimeLayout");
     const forceBlender = !rebuild
       && (mismatches.includes("blenderVersion") || mismatches.includes("blenderBuild"));
+    if (pendingCovtrace && !rebuild) {
+      // 版本标签没变但内容变了：删掉标记，让 CovTrace 卡片重新铺。
+      await fsp.rm(
+        path.join(installRoot(), "runtime", "blender-src", ".covtrace-version"),
+        { force: true },
+      );
+    }
     const backup = rebuild ? await moveAsideRuntime() : "";
     try {
-      info = await runSetup({ onStep, forceBlender });
+      info = await runSetup({ onStep, forceBlender, blenderArchive });
     } catch (error) {
       if (backup) {
         try {
@@ -442,6 +520,7 @@ export async function ensureRuntime({ onStep, force = false } = {}) {
       throw error;
     }
     if (backup) void fsp.rm(backup, { recursive: true, force: true }).catch(() => {});
+    await consumePending();
     await applyRuntimeEnv(info);
     return { ...info, ranSetup: true, skipped: false, mismatches };
   }
@@ -451,7 +530,8 @@ export async function ensureRuntime({ onStep, force = false } = {}) {
     return { ...info, ranSetup: false, skipped: true };
   }
 
-  info = await runSetup({ onStep });
+  info = await runSetup({ onStep, blenderArchive });
+  await consumePending();
   await applyRuntimeEnv(info);
   return { ...info, ranSetup: true, skipped: false };
 }

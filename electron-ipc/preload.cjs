@@ -17,4 +17,16 @@ contextBridge.exposeInMainWorld("piFlow", {
   setDirty: (dirty) => ipcRenderer.send("window:dirty", Boolean(dirty)),
   onCloseRequest: (handler) => ipcRenderer.on("app:close-request", (_event, info) => handler(info)),
   respondClose: (action) => ipcRenderer.send("window:close-response", action),
+
+  /* 更新：检查 / 下载 / 取消 / 重启；进度用事件回传。 */
+  getVersion: () => ipcRenderer.invoke("app:version"),
+  checkUpdate: () => ipcRenderer.invoke("update:check"),
+  startUpdate: () => ipcRenderer.invoke("update:start"),
+  cancelUpdate: () => ipcRenderer.invoke("update:cancel"),
+  restartApp: () => ipcRenderer.invoke("update:restart"),
+  onUpdateEvent: (handler) => {
+    const listener = (_event, info) => handler(info);
+    ipcRenderer.on("update:event", listener);
+    return () => ipcRenderer.removeListener("update:event", listener);
+  },
 });

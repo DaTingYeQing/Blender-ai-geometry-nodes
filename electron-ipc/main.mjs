@@ -1,10 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain, screen, shell } from "electron";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { setLocale, t } from "../shared/messages.mjs";
-import { ensureAgents, ensureRuntime, inspectRuntime, isSetupRunning, RESOURCES_DIR, runtimePaths, runtimeVersionMismatches, SHARD_DIR, stopSetup } from "./runtime.mjs";
+import { ensureAgents, ensureRuntime, inspectRuntime, installRoot, isSetupRunning, RESOURCES_DIR, runtimePaths, runtimeVersionMismatches, SHARD_DIR, stopSetup } from "./runtime.mjs";
+import { createUpdater } from "./updater.mjs";
+import { readPending } from "./update-state.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SETUP_UI_DIR = path.join(RESOURCES_DIR, "scripts", "setup-ui");
@@ -178,6 +181,175 @@ ipcMain.on("setup:close", async (event) => {
     if (response !== 0) return;
   }
   win.close();
+});
+
+/* ---------- 应用内更新 ----------
+ * mock：开发模式或 PI_FLOW_UPDATE_MOCK=1，用模拟数据调 UI。
+ * real：打包版或设置了 PI_FLOW_UPDATE_URL，拉 update.json 并真实下载。
+ */
+const updateTimers = new Map();
+let activeUpdater = null;
+
+function updateMode() {
+  if (process.env.PI_FLOW_UPDATE_MOCK === "1") return "mock";
+  if (IS_PACKAGED || process.env.PI_FLOW_UPDATE_URL) return "real";
+  return "mock";
+}
+
+function createRealUpdater(sender) {
+  return createUpdater({
+    installRoot: installRoot(),
+    appVersion: app.getVersion(),
+    setupResultPath: runtimePaths().result,
+    onEvent: (payload) => {
+      if (payload.phase === "ready" || payload.phase === "error") {
+        activeUpdater = null;
+      }
+      if (sender && !sender.isDestroyed()) sender.send("update:event", payload);
+    },
+  });
+}
+
+function nextPatchVersion(version) {
+  const match = /^(\d+)\.(\d+)\.(\d+)/.exec(String(version || ""));
+  if (!match) return String(version || "");
+  return `${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
+}
+
+function mockUpdatePayload() {
+  const current = app.getVersion();
+  const latest = nextPatchVersion(current);
+  const components = [
+    { id: "app", current, latest, bytes: 38_000_000, changed: true },
+    { id: "blender", current: "2026-11-22", latest: "2026-12-01", bytes: 720_000_000, changed: true },
+    { id: "covtrace", current: "1.0.0", latest: "1.0.0", bytes: 32_000_000, changed: false },
+  ];
+  return {
+    status: "available",
+    current,
+    latest,
+    components,
+    totalBytes: components
+      .filter((item) => item.changed)
+      .reduce((sum, item) => sum + item.bytes, 0),
+  };
+}
+
+function clearUpdateTimer(sender) {
+  const timer = updateTimers.get(sender.id);
+  if (timer == null) return;
+  clearInterval(timer);
+  updateTimers.delete(sender.id);
+}
+
+ipcMain.handle("app:version", () => app.getVersion());
+
+ipcMain.handle("update:check", async () => {
+  if (updateMode() === "real") {
+    try {
+      return await createRealUpdater(null).check();
+    } catch (error) {
+      return { status: "error", message: String(error?.message || error) };
+    }
+  }
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  return mockUpdatePayload();
+});
+
+ipcMain.handle("update:start", async (event) => {
+  const sender = event.sender;
+  clearUpdateTimer(sender);
+
+  if (updateMode() === "real") {
+    activeUpdater?.cancel?.();
+    activeUpdater = createRealUpdater(sender);
+    return activeUpdater.start();
+  }
+
+  const payload = mockUpdatePayload();
+  const changed = payload.components.filter((item) => item.changed);
+  const total = payload.totalBytes;
+  const steps = 40;
+  let step = 0;
+
+  const timer = setInterval(() => {
+    step += 1;
+    const ratio = Math.min(1, step / steps);
+    const received = Math.round(total * ratio);
+    let accumulated = 0;
+    let component = changed[changed.length - 1]?.id || "";
+    for (const item of changed) {
+      accumulated += item.bytes;
+      if (received <= accumulated) {
+        component = item.id;
+        break;
+      }
+    }
+    if (!sender.isDestroyed()) {
+      sender.send("update:event", {
+        phase: "progress",
+        percent: Math.round(ratio * 100),
+        received,
+        total,
+        component,
+        speed: Math.round(total / (steps * 0.12)),
+      });
+    }
+    if (ratio >= 1) {
+      clearUpdateTimer(sender);
+      if (!sender.isDestroyed()) sender.send("update:event", { phase: "ready" });
+    }
+  }, 120);
+
+  updateTimers.set(sender.id, timer);
+  sender.once("destroyed", () => clearUpdateTimer(sender));
+  return { ok: true };
+});
+
+ipcMain.handle("update:cancel", (event) => {
+  clearUpdateTimer(event.sender);
+  activeUpdater?.cancel?.();
+  activeUpdater = null;
+  if (!event.sender.isDestroyed()) {
+    event.sender.send("update:event", { phase: "cancelled" });
+  }
+  return { ok: true };
+});
+
+ipcMain.handle("update:restart", async () => {
+  const pending = await readPending(installRoot());
+  const installer = pending?.appInstaller?.path;
+
+  if (installer && fs.existsSync(installer)) {
+    // 开发/演示模式下不启动真实安装器，避免误装。
+    if (!IS_PACKAGED) return { ok: true, mock: true };
+
+    const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+    if (win) {
+      await dialog.showMessageBox(win, {
+        type: "info",
+        title: t("更新"),
+        message: t("安装程序即将启动"),
+        detail: t("请按提示完成安装；完成后重新打开 Pi Flow，已下载的运行时会在启动时应用。"),
+        buttons: [t("继续")],
+        defaultId: 0,
+        noLink: true,
+      });
+    }
+    // 安装包会替换程序文件；先启动它，再退出当前进程。
+    // 新程序启动后会读到 pending，把已经下好的运行时应用掉。
+    spawn(installer, [], { detached: true, stdio: "ignore" }).unref();
+    app.quit();
+    return { ok: true };
+  }
+
+  // 开发/演示模式下不真的重启，避免调 UI 时反复退出。
+  if (!IS_PACKAGED && process.env.PI_FLOW_UPDATE_MOCK !== "1") {
+    return { ok: true, mock: true };
+  }
+  app.relaunch();
+  app.exit(0);
+  return { ok: true };
 });
 
 function createSetupLogger(win) {

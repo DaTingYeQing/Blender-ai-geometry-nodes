@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="css/canvas.css">
 <link rel="stylesheet" href="css/gate.css">
 <link rel="stylesheet" href="css/toast.css">
+<link rel="stylesheet" href="css/update.css">
 </head>
 <body>
   <div class="app">
@@ -17,6 +18,13 @@
     <div class="topbar">
       <div class="logo"><img src="cube-icon.svg" alt="logo">Flow</div>
       <div class="spacer"></div>
+      <button class="update-chip" id="updateChip" type="button"
+              title="检查更新" data-i18n-title="检查更新"
+              aria-label="检查更新" data-i18n-aria="检查更新">
+        <span class="update-chip-version" id="updateChipVersion"></span>
+        <span class="update-chip-icon" aria-hidden="true">↻</span>
+        <span class="update-chip-dot" id="updateChipDot" hidden></span>
+      </button>
       <div class="dots">
         <span class="dot-green" data-win="minimize" title="最小化" data-i18n-title="最小化"></span>
         <span class="dot-yellow" data-win="maximize" title="最大化 / 还原" data-i18n-title="最大化 / 还原"></span>
@@ -33,6 +41,11 @@
     <!-- Agent 配置面板：同样由 regions/agent-panel.js 渲染内部结构 -->
     <div class="modal-overlay" id="agentPanel">
       <div class="modal modal-agent"></div>
+    </div>
+
+    <!-- 更新窗口：内部结构由 regions/update-panel.js 渲染 -->
+    <div class="modal-overlay" id="updatePanel">
+      <div class="modal modal-update"></div>
     </div>
 
     <!-- 主体 -->
